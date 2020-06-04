@@ -4,36 +4,51 @@
 #include <dos.h>
 #include <windows.h>
 #include <sstream>
+#include <iostream>
+#include <SFML/Network.hpp>
 using namespace  sf; 
+using namespace  std; 
+int screenWidth = 800, screenHeigth = 600;
 const double  pi=3.1415926;
-const int kolvoPylu=200;// количество пуль
-int const kolvoStens=3;// количество стен
-int const kolvoBonus=20;// количество бонусов
-int const kolvoBabah=20;// количество взрывов
-int const timeBabah=35;// длительность взрыва
+const int amountBullet=200;// РєРѕР»РёС‡РµСЃС‚РІРѕ РїСѓР»СЊ
+int const amountWalls=35;// РєРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚РµРЅ
+int const amountBonus=20;// РєРѕР»РёС‡РµСЃС‚РІРѕ Р±РѕРЅСѓСЃРѕРІ
+int const amountBurst=20;// РєРѕР»РёС‡РµСЃС‚РІРѕ РІР·СЂС‹РІРѕРІ
+int const timeBurst=35;// РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РІР·СЂС‹РІР°
 int const map_Size_X=20;
 int const map_Size_Y=14; 
+int const countPacked=10;
 int scorePlayer=0,scoreBot=0,starsPlayer=0,starsBot=0;
- sf::RenderWindow window(VideoMode(800, 600), "CONTRA ");
-void DrawLine(int x,int y,int x1,int y1,Color color)// процедура рисования линии
+bool NoShotFocus=false; // Р·Р°РїСЂРµС‚ РІС‹СЃС‚СЂРµР»Р° С‚Р°РЅРєР° РєРѕРіРґР° РѕРєРЅРѕ РёРіСЂС‹ РІС…РѕРґРёС‚ РІ С„РѕРєСѓСЃ
+bool startGame=false;// СЃС‚Р°СЂС‚Р°РІР°Р»Р° Р»Рё РёРіСЂР°
+bool StartConnected=false;// РЅР°С‡Р°Р»РѕСЃСЊ Р»Рё СЃРѕРµРґРµРЅРёРµ С‚Рѕ-РµСЃС‚СЊ РІРІРѕРґ РёРї Рё РѕР¶РёРґР°РЅРёРµ
+bool networkGame=false;
+bool mouseCapture = true;// Р·Р°С…РІР°С‚ РјС‹С€Рё РїСЂРёР»РѕР¶РµРЅРёРµРј
+bool isView3D = true;
+IpAddress ip="192.168.1.178";
+int port=2000;
+char mode;
+
+ sf::RenderWindow window(VideoMode(800, 600), "CONTRA ",Style::Close);
+void DrawLine(int x,int y,int x1,int y1,Color color)// РїСЂРѕС†РµРґСѓСЂР° СЂРёСЃРѕРІР°РЅРёСЏ Р»РёРЅРёРё
 {
-//создаем массив точек, по которым будут рисоваться линии:
-		sf::VertexArray lines(sf::Lines, 16 /*количество точек*/);
+//СЃРѕР·РґР°РµРј РјР°СЃСЃРёРІ С‚РѕС‡РµРє, РїРѕ РєРѕС‚РѕСЂС‹Рј Р±СѓРґСѓС‚ СЂРёСЃРѕРІР°С‚СЊСЃСЏ Р»РёРЅРёРё:
+		sf::VertexArray lines(sf::Lines, 16 /*РєРѕР»РёС‡РµСЃС‚РІРѕ С‚РѕС‡РµРє*/);
  
-		//далее для каждой из точек задаем свою позицию:
+		//РґР°Р»РµРµ РґР»СЏ РєР°Р¶РґРѕР№ РёР· С‚РѕС‡РµРє Р·Р°РґР°РµРј СЃРІРѕСЋ РїРѕР·РёС†РёСЋ:
 		lines[0].position = sf::Vector2f(x,y);
 		lines[1].position = sf::Vector2f(x1,y1);
-		//и т.д.
+		//Рё С‚.Рґ.
  
-		//далее для каждой точки указываем цвет(так можно создавать градиенты):
+		//РґР°Р»РµРµ РґР»СЏ РєР°Р¶РґРѕР№ С‚РѕС‡РєРё СѓРєР°Р·С‹РІР°РµРј С†РІРµС‚(С‚Р°Рє РјРѕР¶РЅРѕ СЃРѕР·РґР°РІР°С‚СЊ РіСЂР°РґРёРµРЅС‚С‹):
 		lines[0].color = color;
 		lines[1].color = color;
-		//и т.д.
+		//Рё С‚.Рґ.
  
-		//и в конце выводим все на экран:
+		//Рё РІ РєРѕРЅС†Рµ РІС‹РІРѕРґРёРј РІСЃРµ РЅР° СЌРєСЂР°РЅ:
 		window.draw(lines);
 	}
-double RaschetAngle(int x,int y,int ArrivalX,int ArrivalY)// процедура расчета угла по 2м точкам
+double CalcAngle(int x,int y,int ArrivalX,int ArrivalY)// РїСЂРѕС†РµРґСѓСЂР° СЂР°СЃС‡РµС‚Р° СѓРіР»Р° РїРѕ 2Рј С‚РѕС‡РєР°Рј
 {
         int fdx,fdy;
        double fxy,ff;
@@ -51,11 +66,11 @@ double RaschetAngle(int x,int y,int ArrivalX,int ArrivalY)// процедура расчета у
          ff+=90;
         return ff;
 }
- bool ClickMouseLeft(Event event)// процедура обработки события нажатие левой кнопки мыщи
+ bool ClickMouseLeft(Event event)// РїСЂРѕС†РµРґСѓСЂР° РѕР±СЂР°Р±РѕС‚РєРё СЃРѕР±С‹С‚РёСЏ РЅР°Р¶Р°С‚РёРµ Р»РµРІРѕР№ РєРЅРѕРїРєРё РјС‹С‰Рё
  {
 	 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-	 //if (event.type == Event::MouseButtonPressed)//если нажата клавиша мыши
-	//			if (event.key.code == Mouse::Left)//а именно левая
+	 //if (event.type == Event::MouseButtonPressed)//РµСЃР»Рё РЅР°Р¶Р°С‚Р° РєР»Р°РІРёС€Р° РјС‹С€Рё
+	//			if (event.key.code == Mouse::Left)//Р° РёРјРµРЅРЅРѕ Р»РµРІР°СЏ
 				{ 
 					//std::cout<<"ckick mouse"<<"\n";
 					return true;
@@ -63,7 +78,7 @@ double RaschetAngle(int x,int y,int ArrivalX,int ArrivalY)// процедура расчета у
 				}
      return false;
  }
- double MovingToAngle(double angle,double angle1)// функция плавного изменеия угла (нужна для того что бы прицел был плавным) 
+ double MovingToAngle(double angle,double angle1,bool speedTurn=false)// С„СѓРЅРєС†РёСЏ РїР»Р°РІРЅРѕРіРѕ РёР·РјРµРЅРµРёСЏ СѓРіР»Р° (РЅСѓР¶РЅР° РґР»СЏ С‚РѕРіРѕ С‡С‚Рѕ Р±С‹ РїСЂРёС†РµР» Р±С‹Р» РїР»Р°РІРЅС‹Рј) 
 {
  int vector=0;
 		//if (vector==0)
@@ -82,195 +97,528 @@ double RaschetAngle(int x,int y,int ArrivalX,int ArrivalY)// процедура расчета у
         if (angle>=180) angle-=360;
         if (angle<=-180) angle+=360;
 		double speedRotation=1;
+		if (speedTurn==true)
+		{
+			if (fabs(angle1-angle)>=6) speedRotation=5;
+			if (fabs(angle1-angle)>=16) speedRotation=10;
+		}
+		if  (angle<=angle1+1&&angle>=angle1-1) { vector=0; return angle;};
         if (vector==1) return angle+ speedRotation;
         // unit[n].f++;
         if (vector==2) return angle- speedRotation;
         //unit[n].f--;
-		if  (angle<=angle1+1&&angle>=angle1-1) { vector=0; return angle;};
+		
+		
 }
- class Stens// класс стен
+ float ControlMouse()
+ {
+	 static int flagBeginProg = false;
+	 static float dir = 0;
+	 if (flagBeginProg == false)
+	 {
+		 flagBeginProg = true;
+		 window.setMouseCursorVisible(false);
+	 }
+	 if (Keyboard::isKeyPressed(Keyboard::M))// РїРѕРІРѕСЂРѕС‚ РїРѕ С‡Р°СЃРѕРІРѕР№
+	 {
+		 mouseCapture = !mouseCapture;
+		 //window.setMouseCursorVisible() // СЃРїСЂСЏС‚Р°С‚СЊ РєСѓСЂСЃРѕСЂ
+		 window.setMouseCursorVisible(!mouseCapture);
+
+
+		 while (Keyboard::isKeyPressed(Keyboard::M))
+		 {
+
+		 }
+	 }
+
+	 if (mouseCapture == true)
+	 {
+		 static Vector2i oldMouse = Mouse::getPosition(window);
+		 Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+		 Vector2i winPos = window.getPosition();
+		 if (oldMouse.x > mousePos.x)
+		 {
+			 dir += (oldMouse.x - mousePos.x) / (float)500;
+			 if (dir > 2*pi) dir -= 2 * pi;
+		 }
+		 else if (oldMouse.x < mousePos.x)
+		 {
+			 dir -= (mousePos.x - oldMouse.x) / (float)500;
+			 if (dir < 0) dir += 2 * pi;
+		 }
+		 
+		 Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// СѓСЃС‚Р°РЅРЅРѕРІРєР° РєСѓСЂСЃРѕСЂР° РІ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёРµ РєРѕРѕСЂРґРёРЅР°С‚С‹  
+		 oldMouse = Mouse::getPosition(window);
+		 return dir;
+	 }
+ }
+  struct Data
+ {
+	 sf::Uint16 key,tip;
+	 double x,y,angle;
+ };
+  Data dataServerRace[countPacked],// РґС„РЅРЅС‹Рµ РїСЂРёРµРјР° СЃРµСЂРІРµСЂР°
+	  dataClientRace[countPacked];// РґР°РЅРЅС‹Рµ РїСЂРёРµРјР° РєР»РёРµРЅС‚Р°
+ class Server
+{
+	
+public:
+	TcpListener listener;
+	TcpSocket client;
+
+	void Listen ()
+	{
+		// bind the listener to a port
+		if (listener.listen(2000) != sf::Socket::Done)
+		{
+			std::cout<<"error";
+		}
+
+		// accept a new connection
+		//sf::TcpSocket client;
+		if (listener.accept(client) != sf::Socket::Done)
+		{
+			std::cout<<"error";
+		}
+		else 
+		{
+			std::cout<<"Connect Good"<<"\n";
+			networkGame=true;
+			client.setBlocking(false);
+		}
+	}
+	Data Receive()
+	{
+
+		// on receiving side
+		sf::Uint16 key,type;
+		std::string s;
+		double x,y,angle;
+		Packet packet;
+		Data data;
+		data.key=0;
+		if (client.receive(packet)!=Socket::NotReady)
+		{
+			packet  >> s >> key >> x >> y >> type>> angle;
+			if (s!="")
+			{
+				std::cout<<"client..>"<< s<<" " <<key<<" "<<x << " "<< y<<" "
+					           << type<< " " <<angle << std::endl;
+				data.key=key;
+				data.x=x;
+				data.y=y;
+				data.tip=type;
+				data.angle=angle;
+			}
+			else
+			{
+				std::cout<<"client not conect"<< s  << std::endl;
+			}
+			return data;
+		}
+
+
+		
+	}
+	void Send(Uint16 key,double x ,double y, Uint16 type, double angle)
+	{
+
+		// on sending side
+		std::string s="Hello";
+		sf::Packet packet;
+		packet  <<s << key<<x<<y<<type<<angle; 
+	    client.send(packet);
+
+	}
+	
+};
+Server server;
+class Client
+{
+	
+public:
+	TcpSocket socket;
+//	TcpListener listener;
+	void Connect()
+	{
+		Socket::Status status= socket.connect (ip,port);
+		if(status !=Socket::Done)
+		{
+			std::cout<<"error";
+		}
+		else 
+		{
+			std::cout<<"connect good"<<"\n";
+			networkGame=true;
+			socket.setBlocking(false);
+		}
+	}
+	Data Receive()
+	{
+
+		// on receiving side
+		sf::Uint16 key,type;
+		std::string s;
+		double x,y,angle;
+		Packet packet;
+		Data data;
+		data.key=0;
+		if (socket.receive(packet)!=Socket::NotReady)
+		{
+			packet  >> s >> key >> x >> y >> type>> angle;
+			if (s!="")
+			{
+				std::cout<<"server..>"<< s<<" " <<key<<" "<<x << " "<< y<<" "
+					           << type<< " " <<angle << std::endl;
+				data.key=key;
+				data.x=x;
+				data.y=y;
+				data.tip=type;
+				data.angle=angle;
+			}
+			else
+			{
+				std::cout<<"client not conect"<< s  << std::endl;
+			}
+			return data;
+		}
+		
+
+
+		
+	}
+	void Send(Uint16 key,double x ,double y, Uint16 tip, double angle)
+	{
+
+		// on sending side
+		std::string s="Hello";
+		sf::Packet packet;
+		packet  <<s << key<<x<<y<<tip<<angle; 
+	    socket.send(packet);
+
+	}
+};
+
+Client client;
+void ServerRace()// РїСЂРёРµРј РґР°РЅРЅС‹С… СЃ РєР»РёРµРЅС‚Р° СЃРµСЂРІРµСЂРѕРј
+{
+	for (int i=0;i<countPacked;i++)
+	{
+		dataServerRace[i]=server.Receive();
+	}
+}
+void ClientRace()// РїСЂРёРµРј РґР°РЅРЅС‹С… СЃ СЃРµСЂРІРµСЂР° РєР»РёРµРЅС‚РѕРј
+{
+	for (int i=0;i<countPacked;i++)
+	{
+		dataClientRace[i]=client.Receive();
+	}
+}
+class MainMenu
+{
+	int focus;// РЅРѕРјРµСЂ РїСѓРЅРєС‚Р° РјРµРЅСЋ РЅР° РєРѕС‚РѕСЂС‹Р№ РЅР°РІРµРґРµРЅ СѓРєР°Р·Р°С‚РµР»СЊ РјС‹С€Рё 
+	bool network;
+	int startX,startY;//РєРѕРѕСЂРґРёРЅР°С‚С‹ РѕС‚ РєРѕС‚РѕСЂС‹С… Р±СѓРґРµС‚ РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°С‚СЊСЃСЏ РјРµРЅСЋ
+	int stepDown;// СЂР°СЃС‚РѕСЏРЅРёРµ РјРµР¶РґСѓ РїСѓРЅРєС‚Р°РјРё РјРµРЅСЋ
+	int widthPunct;// С€РёСЂРёРЅР° РїСѓРЅРєС‚Р° РґР»СЏ РЅР°РІРµРґРµРЅРёСЏ РјС‹С€Рё
+public:
+	MainMenu()
+	{
+		focus=0;
+		network=false;
+		startX=300;
+		startY=165;
+		stepDown=50;
+		widthPunct=210;
+	}
+	int Service(Event event)
+	{
+		Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+		if (network==false)
+		{
+			focus=0;
+			if (mousePos.x>startX && mousePos.x<startX+widthPunct)
+			{
+				if ( mousePos.y>startY && mousePos.y<startY+stepDown) focus=1;
+				if ( mousePos.y>startY+stepDown && mousePos.y<startY+stepDown*2) focus=2;
+				if ( mousePos.y>startY+stepDown*2 && mousePos.y<startY+stepDown*3) focus=3;
+				if ( mousePos.y>startY+stepDown*3 && mousePos.y<startY+stepDown*4) focus=4;
+			}
+			if (focus==1 && ClickMouseLeft(event)==true ) return 1;
+			if (focus==2 && ClickMouseLeft(event)==true )
+			{
+					network=true;
+					return 2;
+			}
+		}
+		return 0;
+	}
+	void Draw(Text text)
+	{
+		if (focus==1) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+		text.setString("New Game");
+		text.setPosition(startX,startY);
+		window.draw(text);
+
+		if (focus==2) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+		text.setString("MultiPlayer");
+		text.setPosition(startX,startY+stepDown);
+		window.draw(text);
+
+		if (focus==3) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+		text.setString("About");
+		text.setPosition(startX,startY+stepDown*2);
+		window.draw(text);
+
+		if (focus==4) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+		text.setString("Exit");
+		text.setPosition(startX,startY+stepDown*3);
+		window.draw(text);
+		if (network==true)
+		{
+			text.setFillColor(Color::Yellow);
+			text.setString("Looking in console");
+			text.setPosition(startX,startY+stepDown*5);
+			window.draw(text);
+		}
+	}
+
+};
+MainMenu mainmenu;
+class Fps
+{
+	float FPS;
+public:
+	
+	void Draw(Text text)
+	{
+		std::ostringstream FPSString;    // РѕР±СЉСЏРІРёР»Рё РїРµСЂРµРјРµРЅРЅСѓСЋ
+		FPSString <<FPS;
+		text.setString(FPSString.str());
+		text.setPosition(400,577);
+		window.draw(text);
+		
+	}
+	void Server(int t1,int t2)
+	{
+		if (t2-t1!=0) FPS=1000000/(t2-t1); else FPS=1000;
+		//std::cout<<FPS<<"\n";
+	}
+};
+Fps fps;
+ class Walls// РєР»Р°СЃСЃ СЃС‚РµРЅ
  {
 	
 public:
 	int size;
-	 struct Stena// одна стенка
+	 struct Wall// РѕРґРЅР° СЃС‚РµРЅРєР°
 	 {
 		 int x,y;
 	 };
-	 Stena stena[kolvoStens];
-	 Stens()// конструктор стен. расставляяет случайно стены
+	 Wall wall[amountWalls];
+	 Walls()// РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃС‚РµРЅ. СЂР°СЃСЃС‚Р°РІР»СЏСЏРµС‚ СЃР»СѓС‡Р°Р№РЅРѕ СЃС‚РµРЅС‹
 	 {
-		 size=40;
-		 for (int i=0;i<kolvoStens;i++)
+		size=40; 
+	 }
+	 void Placement()
+	 {
+		
+		 for (int i=0;i<amountWalls;i++)
 		 {
 			 int rx= rand()%map_Size_X;
 			 int ry= rand()%map_Size_Y-1;
-			 stena[i].x=rx*40;
-			 stena[i].y=ry*40;
+			 wall[i].x=rx*40;
+			 wall[i].y=ry*40;
 		 }
 
 	 }
-	 void DrawStens()// нарисовать стены
+	 void DrawWalls()// РЅР°СЂРёСЃРѕРІР°С‚СЊ СЃС‚РµРЅС‹
 	 {
 		 RectangleShape rectangle(sf::Vector2f(size, size));
 		 rectangle.setFillColor(Color(128, 128,128));
-		 for (int i=0;i<kolvoStens;i++)
+		 for (int i=0;i<amountWalls;i++)
 		 {
-			 rectangle.setPosition(stena[i].x,stena[i].y);
+			 rectangle.setPosition(wall[i].x,wall[i].y);
 			 window.draw(rectangle);
 		 }
 	 }
-	 bool InStens (int x,int y,int dx=-1,int dy=-1,bool baruer=false)// процедура проверки нахожжденя в стене
+	 bool CrossWall (int x,int y,int dx=-1,int dy=-1,bool baruer=false)// РїСЂРѕС†РµРґСѓСЂР° РїСЂРѕРІРµСЂРєРё РЅР°С…РѕР¶Р¶РґРµРЅСЏ РІ СЃС‚РµРЅРµ
 	 {
-		 for (int i=0;i<kolvoStens;i++)
+		 for (int i=0;i<amountWalls;i++)
 		 {
 			 if (dx==-1&&dy==-1)
 			 {
-				 //если не задано смешение dx, dy то проверяет одну точку
+				 //РµСЃР»Рё РЅРµ Р·Р°РґР°РЅРѕ СЃРјРµС€РµРЅРёРµ dx, dy С‚Рѕ РїСЂРѕРІРµСЂСЏРµС‚ РѕРґРЅСѓ С‚РѕС‡РєСѓ
 				 if (baruer==false)
 				 {
 					 
-					if (x>=stena[i].x && x<=stena[i].x+size && y>=stena[i].y && y<=stena[i].y+size) return true;
+					if (x>=wall[i].x && x<=wall[i].x+size && y>=wall[i].y && y<=wall[i].y+size) return true;
 
 				 }
 				 else
 				 {
-					 // если барьер ==истина то проверяет раздвинув рамки
-					 if (x>=stena[i].x-5 && x<=stena[i].x+size+5 && y>=stena[i].y-5 && y<=stena[i].y+size+5) return true;
+					 // РµСЃР»Рё Р±Р°СЂСЊРµСЂ ==РёСЃС‚РёРЅР° С‚Рѕ РїСЂРѕРІРµСЂСЏРµС‚ СЂР°Р·РґРІРёРЅСѓРІ СЂР°РјРєРё
+					 if (x>=wall[i].x-5 && x<=wall[i].x+size+5 && y>=wall[i].y-5 && y<=wall[i].y+size+5) return true;
 				 }
 			 }
 			 else 
 			 {
-				 //если смешение dy, dx  заданно то проверяет на пересечение 2 примоугольника
-				 if (x+dx>=stena[i].x && x<=stena[i].x+size && y+dy>=stena[i].y && y<=stena[i].y+size) return true;
+				 //РµСЃР»Рё СЃРјРµС€РµРЅРёРµ dy, dx  Р·Р°РґР°РЅРЅРѕ С‚Рѕ РїСЂРѕРІРµСЂСЏРµС‚ РЅР° РїРµСЂРµСЃРµС‡РµРЅРёРµ 2 РїСЂРёРјРѕСѓРіРѕР»СЊРЅРёРєР°
+				 if (x+dx>=wall[i].x && x<=wall[i].x+size && y+dy>=wall[i].y && y<=wall[i].y+size) return true;
 			 }
 		 }
 		 return false;
 	 }
+	 void WallsSend(int k)// РїРµСЂРµРґР°С‡Р° РєРѕРѕСЂРґРёРЅР°С‚ СЃС‚РµРЅ СЃ СЃРµСЂРІРµСЂР° РєР»РёРµРЅС‚Сѓ
+	 {
+		  
+		 
+		server.Send(1,wall[k].x,wall[k].y,k,0);
+	
+		 
+	 }
+	 int WallsReceive()// РїСЂРёРµРј СЃС‚РµРЅ СЃ СЃРµСЂРІРµСЂР° Рё РїСЂРёСЃРІРѕРµРЅРёРµ СЃС‚РµРЅР°Рј РєoРѕСЂРґРёРЅР°С‚
+	 {
+		 
+		Data data ;
+		data=client.Receive();
+		if (data.key==1)
+		{
+			wall[data.tip].x=(int)data.x;
+			wall[data.tip].y=(int)data.y;
+		 	return data.tip;
+		} 
+		 return -1;
+	 }
  };
- Stens stens;
- class Marshrut //класс который хранит маршрут для движения юнитов
+ Walls walls;
+ class Route //РєР»Р°СЃСЃ РєРѕС‚РѕСЂС‹Р№ С…СЂР°РЅРёС‚ РјР°СЂС€СЂСѓС‚ РґР»СЏ РґРІРёР¶РµРЅРёСЏ СЋРЅРёС‚РѕРІ
 { 
-	int MapPoisk[map_Size_X][map_Size_Y];// массив который хранит значения ждля поиска пути, который хранить номер клетки от начала поиска
+	int MapSearch[map_Size_X][map_Size_Y];// РјР°СЃСЃРёРІ РєРѕС‚РѕСЂС‹Р№ С…СЂР°РЅРёС‚ Р·РЅР°С‡РµРЅРёСЏ Р¶РґР»СЏ РїРѕРёСЃРєР° РїСѓС‚Рё, РєРѕС‚РѕСЂС‹Р№ С…СЂР°РЅРёС‚СЊ РЅРѕРјРµСЂ РєР»РµС‚РєРё РѕС‚ РЅР°С‡Р°Р»Р° РїРѕРёСЃРєР°
 
    public:
-       int dlina,dlinaPuti,arrivalX,arrivalY,beginX,beginY;
-	   bool being;// сушествует ли маршрут
-       struct PointPuti // точка пути
+       int length,lengthRoute,arrivalX,arrivalY,beginX,beginY;
+	   bool being;// СЃСѓС€РµСЃС‚РІСѓРµС‚ Р»Рё РјР°СЂС€СЂСѓС‚
+       struct PointPuti // С‚РѕС‡РєР° РїСѓС‚Рё
        {
 			int x,y;
 			bool being;
        };
-	   PointPuti pointPuti[100/*map_Size_X*map_Size_Y*/];
-       Marshrut ()
+	   PointPuti pointRoute[100/*map_Size_X*map_Size_Y*/];
+       Route ()
        {
-                dlina=0;
+                length=0;
 				arrivalX=0;
 				arrivalY=0;
        }
-void DrawPoisk(Text text)
+void DrawSearchRoute(Text text)
 {
 	    RectangleShape rectangle(sf::Vector2f(10,10));
 		for (int i=0;i<map_Size_X;i++)
 		for (int j=0;j<map_Size_Y;j++)
 		{
 			rectangle.setPosition(i*40+15,j*40+15);
-			if(MapPoisk[i][j]==-1)
+			if(MapSearch[i][j]==-1)
 			{
 				 rectangle.setFillColor(Color(108, 108,255));
 				 window.draw(rectangle);
 			}
-			if(MapPoisk[i][j]==-4)
+			if(MapSearch[i][j]==-4)
 			{
 				 rectangle.setFillColor(Color(255, 108,108));
 				 
 				 window.draw(rectangle);
 			}
-			if(MapPoisk[i][j]==-2)
+			if(MapSearch[i][j]==-2)
 			{
 				 rectangle.setFillColor(Color(108, 255,108));
 				 
 				 window.draw(rectangle);
 			}
-			//
-			//if (MapPoisk[i][j]>0)
-			//{
-			//	text.setColor(Color(255,255,255));//покрасили текст в красный. если убрать эту строку, то по умолчанию он белый
-			//	std::ostringstream numRastStr;    // объявили переменную
-			//	numRastStr <<MapPoisk[i][j];
-			//	text.setString(numRastStr.str());
-			//    text.setPosition(i*40+20,j*40+20);
-			//	window.draw(text);
-			//	 rectangle.setFillColor(Color(108+MapPoisk[i][j]*30, 108,108));
-			//	 
-			//	 window.draw(rectangle);
-			//}
-			//
+
 		 
 		}
 		rectangle.setFillColor(Color(255, 255,108));
-		for (int i=0;i<dlina;i++)
-		if(pointPuti[i].being==true)
+		for (int i=0;i<length;i++)
+		if(pointRoute[i].being==true)
 		{
 		
-			rectangle.setPosition(pointPuti[i].x*40+15,pointPuti[i].y*40+15);
+			rectangle.setPosition(pointRoute[i].x*40+15,pointRoute[i].y*40+15);
 			 window.draw(rectangle);
-		}
+		}/*
 		for (int i=0;i<map_Size_X;i++) DrawLine(i*40+20,1,i*40+20,600,Color::Red);
 		for (int j=0;j<map_Size_Y;j++) DrawLine(1,j*40+20,800,j*40+20,Color::Red);
-		
+		*/
 		
 		
 }
-void LoadMapPoisk(int x,int y,int arrX,int arrY,int panzerX=-1,int panzerY=-1)// загрузитть данные в массив предназначеннй для поиска пути
+void CancelRoute()
+{
+	lengthRoute=0;
+	length=0;
+	being=0;
+	for (int k=0;k<100;k++)
+	{
+		pointRoute[k].x=0;
+		pointRoute[k].y=0;
+		pointRoute[k].being=false;
+	}
+	for (int i=0;i<map_Size_X;i++)
+		for (int j=0;j<map_Size_Y;j++)
+		{
+			MapSearch[i][j]=0;
+		}
+}
+void PrepareMapForSearchRoute(int x,int y,int arrX,int arrY,int panzerX=-1,int panzerY=-1)// Р·Р°РіСЂСѓР·РёС‚С‚СЊ РґР°РЅРЅС‹Рµ РІ РјР°СЃСЃРёРІ РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅРЅР№ РґР»СЏ РїРѕРёСЃРєР° РїСѓС‚Рё
 {
 	
 	for (int i=0;i<map_Size_X;i++)
 	for (int j=0;j<map_Size_Y;j++)
      {
-       //инициализация массива для поиска пути   
-      MapPoisk[i][j]=0;
-	  for (int k=0;k<kolvoStens;k++)
-	  if (stens.stena[k].x==i*40 && stens.stena[k].y==j*40 ) // заносим в массив стены
+       //РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјР°СЃСЃРёРІР° РґР»СЏ РїРѕРёСЃРєР° РїСѓС‚Рё   
+      MapSearch[i][j]=0;
+	  for (int k=0;k<amountWalls;k++)
+	  if (walls.wall[k].x==i*40 && walls.wall[k].y==j*40 ) // Р·Р°РЅРѕСЃРёРј РІ РјР°СЃСЃРёРІ СЃС‚РµРЅС‹
 	  {
-			  MapPoisk[i][j]=-1; 
+			  MapSearch[i][j]=-1; 
 			  break;
 	  }
-      if (x>i*40 &&  x<i*40+40 && y>j*40 && y<j*40+40)
+      if (x>i*40 &&  x<=i*40+40 && y>j*40 && y<=j*40+40)
 	  {
 			  beginX=i;
 			  beginY=j;
-			  MapPoisk[i][j]=-2;// заносим в массив точку начала пути 
+			  MapSearch[i][j]=-2;// Р·Р°РЅРѕСЃРёРј РІ РјР°СЃСЃРёРІ С‚РѕС‡РєСѓ РЅР°С‡Р°Р»Р° РїСѓС‚Рё 
 	  }
-	  if (arrX>i*40 &&  arrX<i*40+40 && arrY>j*40 && arrY<j*40+40)
+	  if (arrX>i*40 &&  arrX<=i*40+40 && arrY>j*40 && arrY<=j*40+40)
 	  {
 			  arrivalX=i;
 			  arrivalY=j;
-			//  MapPoisk[i][j]=-3;// заносим точку конца пути
+			//  MapPoisk[i][j]=-3;// Р·Р°РЅРѕСЃРёРј С‚РѕС‡РєСѓ РєРѕРЅС†Р° РїСѓС‚Рё
 	  }
 	  if(panzerX!=-1&&panzerY!=-1)
-	  if (panzerX+30>i*40 && panzerX<i*40+40 && panzerY+30>j*40 && panzerY<j*40+40) MapPoisk[i][j]=-4; // заносим точки движушихся препятсвий
+	  if (panzerX+30>i*40 && panzerX<i*40+40 && panzerY+30>j*40 && panzerY<j*40+40) MapSearch[i][j]=-4; // Р·Р°РЅРѕСЃРёРј С‚РѕС‡РєРё РґРІРёР¶СѓС€РёС…СЃСЏ РїСЂРµРїСЏС‚СЃРІРёР№
 
      }
 	for (int i=0;i<100;i++)
 	{
-		pointPuti[i].being=false;
+		pointRoute[i].being=false;
 	}
     arrX=arrX;	   
 }
 
-	void  VolnaPuti (int DLINA)// распространеет волну пути от х,у
+	void  WaveSpread (int LENGTH)// СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅРµРµС‚ РІРѕР»РЅСѓ РїСѓС‚Рё РѕС‚ С…,Сѓ
 	{
-      dlina=DLINA; 
+      length=LENGTH; 
 	  
-     for (int k=0;k<dlina;k++) // само распространение волны
+     for (int k=0;k<length;k++) // СЃР°РјРѕ СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅРµРЅРёРµ РІРѕР»РЅС‹
      {
 	 for (int i=0;i<map_Size_X;i++)
      for (int j=0;j<map_Size_Y;j++)
      {   	
 		 
 		
-         if ((MapPoisk[i][j]==k&&k!=0)||(MapPoisk[i][j]==-2&&k==0))
+         if ((MapSearch[i][j]==k&&k!=0)||(MapSearch[i][j]==-2&&k==0))
          {
 			 /*
             if (MapPoisk[i][j-1]==-3||MapPoisk[i+1][j]==-3
@@ -281,13 +629,13 @@ void LoadMapPoisk(int x,int y,int arrX,int arrY,int panzerX=-1,int panzerY=-1)//
 			 }
 			*/
            if (i-1>=0)
-			   if (MapPoisk[i-1][j]==0) MapPoisk[i-1][j]=k+1;
+			   if (MapSearch[i-1][j]==0) MapSearch[i-1][j]=k+1;
            if (j+1<map_Size_Y)
-            if (MapPoisk[i][j+1]==0) MapPoisk[i][j+1]=k+1;
+            if (MapSearch[i][j+1]==0) MapSearch[i][j+1]=k+1;
            if (i+1<map_Size_X)
-            if (MapPoisk[i+1][j]==0) MapPoisk[i+1][j]=k+1;
+            if (MapSearch[i+1][j]==0) MapSearch[i+1][j]=k+1;
            if (j-1>=0)
-             if (MapPoisk[i][j-1]==0) MapPoisk[i][j-1]=k+1;
+             if (MapSearch[i][j-1]==0) MapSearch[i][j-1]=k+1;
 			
 		   if (arrivalY!=0)
 			   arrivalY=arrivalY;
@@ -296,92 +644,119 @@ void LoadMapPoisk(int x,int y,int arrX,int arrY,int panzerX=-1,int panzerY=-1)//
          }
      
      }
-	 dlina=dlina;
 	}
-	void LoadMarshrut()
+	void LoadRoute(int numStep=0)
 	{
+		// numstep РїРµСЂРµРјРµРЅРЅР°СЏ РєРѕС‚РѕСЂР°СЏ С…СЂР°РЅРёС‚ РЅРѕРјРµСЂ С€Р°РіР° РѕС‚ РєРѕС‚РѕСЂРѕРіРѕ РЅР°С‡РёРЅР°РµС‚СЃСЏ С‚РѕС‡РєР° РЅР°С‡Р°Р»Р° РїСѓС‚Рё
 		int pointX,pointY;
-		dlinaPuti=MapPoisk[arrivalX][arrivalY];	
+		lengthRoute=MapSearch[arrivalX][arrivalY];	
      pointX=arrivalX; 
 	 pointY=arrivalY;
-	 pointPuti[dlinaPuti].y=pointY;
-	 pointPuti[dlinaPuti].x=pointX;
-	 pointPuti[dlinaPuti].being=true;
-	 pointPuti[0].y=beginY;
-	 pointPuti[0].x=beginX;
-	 pointPuti[0].being=true;
-	 for (int k=dlinaPuti;k>0;k--)
+	 pointRoute[lengthRoute].y=pointY;
+	 pointRoute[lengthRoute].x=pointX;
+	 pointRoute[lengthRoute].being=true;
+	 pointRoute[0].y=beginY;
+	 pointRoute[0].x=beginX;
+	 pointRoute[0].being=true;
+	 for (int k=lengthRoute;k>numStep;k--)
 	 
 	 {
-		 if (MapPoisk[pointX][pointY-1]==k-1 && pointY>0)
+		 if (MapSearch[pointX][pointY-1]==k-1 && pointY>0)
 		 {
 			 pointY--;
-			 pointPuti[k-1].y=pointY;
-			 pointPuti[k-1].x=pointX;
-			 pointPuti[k-1].being=true;
+			 pointRoute[k-1].y=pointY;
+			 pointRoute[k-1].x=pointX;
+			 pointRoute[k-1].being=true;
 			 continue;
 		 }
-		 if (MapPoisk[pointX+1][pointY]==k-1 && pointX<map_Size_X)
+		 if (MapSearch[pointX+1][pointY]==k-1 && pointX<map_Size_X-1)
 		 {
 			 pointX++;
-			 pointPuti[k-1].y=pointY;
-			 pointPuti[k-1].x=pointX;
-			 pointPuti[k-1].being=true;
+			 pointRoute[k-1].y=pointY;
+			 pointRoute[k-1].x=pointX;
+			 pointRoute[k-1].being=true;
 			 continue;
 		 }
-		 if (MapPoisk[pointX][pointY+1]==k-1 && pointY<map_Size_Y)
+		 if (MapSearch[pointX][pointY+1]==k-1 && pointY<map_Size_Y-1)
 		 {
 			 pointY++;
-			 pointPuti[k-1].y=pointY;
-			 pointPuti[k-1].x=pointX;
-			 pointPuti[k-1].being=true;
+			 pointRoute[k-1].y=pointY;
+			 pointRoute[k-1].x=pointX;
+			 pointRoute[k-1].being=true;
 			 continue;
 		 }
-		 if (MapPoisk[pointX-1][pointY]==k-1 && pointX>0)
+		 if (MapSearch[pointX-1][pointY]==k-1 && pointX>0)
 		 {
 			 pointX--;
-			 pointPuti[k-1].y=pointY;
-			 pointPuti[k-1].x=pointX;
-			 pointPuti[k-1].being=true;
+			 pointRoute[k-1].y=pointY;
+			 pointRoute[k-1].x=pointX;
+			 pointRoute[k-1].being=true;
 			 continue;
 		 }
 	 }
 	pointX=pointX;
-	being=true;// маршрут создан и присвоем его сушествованию истина
+	being=true;// РјР°СЂС€СЂСѓС‚ СЃРѕР·РґР°РЅ Рё РїСЂРёСЃРІРѕРµРј РµРіРѕ СЃСѓС€РµСЃС‚РІРѕРІР°РЅРёСЋ РёСЃС‚РёРЅР°
+	   if (Keyboard::isKeyPressed(Keyboard::X)) 
+	   {
+			pointX=pointX;
+	   }
 	}
+
 };      
- Marshrut marshrut;
- bool Vidimosty(int x,int y,int arrivalX,int arrivalY)// функция видимости через стены
- {
-	 double angle,pointX=x,pointY=y;
-	 angle=RaschetAngle( x, y, arrivalX,arrivalY);
-	 for (int i=0;i<140;i++)
-	 {
-		 pointY+=7*sin(pi*(angle-90)/180);
-		 pointX+=7*cos(pi*(angle-90)/180);
-		 if (stens.InStens(pointX,pointY,-1,-1,true)) return false;
-		 if (pointX>arrivalX-10 && pointX<arrivalX+10 
-			 && pointY>arrivalY-10 && pointY<arrivalY+10) return true;
-	 }
-	 return true;
- }
- class Babahs// класс взрывов
+
+Route route; 
+float VectMult(float ax, float ay, float bx, float by)
 {
-	struct Babah// взрыв
+	return (ax * by) - (ay * bx);
+}
+
+bool IsCrossing(float a1x, float a1y, float a2x, float a2y, float b1x, float b1y, float b2x, float b2y)
+{
+	float v1 = VectMult(b2x - b1x, b2y - b1y, a1x - b1x, a1y - b1y);
+	float v2 = VectMult(b2x - b1x, b2y - b1y, a2x - b1x, a2y - b1y);
+	float v3 = VectMult(a2x - a1x, a2y - a1y, b1x - a1x, b1y - a1y);
+	float v4 = VectMult(a2x - a1x, a2y - a1y, b2x - a1x, b2y - a1y);
+	return (v1 * v2) <= 0 && (v3 * v4) <= 0;
+}
+bool LookAcrossWall(int x,int y,int arrivalX,int arrivalY)// С„СѓРЅРєС†РёСЏ РІРёРґРёРјРѕСЃС‚Рё С‡РµСЂРµР· СЃС‚РµРЅС‹
+{
+	for (size_t i = 0; i < amountWalls; i++)
+		if (IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x, walls.wall[i].y, walls.wall[i].x + walls.size, walls.wall[i].y) ||
+			IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x + walls.size, walls.wall[i].y, walls.wall[i].x + walls.size, walls.wall[i].y + walls.size) ||
+			IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x + walls.size, walls.wall[i].y + walls.size, walls.wall[i].x, walls.wall[i].y + walls.size) ||
+			IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x, walls.wall[i].y + walls.size, walls.wall[i].x, walls.wall[i].y))
+			return false;
+	return true;
+
+	//double angle, pointX = x, pointY = y;
+	//angle = CalcAngle(x, y, arrivalX, arrivalY);
+	//for (int i = 0; i < 1000; i++)
+	//{
+	//	pointY += 1 * sin(pi * (angle - 90) / 180);
+	//	pointX += 1 * cos(pi * (angle - 90) / 180);
+	//	if (walls.CrossWall(pointX, pointY, -1, -1, true)) return false;
+	//	if (pointX > arrivalX - 10 && pointX<arrivalX + 10
+	//		&& pointY>arrivalY - 10 && pointY < arrivalY + 10) return true;
+	//}
+}
+
+ class Burstes// РєР»Р°СЃСЃ РІР·СЂС‹РІРѕРІ
+{
+	struct burst// РІР·СЂС‹РІ
 	{
-		int x,y,chet;
+		int x,y,count;
 		bool being;
 		bool SmallBah;
 	};
-	Babah babah[kolvoBabah];
+	burst burst[amountBurst];
 public:
-	void Draw()// нарисовать взрыв
+	void Draw()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РІР·СЂС‹РІ
 	{
-		for (int i=0;i<kolvoBabah;i++)
-		if (babah[i].being==true) 
+		for (int i=0;i<amountBurst;i++)
+		if (burst[i].being==true) 
 		{
-			CircleShape shape(babah[i].chet);
-			if (babah[i].chet %2==0) //если четное то рисовать крсным иначе желтым
+			CircleShape shape(burst[i].count);
+			if (burst[i].count %2==0) //РµСЃР»Рё С‡РµС‚РЅРѕРµ С‚Рѕ СЂРёСЃРѕРІР°С‚СЊ РєСЂСЃРЅС‹Рј РёРЅР°С‡Рµ Р¶РµР»С‚С‹Рј
 			{
 				shape.setFillColor(Color(255,0,0));
 
@@ -390,51 +765,51 @@ public:
 			{
 					shape.setFillColor(Color(255,255,0));
 			}
-			shape.setPosition(Vector2f(babah[i].x-babah[i].chet,babah[i].y-babah[i].chet));
+			shape.setPosition(Vector2f(burst[i].x-burst[i].count,burst[i].y-burst[i].count));
 			window.draw(shape);
 		}
 	}
-	void Registration(int xx,int yy,bool smallBabah=false )// регистрация взрыва
+	void Registration(int xx,int yy,bool smallBabah=false )// СЂРµРіРёСЃС‚СЂР°С†РёСЏ РІР·СЂС‹РІР°
 	{
-		for (int i=0;i<kolvoBabah;i++)
-		if (babah[i].being==false) 
+		for (int i=0;i<amountBurst;i++)
+		if (burst[i].being==false) 
 		{
-			babah[i].x=xx;
-			babah[i].y=yy;
-			babah[i].being=true;
-			babah[i].SmallBah=smallBabah;
+			burst[i].x=xx;
+			burst[i].y=yy;
+			burst[i].being=true;
+			burst[i].SmallBah=smallBabah;
 			break;
 		}
 	}
-	void Server()// обслуживание взрывов
+	void Service()// РѕР±СЃР»СѓР¶РёРІР°РЅРёРµ РІР·СЂС‹РІРѕРІ
 	{
-		for (int i=0;i<kolvoBabah;i++)
-		if (babah[i].being==true) 
+		for (int i=0;i<amountBurst;i++)
+		if (burst[i].being==true) 
 		{
-			if ((babah[i].chet<timeBabah && babah[i].SmallBah==false)
-				||babah[i].chet<12 && babah[i].SmallBah==true)
+			if ((burst[i].count<timeBurst && burst[i].SmallBah==false)
+				||burst[i].count<12 && burst[i].SmallBah==true)
 			{
-				babah[i].chet++;
+				burst[i].count++;
 			}
 			else 
 			{
-				babah[i].being=false;
-				babah[i].chet=0;
+				burst[i].being=false;
+				burst[i].count=0;
 			}
 		}
 	}
 };
-Babahs babahs;
-class Bonuses// класс бонысы
+Burstes burstes;
+class Bonuses// РєР»Р°СЃСЃ Р±РѕРЅС‹СЃС‹
 {
 	 public:
-	 Image bonusesImage; //создаем объект Image (изображение)
-	 Texture bonusesTexture;//создаем объект Texture (текстура)
+	 Image bonusesImage; //СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚ Image (РёР·РѕР±СЂР°Р¶РµРЅРёРµ)
+	 Texture bonusesTexture;//СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚ Texture (С‚РµРєСЃС‚СѓСЂР°)
 	 Sprite bonusesSprite; 
-	 struct Bonus // бонус
+	 struct Bonus // Р±РѕРЅСѓСЃ
 	 {
 	  public:
-		  int x,y,tip;
+		  int x,y,type;
 		  bool being;
 		  Bonus()
 		  {
@@ -446,37 +821,50 @@ class Bonuses// класс бонысы
 			  */
 		  }
 	 };
-	 Bonus bonus[kolvoBonus];
+	 Bonus bonus[amountBonus];
 	 Bonuses()
 	 {
 		
-		bonusesImage.loadFromFile("Bonus.png");//загружаем в него файл
+		bonusesImage.loadFromFile("Bonus.png");//Р·Р°РіСЂСѓР¶Р°РµРј РІ РЅРµРіРѕ С„Р°Р№Р»
 		bonusesImage.createMaskFromColor(Color(255,255,255));
 		
-		bonusesTexture.loadFromImage(bonusesImage);//передаем в него объект Image (изображения)
+		bonusesTexture.loadFromImage(bonusesImage);//РїРµСЂРµРґР°РµРј РІ РЅРµРіРѕ РѕР±СЉРµРєС‚ Image (РёР·РѕР±СЂР°Р¶РµРЅРёСЏ)
 		bonusesSprite.setTexture(bonusesTexture);
 	 }
-	 void Draw()// нарисовать бонусы
+	 void Draw()// РЅР°СЂРёСЃРѕРІР°С‚СЊ Р±РѕРЅСѓСЃС‹
 	 {
-		 for (int i=0;i<kolvoBonus;i++)
+		 for (int i=0;i<amountBonus;i++)
 		 if(bonus[i].being==true)
 		 {
-			 if (bonus[i].tip==1) bonusesSprite.setTextureRect(IntRect(1,1,40,40));
-			 if (bonus[i].tip==2) bonusesSprite.setTextureRect(IntRect(40,1,40,40));
-			 if (bonus[i].tip==3) bonusesSprite.setTextureRect(IntRect(1,40,40,40));
+			 if (bonus[i].type==1) bonusesSprite.setTextureRect(IntRect(1,1,40,40));
+			 if (bonus[i].type==2) bonusesSprite.setTextureRect(IntRect(40,1,40,40));
+			 if (bonus[i].type==3) bonusesSprite.setTextureRect(IntRect(1,40,40,40));
+			 if (bonus[i].type==4) bonusesSprite.setTextureRect(IntRect(40,40,40,40));
 			 bonusesSprite.setPosition(bonus[i].x,bonus[i].y);
 			 window.draw(bonusesSprite);
 		 }
 	 }
-	 void NewBonus(int x,int y,int tip,bool rezerv=false)// регистрация нового бонуса
+	 void NewBonus(int x,int y,int tip,bool rezerv=false)// СЂРµРіРёСЃС‚СЂР°С†РёСЏ РЅРѕРІРѕРіРѕ Р±РѕРЅСѓСЃР°
 	 {
-		 int realKolvoBonus=rezerv==false ? kolvoBonus-15 : kolvoBonus;
-		 for (int i=0;i<realKolvoBonus;i++)
+		 int realCountBonus= (rezerv==false ? amountBonus-15 : amountBonus);
+		 int i1,i;
+		 // СЂР°СЃС‡РёС‚Р°РµРј РїРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ С†РёРєР»Р° С‡С‚Рѕ Р±С‹ Р±С‹Р» СЂРµР·РµСЂРІ
+		 if(rezerv==false) 
+		 {
+			 i=0;
+			 i1=amountBonus-15;
+		 }
+		 else
+		 {
+			 i=amountBonus-15;
+			 i1=amountBonus;
+		 }
+		 for ( i;i<i1;i++)
 		 if(bonus[i].being==false)
 		 {
 			 bonus[i].x=x/40*40;
 			 bonus[i].y=y/40*40;
-			 bonus[i].tip=tip;
+			 bonus[i].type=tip;
 			 bonus[i].being=true;
 			
 			 break;
@@ -491,9 +879,10 @@ class Bonuses// класс бонысы
 			 }
 			 */
 	 }
-	 int InBonus (int x,int y,int dx=-1,int dy=-1)// процедура проверки нахождения точки или прямоугольника в бонусе
+	 int CrossBonus (int x,int y,int dx=-1,int dy=-1)// РїСЂРѕС†РµРґСѓСЂР° РїСЂРѕРІРµСЂРєРё РЅР°С…РѕР¶РґРµРЅРёСЏ С‚РѕС‡РєРё РёР»Рё РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєР° РІ Р±РѕРЅСѓСЃРµ
 	 {
-		 for (int i=0;i<kolvoBonus;i++)
+		 
+		 for (int i=0;i<amountBonus;i++)
 		 if (bonus[i].being==true)
 		 {
 			 if (dx==-1&&dy==-1)
@@ -509,36 +898,36 @@ class Bonuses// класс бонысы
 		 }
 		 return -1;
 	 }
-	 void KillBonus(int n)// удалить бонус
+	 void KillBonus(int n)// СѓРґР°Р»РёС‚СЊ Р±РѕРЅСѓСЃ
 	 {
 		 bonus[n].being=false;
 	 }
 };
 Bonuses bonuses;
 
-class Pylu// класс пуля
+class Bullet// РєР»Р°СЃСЃ РїСѓР»СЏ
 {
 public:
-	double x,y,// координаты
-		angle, // угол
-		dx,dy;// смешение при полете
+	double x,y,// РєРѕРѕСЂРґРёРЅР°С‚С‹
+		angle, // СѓРіРѕР»
+		dx,dy;// СЃРјРµС€РµРЅРёРµ РїСЂРё РїРѕР»РµС‚Рµ
 	bool being;
-	Pylu ()
+	Bullet ()
 	{
 		being=false;
 	}
-	void Draw()// нарисовать пулю
+	void Draw()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РїСѓР»СЋ
 	{
 		if (being==true)
 		{
 			CircleShape shape(2);
-			// задаём фигуре зелёный цвет
+			// Р·Р°РґР°С‘Рј С„РёРіСѓСЂРµ Р·РµР»С‘РЅС‹Р№ С†РІРµС‚
 			shape.setFillColor(Color(250, 250, 0));
 			shape.setPosition(x,y);
 			window.draw(shape);
 		}
 	}
-	void Registration(int xx,int yy, double angle1,double dx1=0, double dy1=0)// зарегать пулю
+	void Registration(int xx,int yy, double angle1,double dx1=0, double dy1=0)// Р·Р°СЂРµРіР°С‚СЊ РїСѓР»СЋ
 	{
 		if (being==false)
 		{
@@ -550,74 +939,78 @@ public:
 			being=true;
 		}
 	}
-	void Server()// обслуживание пуль
+	void Service()// РѕР±СЃР»СѓР¶РёРІР°РЅРёРµ РїСѓР»СЊ
 	{
 		if (being==true)
 		{
 			y+=15*sin(pi*(angle-90)/180)+dy;
 			x+=15*cos(pi*(angle-90)/180)+dx;
 			if (y<0||y>600||x<0||x>800) being=false;
-			if (stens.InStens(x,y))
+			if (walls.CrossWall(x,y))
 			{
 				being=false;
-				babahs.Registration(x,y,true);
+				burstes.Registration(x,y,true);
 			}
 		}
 		
 	}
 
 };
-Pylu pylu[kolvoPylu];
-void PoletPylus()// фунцкция обработки полетов пуль
+Bullet bullets[amountBullet];
+void FlyBullets()// С„СѓРЅС†РєС†РёСЏ РѕР±СЂР°Р±РѕС‚РєРё РїРѕР»РµС‚РѕРІ РїСѓР»СЊ
 {
-	for (int i=0;i<kolvoPylu;i++)
+	for (int i=0;i<amountBullet;i++)
 	{
-		pylu[i].Server();
+		bullets[i].Service();
 	}
 }
-void vustrel(int x,int y, double angle,double dx,double dy)// регистрация новой пули
+void Shot(int x,int y, double angle,double dx,double dy)// СЂРµРіРёСЃС‚СЂР°С†РёСЏ РЅРѕРІРѕР№ РїСѓР»Рё
 {
-	for (int i=0;i<kolvoPylu;i++)
+	for (int i=0;i<amountBullet;i++)
 	{
-		if (pylu[i].being==false)
+		if (bullets[i].being==false)
 		{
-			pylu[i].Registration(x,y,angle,dx,dy);
+			bullets[i].Registration(x,y,angle,dx,dy);
 			break;
 		}
 	}
 }
-class Panzer// класс танк игрока
+class Panzer// РєР»Р°СЃСЃ С‚Р°РЅРє РёРіСЂРѕРєР°
 {
 protected:
 	double x,y;
 	bool being;
-	int chetKill;// счетчик времени когда умер танк
+	int countKill;// СЃС‡РµС‚С‡РёРє РІСЂРµРјРµРЅРё РєРѕРіРґР° СѓРјРµСЂ С‚Р°РЅРє
 	int pos;
 	int size;
-	int chetAttack,timeAttack;
-	int pyluInMagaz;
+	int countAttack,// СЃС‡РµС‚С‡РёРє РїРµСЂРµР·Р°СЂСЏРґРєРё
+		timeAttack;// РІСЂРµРјСЏ РїРµСЂРµР·Р°СЂСЏРґРєРё
+	int ammoMagazine;// РњР°РіР°Р·РёРЅ РїР°С‚СЂРѕРЅРѕРІ
 	int HP;
-	int BRONY;
+	int ARMOR;// Р±СЂРѕРЅСЏ
 	Color color;
 	double angle;
-	double turnX,turnY,turnX1,turnY1;// точки рисования пушки
+	double turnX,turnY,turnX1,turnY1;// С‚РѕС‡РєРё СЂРёСЃРѕРІР°РЅРёСЏ РїСѓС€РєРё
+	
 public:
+	bool speedTurn;// Р±С‹СЃС‚СЂРѕРµ РІСЂР°С‰РµРЅРёРµ Р±Р°С€РЅРё
 	Panzer ()
 	{
 		size=15;
 		x=140;
 		y=100;
 		angle=90;
-		chetAttack=0;
+		countAttack=0;
 		timeAttack=50;
-		pyluInMagaz=5;
+		ammoMagazine=15;
 		HP=100;
-		BRONY=100;
+		ARMOR=100;
 		being=true;
-		chetKill=0;
+		countKill=0;
 		color=Color::Green;
+		speedTurn=false;
 	}
-	void Draw()// нарисовать танк 
+	void Draw()// РЅР°СЂРёСЃРѕРІР°С‚СЊ С‚Р°РЅРє 
 	{
 		if (being==true)
 		{
@@ -631,76 +1024,173 @@ public:
 	void ChangePosition(int newPos)
 	{
 	}
-	void Move(double dx, double dy) // движения танка
+	void Move(double dx, double dy) // РґРІРёР¶РµРЅРёСЏ С‚Р°РЅРєР°
 	{
 		x+=dx;
 		y+=dy;
+		
+
 	}
-	void Turn(double angle)// поворот башни в определенный угол
+	void Turn(double angle)// РїРѕРІРѕСЂРѕС‚ Р±Р°С€РЅРё РІ РѕРїСЂРµРґРµР»РµРЅРЅС‹Р№ СѓРіРѕР»
 	{
 		//int size1=size/3;
 		turnY=size*2*sin(pi*(angle-90)/180)+y+size;
 		turnX=size*2*cos(pi*(angle-90)/180)+x+size;
-		turnY1=size*sin(pi*(angle-90)/180)+y+size; 
-		turnX1=size*cos(pi*(angle-90)/180)+x+size;
+		turnY1=size*10*sin(pi*(angle-90)/180)+y+size; 
+		turnX1=size*10*cos(pi*(angle-90)/180)+x+size;
 	}
-	virtual void Upravlenie(Event event)//функция управления танком с клавиатуры
+	void Control3D(Event event)
 	{
-		double angleMouse, // угол приццела куда смотрит мышь
-			speed=1.5,// скорость движения танка
-			dx=0,dy=0;// скорости движения по вертикали и горизонтали
-		int vector=0;
-		if (Keyboard::isKeyPressed(Keyboard::W)) // движение вверх
+		float speed = 1.5;// СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ С‚Р°РЅРєР°
+		float dx = 0, dy = 0;
+		// РЅСѓР¶РЅРѕ РІСЃС‚Р°РІРёС‚СЊ РІ СѓСЃР»РѕРІРёРµ РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРѕРє СѓРїСЂР°РІР»РµРёСЏ
+		//if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// РµСЃР»Рё РЅРµ РІСЂРµР·Р°Р»СЃСЏ РІ СЃС‚РµРЅСѓ
+			//{
+			//	Move(0, -speed);
+			//	dy. = -speed;
+
+			//}
+		angle = (180 * -ControlMouse() / pi); ;
+		/*if (angle < -180) angle += 360;
+		else if (angle > 180) angle -= 360;*/
+		if (Keyboard::isKeyPressed(Keyboard::W)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
 		{
-			if (stens.InStens(x,y-speed,size*2,size*2)==false)// если не врезался в стену
+			
+			dy = speed * sin(pi * (angle+90 ) / 180) ;
+			dx = speed * cos(pi * (angle + 90) / 180);
+			Move(dx,dy);
+			
+		}
+		if (Keyboard::isKeyPressed(Keyboard::S)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		{
+
+			dy = -speed * sin(pi * (angle + 90) / 180);
+			dx = -speed * cos(pi * (angle + 90) / 180);
+			Move(dx, dy);
+
+		}
+		if (Keyboard::isKeyPressed(Keyboard::D)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		{
+
+			dy = speed * sin(pi * (angle  + 90 + 90) / 180);
+			dx = speed * cos(pi * (angle + 90 + 90) / 180);
+			Move(dx, dy);
+
+		}
+		if (Keyboard::isKeyPressed(Keyboard::A)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		{
+
+			dy = speed * sin(pi * (angle + 90 - 90) / 180);
+			dx = speed * cos(pi * (angle + 90 - 90) / 180);
+			Move(dx, dy);
+
+		}
+		//Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+
+		//angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// СЂР°СЃС‡РµС‚ СѓРіР»Р° РјС‹С€Рё
+		//cout<<angle<<"\n";
+		if (NoShotFocus == false)
+			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// СѓСЃР»РѕРІРёРµ РІС‹СЃС‚СЂРµР»Р°
+			{
+				double angleVustrel = angle+180/*+(rand() % 7) - 4*/;
+				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
+				Shot(turnX, turnY, angleVustrel, 0, 0);
+				//ammoMagazine--;
+				countAttack = 0;
+				if (networkGame == true)
+				{
+					server.Send(5, turnX, turnY, 0, angleVustrel);
+				}
+			}
+		// РґРІРёРіР°С‚СЊ Р±Р°С€РЅСЋ С‚СѓРґР° РєСѓРґР° СѓРєР°Р·С‹РІР°РµС‚ РјС‹С€СЊ
+		//angle = MovingToAngle(angle, angleMouse, speedTurn);
+		Turn(angle+180);
+		cout << angle<<"   "<<angle+90<<'\n';
+	}
+	virtual void Control(Event event)//С„СѓРЅРєС†РёСЏ СѓРїСЂР°РІР»РµРЅРёСЏ С‚Р°РЅРєРѕРј СЃ РєР»Р°РІРёР°С‚СѓСЂС‹
+	{
+		double angleMouse, // СѓРіРѕР» РїСЂРёС†С†РµР»Р° РєСѓРґР° СЃРјРѕС‚СЂРёС‚ РјС‹С€СЊ
+			speed=1.5,// СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ С‚Р°РЅРєР°
+			dx=0,dy=0;// СЃРєРѕСЂРѕСЃС‚Рё РґРІРёР¶РµРЅРёСЏ РїРѕ РІРµСЂС‚РёРєР°Р»Рё Рё РіРѕСЂРёР·РѕРЅС‚Р°Р»Рё
+		static double angleOld=angle;// РїРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С‚РѕРіРѕ С‡С‚Рѕ Р±С‹ РїРµСЂРµРґРѕРІР°С‚СЊ РґР°РЅРЅС‹Рµ РѕР± СѓРіР»Рµ РІ С‚РѕРј СЃР»СѓС‡Р°Рµ СЃР»Рё СѓРіРѕР» РёР·РјРµРЅРёР»СЃСЏ
+		int vector=0;
+		if (Keyboard::isKeyPressed(Keyboard::W)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		{
+			if (walls.CrossWall(x,y-speed,size*2,size*2)==false)// РµСЃР»Рё РЅРµ РІСЂРµР·Р°Р»СЃСЏ РІ СЃС‚РµРЅСѓ
 			{
 				Move(0,-speed);
 				dy=-speed;
 
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::D)) // движение вправо
+		if (Keyboard::isKeyPressed(Keyboard::D)) // РґРІРёР¶РµРЅРёРµ РІРїСЂР°РІРѕ
 		{
-			if (stens.InStens(x+speed,y,size*2,size*2)==false)
+			if (walls.CrossWall(x+speed,y,size*2,size*2)==false)
 			{
 				Move(speed,0);
 				dx=speed;
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::S)) // движение вниз
+		if (Keyboard::isKeyPressed(Keyboard::S)) // РґРІРёР¶РµРЅРёРµ РІРЅРёР·
 		{
-			if (stens.InStens(x,y+speed,size*2,size*2)==false)
+			if (walls.CrossWall(x,y+speed,size*2,size*2)==false)
 			{
 				Move(0,speed);
 				dy=speed;
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::A)) // двиение влево
+		if (Keyboard::isKeyPressed(Keyboard::A)) // РґРІРёРµРЅРёРµ РІР»РµРІРѕ
 		{
-			if (stens.InStens(x-speed,y,size*2,size*2)==false)
+			if (walls.CrossWall(x-speed,y,size*2,size*2)==false)
 			{
 				Move(-speed,0);
 				dx-=speed;
 			}
 		}
-		if (x<=0||x+size*2>=800||y<=0||y+size*2>=560)// если врезался в границу игрового поля
+		if (x<=0||x+size*2>=800||y<=0||y+size*2>=560)// РµСЃР»Рё РІСЂРµР·Р°Р»СЃСЏ РІ РіСЂР°РЅРёС†Сѓ РёРіСЂРѕРІРѕРіРѕ РїРѕР»СЏ
 		{
 			Move(-dx,-dy);
 		}
-		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+		Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
 		
-		angleMouse=RaschetAngle(x+size,y+size,mousePos.x,mousePos.y);// расчет угла мыши
-		if( ClickMouseLeft(event) && chetAttack>=timeAttack && pyluInMagaz>0)// условие выстрела
+		angleMouse=CalcAngle(x+size,y+size,mousePos.x,mousePos.y);// СЂР°СЃС‡РµС‚ СѓРіР»Р° РјС‹С€Рё
+		//cout<<angle<<"\n";
+		if (NoShotFocus==false)
+		if( ClickMouseLeft(event) && countAttack>=timeAttack && ammoMagazine>0)// СѓСЃР»РѕРІРёРµ РІС‹СЃС‚СЂРµР»Р°
 		{
-				vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
-				pyluInMagaz--;
-				chetAttack=0;
+				double angleVustrel=angle+(rand() % 7)-4;
+				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
+				Shot(turnX,turnY,angleVustrel,0,0);
+				ammoMagazine--;
+				countAttack=0;
+				if(networkGame==true)
+				{
+					server.Send(5,turnX,turnY,0,angleVustrel);
+				}
 		}
-		// двигать башню туда куда указывает мышь
-		angle=MovingToAngle(angle,angleMouse);	 
+		// РґРІРёРіР°С‚СЊ Р±Р°С€РЅСЋ С‚СѓРґР° РєСѓРґР° СѓРєР°Р·С‹РІР°РµС‚ РјС‹С€СЊ
+		angle=MovingToAngle(angle,angleMouse,speedTurn);	 
 		Turn(angle);
+		cout << angle<<'\n';
+		if (networkGame==true)
+		{
+		
+			if (mode=='s')
+			{
+				if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::D)
+				|| Keyboard::isKeyPressed(Keyboard::S) || Keyboard::isKeyPressed(Keyboard::W))
+				{
+					server.Send(3,x,y,0,0);
+				}
+				if (angle>=angleOld+1 || angle<=angleOld-1  )
+				{
+					server.Send(4,0,0,0,angle);
+					angleOld=angle;
+				}
+			}
+		}
 	}
-	bool InMe (int xx,int yy,int dx1=-1,int dy1=-1)//нахождение точки или прямоугольника в танке
+	bool CrossMe (int xx,int yy,int dx1=-1,int dy1=-1)//РЅР°С…РѕР¶РґРµРЅРёРµ С‚РѕС‡РєРё РёР»Рё РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєР° РІ С‚Р°РЅРєРµ
 	 {
 	
 			 if (dx1==-1&&dy1==-1)
@@ -715,26 +1205,51 @@ public:
 		 return false;
 	 }
 
-	void Server()// процедура для обслуживания танка
+	void Servis()// РїСЂРѕС†РµРґСѓСЂР° РґР»СЏ РѕР±СЃР»СѓР¶РёРІР°РЅРёСЏ С‚Р°РЅРєР°
 	{
 		if (being==true)
 		{
-			if (chetAttack<timeAttack)	chetAttack++;
+			if (countAttack<timeAttack)	countAttack++;
 		}
 		else
 		{
-			if (chetKill<timeBabah)// пока танк взырваеться 
+			if (countKill<timeBurst)// РїРѕРєР° С‚Р°РЅРє РІР·С‹СЂРІР°РµС‚СЊСЃСЏ 
 			{
-				chetKill++;
+				countKill++;
 			}
 			else
 			{
-				chetKill=0;
+				countKill=0;
 				being=true;
 			}
 
 		}
 	 
+	}
+	void PanzerRace() // РїСЂРѕС†РµРґСѓСЂР° СѓРїСЂР°РІРµРЅРёСЏ Р·РµР»РµРЅС‹Рј С‚Р°РЅРєРѕРј СЃ РїРѕРјРѕС€СЊСЋ РґР°РЅРЅС‹С… РїРѕР»СѓС‡РµРЅРЅС‹С… СЃ СЃРµСЂРІРµСЂР°
+	{
+
+			Data data;
+			for (int i=0;i<countPacked;i++)
+			{
+				data=dataClientRace[i];
+				if(data.key==3)
+				{
+					x=data.x;
+					y=data.y;
+					Turn(angle);
+				}
+				if (data.key==4)
+				{
+					angle=data.angle;
+					Turn(angle);
+				}
+				if (data.key==5)
+				{
+					Shot(data.x,data.y,data.angle,0,0);
+				}
+			}
+		
 	}
 	void KIlled()
 	{
@@ -762,17 +1277,17 @@ public:
 	}
 	int Get_Pylu()
 	{
-		return pyluInMagaz;
+		return ammoMagazine;
 	}
 
 	void Add_Pylu(int value)
 	{
-		pyluInMagaz+=value;
-		if (pyluInMagaz>30) pyluInMagaz=30;
+		ammoMagazine+=value;
+		if (ammoMagazine>30) ammoMagazine=30;
 	}
 	void Put_Pylu(int value)
 	{
-		pyluInMagaz=value;
+		ammoMagazine=value;
 	}
 	int Get_HP()
 	{
@@ -792,22 +1307,22 @@ public:
 
 	int Get_Brony()
 	{
-		return BRONY;
+		return ARMOR;
 	}
 
 	void Add_Brony(int value)
 	{
-		BRONY+=value;
-		if (BRONY>100) BRONY=100;
-		if (BRONY<0) BRONY=0;
+		ARMOR+=value;
+		if (ARMOR>100) ARMOR=100;
+		if (ARMOR<0) ARMOR=0;
 	}
 	void Put_Brony(int value)
 	{
-		BRONY=value;
+		ARMOR=value;
 	}
 	int Get_ChetAttack()
 	{
-		return chetAttack;
+		return countAttack;
 	}
 	int Get_TimeAttack()
 	{
@@ -818,7 +1333,7 @@ public:
 		timeAttack+=value;
 		if (timeAttack>100) timeAttack=100;
 		if (timeAttack<3) timeAttack=3;
-		chetAttack=timeAttack;
+		countAttack=timeAttack;
 	}
 	int Get_Being()
 	{
@@ -826,338 +1341,725 @@ public:
 	}
 };
 Panzer panzer;
-class PanzerBot : public Panzer// класс танка бота наследуеться от танка игрока
+class PanzerBot : public Panzer// РєР»Р°СЃСЃ С‚Р°РЅРєР° Р±РѕС‚Р° РЅР°СЃР»РµРґСѓРµС‚СЊСЃСЏ РѕС‚ С‚Р°РЅРєР° РёРіСЂРѕРєР°
 {
-	int vector;// вектор движение танка
-	int numStep;// число пройденных клеток, ботом по пути
-	double speed,dx,dy;// скорость движения и смешение по х и у
-	bool vidit;// видит ли бот игрока 
-	bool motionToPuty;// движется ли бот по пути
-	bool motion;// прошел ли бот от клетки к клетке пути
-	bool normalizePuty;// нормализует ли танк путь 
+	int vector;// РІРµРєС‚РѕСЂ РґРІРёР¶РµРЅРёРµ С‚Р°РЅРєР°
+	int numStep;// С‡РёСЃР»Рѕ РїСЂРѕР№РґРµРЅРЅС‹С… РєР»РµС‚РѕРє, Р±РѕС‚РѕРј РїРѕ РїСѓС‚Рё
+	double speed,dx,dy;// СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ Рё СЃРјРµС€РµРЅРёРµ РїРѕ С… Рё Сѓ
+	bool looking;// РІРёРґРёС‚ Р»Рё Р±РѕС‚ РёРіСЂРѕРєР° 
+	
+	bool motion;// РїСЂРѕС€РµР» Р»Рё Р±РѕС‚ РѕС‚ РєР»РµС‚РєРё Рє РєР»РµС‚РєРµ РїСѓС‚Рё
+	bool normalizePuty;// РЅРѕСЂРјР°Р»РёР·СѓРµС‚ Р»Рё С‚Р°РЅРє РїСѓС‚СЊ 
 public:
+	bool motionToPuty;// РґРІРёР¶РµС‚СЃСЏ Р»Рё Р±РѕС‚ РїРѕ РїСѓС‚Рё
 	PanzerBot()
 	{
-		x=330;
-		y=320;
+		x=(int)10*40+5;
+		y=(int)10*40+5;
 		color=Color::Red;
-	    //vector=(rand()%4)+1;
-		vidit=false;
-		chetAttack=0;
+	    vector=(rand()%4)+1;
+		looking=false;
+		countAttack=0;
 		timeAttack=50;
-		HP=100;
-		BRONY=100;
+		HP=20;
+		ARMOR=0;
 		speed =1.5;
 		motionToPuty=false;
 
 	}
-	void ToGoBonus()// изменение вектора бота, когда увидил бонус
+	void CancelMovingToRoute()// РѕС‚РјРµРЅРёС‚СЊ РґРІРёР¶РµРЅРё Р±РѕС‚Р° РїРѕ РїСѓС‚Рё
 	{
-		for (int i=0;i<kolvoBonus;i++)
+			motionToPuty=false;
+			numStep=0;
+			route.being=false;
+			route.CancelRoute();
+	}
+	void RegPointAim(int arrivalX,int arrivalY)// СЂРµРіРёСЃС‚СЂР°С†РёСЏ С‚РѕС‡РєРё РєСѓРґР° РґРѕР»Р¶РµРЅ РїСЂРёРµС…Р°С‚СЊ Р±РѕС‚
+	{
+		CancelMovingToRoute();
+		numStep=0;
+		route.PrepareMapForSearchRoute(x+size,y+size,arrivalX,arrivalY,
+			panzer.Get_X()+panzer.Get_Size(),panzer.Get_Y()+panzer.Get_Size());
+		route.WaveSpread(45);
+		route.LoadRoute();
+		motionToPuty=true;
+		BeginNormalize();
+		vector=0;
+	}
+	void RefreshRoute(int arrivalX, int arrivalY)
+	{	
+		Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+		route.PrepareMapForSearchRoute(x+size,y+size,arrivalX,arrivalY,
+			panzer.Get_X()+panzer.Get_Size(),panzer.Get_Y()+panzer.Get_Size());
+		/*marshrut.LoadMapPoisk(x+size,y+size,arrivalX,arrivalY,
+			mousePos.x+panzer.Get_Size(),mousePos.y+panzer.Get_Size());
+*/
+		route.WaveSpread(45);
+		route.LoadRoute();
+	//	if (numStep!=0)
+			numStep=1;
+    }
+	void BonusControl(bool refresh=false)
+	{
+		static int selectBonusX=0,selectBonusY=0,selectBonusNum=0;
+		static bool selectBonusBeing=false;
+		for (int i=0;i<amountBonus;i++)
 		if (bonuses.bonus[i].being==true)
-		if (Vidimosty(x+size,y+size,bonuses.bonus[i].x+20,bonuses.bonus[i].y+20))
 		{
-			if (bonuses.bonus[i].x+20>=x+size-2 && bonuses.bonus[i].x+20<=x+size+2)
+		if ((bonuses.bonus[i].type==2 || bonuses.bonus[i].type==3  )
+					 && selectBonusBeing==false)
+				{
+					selectBonusX=bonuses.bonus[i].x+20;
+					selectBonusY=bonuses.bonus[i].y+20;
+					selectBonusBeing=true;
+					selectBonusNum=i;
+					RegPointAim(selectBonusX,selectBonusY);
+				}
+		}
+		if (bonuses.bonus[selectBonusNum].being==false)
+		{
+					selectBonusBeing=false;
+					CancelMovingToRoute();
+		}
+		if (selectBonusBeing==true&&motionToPuty==true)
+		{
+			int flag=0;
+			for (int i=0;i<100;i++)
+			if (route.pointRoute[i].being==true)
 			{
-				if(bonuses.bonus[i].y+20>=y+size) vector=3;
-				if(bonuses.bonus[i].y+20<=y+size) vector=1;
+				if( ( x+size>=route.pointRoute[i].x*40+20-speed
+							&& x+size<route.pointRoute[i].x*40+20+speed )
+
+					&& (y+size>=route.pointRoute[i].y*40+20-speed
+							&& y+size<route.pointRoute[i].y*40+20+speed))
+				{
+							flag=1;
+							break;
+				}
+					
 			}
-			if (bonuses.bonus[i].y+20>=y+size-2 && bonuses.bonus[i].y+20<=y+size+2)
+			if (flag==1||refresh==true)
 			{
-				if(bonuses.bonus[i].x+20>=x+size) vector=2;
-				if(bonuses.bonus[i].x+20<=x+size) vector=4;
+				RefreshRoute(selectBonusX,selectBonusY);
+		//		normalizePuty=true;
 			}
 		}
 	}
-	void MoveToVector()
-	{
-		if (vector==1) // движение вверх
+	void ToGoBonus()// РёР·РјРµРЅРµРЅРёРµ РІРµРєС‚РѕСЂР° Р±РѕС‚Р°, РєРѕРіРґР° СѓРІРёРґРёР» Р±РѕРЅСѓСЃ
+	{		
+		
+		for (int i=0;i<amountBonus;i++)
+		if (bonuses.bonus[i].being==true)
 		{
-			if (stens.InStens(x,y-speed,size*2,size*2)==false)
+			if (motionToPuty==false)
+			{
+				if (LookAcrossWall(x+size,y+size,bonuses.bonus[i].x+20,bonuses.bonus[i].y+20))
+				{
+					if (bonuses.bonus[i].x+20>=x+size-2 && bonuses.bonus[i].x+20<=x+size+2)// РµСЃР»Рё Р±РѕРЅСѓСЃ РЅРёР¶Рµ РёР»Рё РІС‹С€Рµ
+					{
+						if(bonuses.bonus[i].y+20>=y+size) vector=3;
+						if(bonuses.bonus[i].y+20<=y+size) vector=1;
+					}
+					if (bonuses.bonus[i].y+20>=y+size-2 && bonuses.bonus[i].y+20<=y+size+2)//РµСЃР»Рё Р±РѕРЅСѓСЃ Р»РµРІРµРµ РёР»Рё РїСЂР°РІРµРµ
+					{
+						if(bonuses.bonus[i].x+20>=x+size) vector=2;
+						if(bonuses.bonus[i].x+20<=x+size) vector=4;
+					}
+				}
+			
+			}	
+			
+		}
+		BonusControl();
+	}
+	void MovingToKeyboard()// СѓРїСЂР°РІР»СЏС‚СЊ Р±РѕС‚РѕРј СЃ РєР»Р°РІРёР°С‚СѓСЂС‹
+	{
+		if (Keyboard::isKeyPressed(Keyboard::Up)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		{
+			
+				Move(0,-speed);
+			
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Right)) // РґРІРёР¶РµРЅРёРµ РІРїСЂР°РІРѕ
+		{
+				Move(speed,0);
+			
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Down)) // РґРІРёР¶РµРЅРёРµ РІРЅРёР·
+		{
+			
+				Move(0,speed);
+			
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Left)) // РґРІРёРµРЅРёРµ РІР»РµРІРѕ
+		{
+			
+				Move(-speed,0);
+			
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Space)) // РґРІРёРµРЅРёРµ РІР»РµРІРѕ
+		{
+			vector=0;
+		}
+	}
+	void MoveToVector()// РїРµСЂРµРјРµС€РµРЅРёРµ Р±РѕС‚Р° РїРѕ Р·Р°РґРѕРЅРѕРјСѓ РІРµРєС‚РѕСЂСѓ
+	{
+		if (vector==1) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		{
+			if (walls.CrossWall(x,y-speed,size*2,size*2)==false)
 			{
 				Move(0,-speed);
 				dy=-speed;
 
 			}else vector=(rand()%4)+1;
 		}
-		if (vector==2) // движение вправо
+		if (vector==2) // РґРІРёР¶РµРЅРёРµ РІРїСЂР°РІРѕ
 		{
-			if (stens.InStens(x+speed,y,size*2,size*2)==false)
+			if (walls.CrossWall(x+speed,y,size*2,size*2)==false)
 			{
 				Move(speed,0);
 				dx=speed;
 			}else vector=(rand()%4)+1;
 		}
-		if (vector==3) // движение вниз
+		if (vector==3) // РґРІРёР¶РµРЅРёРµ РІРЅРёР·
 		{
-			if (stens.InStens(x,y+speed,size*2,size*2)==false)
+			if (walls.CrossWall(x,y+speed,size*2,size*2)==false)
 			{
 				Move(0,speed);
 				dy=speed;
 			}else vector=(rand()%4)+1;
 		}
-		if (vector==4)// движение налево
+		if (vector==4)// РґРІРёР¶РµРЅРёРµ РЅР°Р»РµРІРѕ
 		{
-			if (stens.InStens(x-speed,y,size*2,size*2)==false)
+			if (walls.CrossWall(x-speed,y,size*2,size*2)==false)
 			{
 				Move(-speed,0);
 				dx-=speed;
 			}else vector=(rand()%4)+1;
 		}
+		if (vector!=0)
+		{
+			if (networkGame==true)
+			{
+				if (mode=='c')
+				{
+					client.Send(3,x,y,0,0);
+				}
+			
+			}
+		}
 	}
 
-	void CancelMovingToPuty()// отменить движени югнита по пути
-	{
-			motionToPuty=false;
-			numStep=0;
-			marshrut.being=false;
-	}
+
 	
-	bool NormalizeX()
+	bool NormalizeX()// РёСЃС‚РёРЅР° РµСЃР»Рё РЅРѕСЂРјРёР»РёР·РѕРІР°Р»СЃСЏ РїРѕ РҐ
 	{
-		if(x+size>=marshrut.pointPuti[numStep].x*40+20-speed
-			&& x+size<=marshrut.pointPuti[numStep].x*40+20+speed ) return true;
+		if(x+size>=route.pointRoute[numStep].x*40+20-speed
+			&& x+size<=route.pointRoute[numStep].x*40+20+speed ) return true;
 		return false;
 	}
-	bool NormalizeY()
+	bool NormalizeY()// РёСЃС‚С‚РёРЅР° РµСЃР»Рё РЅРѕСЂРјР°Р»РёР·РѕРІР°Р»СЃСЏ РїРѕ РЈ
 	{
-		if(y+size>=marshrut.pointPuti[numStep].y*40+20-speed
-			&& y+size<=marshrut.pointPuti[numStep].y*40+20+speed ) return true;
+		if(y+size>=route.pointRoute[numStep].y*40+20-speed
+			&& y+size<=route.pointRoute[numStep].y*40+20+speed ) return true;
 		return false;
 	}
-	void BeginNormalize()
+	void BeginNormalize()// РЅР°С‡Р°С‚СЊ РЅРѕСЂРјР°Р»РёР·Р°Р°С†РёСЋ РїРѕР·РёС†С†РёРё РІ С†РµРЅС‚СЂР°Р»СЊРЅСѓСЋ Р»РёРЅРёСЋ РєР»РµС‚РєРё
 	{
 		if (NormalizeX()!=true||NormalizeY()!=true)
 		{
 			normalizePuty=true;
 		}
 	}
-	// функция которая перемешает на центр линию клетки карты для того чтобы бот не врезался в стены
-	void NormalizeMovingToPuty()
+	// С„СѓРЅРєС†РёСЏ РєРѕС‚РѕСЂР°СЏ РїРµСЂРµРјРµС€Р°РµС‚ РЅР° С†РµРЅС‚СЂ Р»РёРЅРёСЋ РєР»РµС‚РєРё РєР°СЂС‚С‹ РґР»СЏ С‚РѕРіРѕ С‡С‚РѕР±С‹ Р±РѕС‚ РЅРµ РІСЂРµР·Р°Р»СЃСЏ РІ СЃС‚РµРЅС‹
+	void NormalizeMovingToRoute()
 	{
-		
+		/*
 		if (NormalizeX()==true||NormalizeY()==true)
 		{
 			normalizePuty=false;
-		}
-		
-		if (motionToPuty==true && marshrut.being==true  &&
-			normalizePuty==true
-			)
+		}*/
+		if(numStep<=route.lengthRoute)
 		{
-			if (marshrut.pointPuti[numStep+1].y*40+20<=y+size 
-				|| marshrut.pointPuti[numStep+1].y*40+20>=y+size) // если точка пути находится выше или ниже
+			if (route.pointRoute[numStep].being==true)
+			if (motionToPuty==true && route.being==true 
+				&&	normalizePuty==true
+				)
 			{
-				if (marshrut.pointPuti[numStep+1].x*40+20<x+size)		vector=4;
-				if (marshrut.pointPuti[numStep+1].x*40+20>x+size)		vector=2;
-				if (NormalizeX()==true) normalizePuty=false;
-			}
-			else 
-			if (marshrut.pointPuti[numStep+1].x*40+20<=x+size 
-				|| marshrut.pointPuti[numStep+1].x*40+20>=x+size) // если точка пути находится левее или правее
-			{
-				if (marshrut.pointPuti[numStep+1].y*40+20<y+size)		vector=1;
-				if (marshrut.pointPuti[numStep+1].y*40+20>y+size)		vector=3;
-				if (NormalizeY()==true) normalizePuty=false;
-			}
+				if ( (route.pointRoute[numStep].y*40+20<=y+size 
+					|| route.pointRoute[numStep].y*40+20>=y+size) 
+					&& !( x+size>=route.pointRoute[numStep].x*40+20-speed
+						&& x+size<route.pointRoute[numStep].x*40+20+speed ) )// РµСЃР»Рё С‚РѕС‡РєР° РїСѓС‚Рё РЅР°С…РѕРґРёС‚СЃСЏ РІС‹С€Рµ РёР»Рё РЅРёР¶Рµ
+				{
+					if (route.pointRoute[numStep].x*40+20<=x+size)		vector=4;
+					if (route.pointRoute[numStep].x*40+20>x+size)		vector=2;
+					if (NormalizeX()==true)
+					{
+						normalizePuty=false;
+						vector=0;
+					
+					}
+				//	return;
+				}
+			
+				if ((route.pointRoute[numStep].x*40+20<=x+size 
+					|| route.pointRoute[numStep].x*40+20>=x+size)
+					&& !(y+size>=route.pointRoute[numStep].y*40+20-speed
+						&& y+size<route.pointRoute[numStep].y*40+20+speed)) // РµСЃР»Рё С‚РѕС‡РєР° РїСѓС‚Рё РЅР°С…РѕРґРёС‚СЃСЏ Р»РµРІРµРµ РёР»Рё РїСЂР°РІРµРµ
+				{
+					if (route.pointRoute[numStep].y*40+20<=y+size)		vector=1;
+					if (route.pointRoute[numStep].y*40+20>y+size)		vector=3;
+					if (NormalizeY()==true)
+					{ 
+					
+					}
+				//	return;
+				}
+				if( ( x+size>=route.pointRoute[numStep].x*40+20-speed
+						&& x+size<route.pointRoute[numStep].x*40+20+speed )
 
+				&& (y+size>=route.pointRoute[numStep].y*40+20-speed
+						&& y+size<route.pointRoute[numStep].y*40+20+speed))
+				{
+						normalizePuty=false;
+						vector=0;
+					
+				}
+
+			}
 		}
 		
 	}	
-	void RegPointAim(int arrivalX,int arrivalY)// регистрация точки куда должен приехать бот
+	
+	void MovingToRoute()// С„СѓРЅРєС†РёСЏ РґРІРёР¶РµРЅРёСЏ Р±РѕС‚Р° РїРѕ РїСѓС‚Рё
 	{
-		motionToPuty=true;
-		BeginNormalize();
-	}
-	void MovingToPuty()// функция движения бота по пути
-	{
-		if (motionToPuty==true && marshrut.being==true)
+		
+		if (route.pointRoute[numStep].being==true)
+		if (motionToPuty==true && route.being==true)
 		{
 		//	vector=1;
-			if (x+size>marshrut.pointPuti[numStep].x*40
-			&& x+size<marshrut.pointPuti[numStep].x*40+40
-			&& marshrut.pointPuti[numStep].y*40+20<y+size)
+			if (x+size>=route.pointRoute[numStep].x*40+20-speed
+			&& x+size<route.pointRoute[numStep].x*40+20+speed
+			&& route.pointRoute[numStep].y*40+20<y+size)
 			{
 				vector=1;
 			}
-			if (y+size>marshrut.pointPuti[numStep].y*40
-			&& y+size<marshrut.pointPuti[numStep].y*40+40
-			&& marshrut.pointPuti[numStep].x*40+20>x+size)
+			if (y+size>=route.pointRoute[numStep].y*40+20-speed
+			&& y+size<route.pointRoute[numStep].y*40+20+speed
+			&& route.pointRoute[numStep].x*40+20>x+size)
 			{ 
 				vector=2;
 			}
-			if (x+size>marshrut.pointPuti[numStep].x*40
-			&&  x+size<marshrut.pointPuti[numStep].x*40+40
-			&& marshrut.pointPuti[numStep].y*40+20>y+size)
+			if (x+size>=route.pointRoute[numStep].x*40+20-speed
+			&&  x+size<route.pointRoute[numStep].x*40+20+speed
+			&& route.pointRoute[numStep].y*40+20>y+size)
 			{
 				vector=3;
 			}
-			if (y+size>marshrut.pointPuti[numStep].y*40
-			&& y+size<marshrut.pointPuti[numStep].y*40+40
-			&& marshrut.pointPuti[numStep].x*40+20<x+size) 
+			if (y+size>=route.pointRoute[numStep].y*40+20-speed
+			&& y+size<route.pointRoute[numStep].y*40+20+speed
+			&& route.pointRoute[numStep].x*40+20<x+size) 
 			{
 				vector=4;
 			}
 		}
-		if(x+size>marshrut.pointPuti[numStep].x*40
-			&& x+size<marshrut.pointPuti[numStep].x*40+40
-			&& y+size>marshrut.pointPuti[numStep].y*40
-			&& y+size<marshrut.pointPuti[numStep].y*40+40)
+		if(x+size>route.pointRoute[numStep].x*40+20-speed
+			&& x+size<route.pointRoute[numStep].x*40+20+speed
+			&& y+size>route.pointRoute[numStep].y*40+20-speed
+			&& y+size<route.pointRoute[numStep].y*40+20+speed)
 		{
 			numStep++;
 		}
-		int dlinaPuti=marshrut.dlinaPuti;
-		if(x+size>marshrut.pointPuti[dlinaPuti].x*40
-			&& x+size<marshrut.pointPuti[dlinaPuti].x*40+40
-			&& y+size>marshrut.pointPuti[dlinaPuti].y*40
-			&& y+size<marshrut.pointPuti[dlinaPuti].y*40+40)
+		int dlinaPuti=route.lengthRoute;
+		if(x+size>route.pointRoute[dlinaPuti].x*40+20-speed
+			&& x+size<route.pointRoute[dlinaPuti].x*40+20+speed
+			&& y+size>route.pointRoute[dlinaPuti].y*40+20-speed
+			&& y+size<route.pointRoute[dlinaPuti].y*40+20+speed)
+		
 		{
-			CancelMovingToPuty();
+			CancelMovingToRoute();
 		}
+		
+		if (Keyboard::isKeyPressed(Keyboard::Z)) 
+	    {
+		//	bonuses.NewBonus(rand()%800,rand()%541,1);
+		  Sleep (10);
+	    }
 	}
-	void Upravlenie()// функцуя поведиение бота
+	void UpravlenieAttack()// РІСѓРЅРєС†РёСЏ РєРѕС‚РѕСЂР°СЏ СѓРїСЂР°РІР»РµСЏС‚ Р°С‚С‚Р°РєРѕР№ Р±РѕС‚Р°
 	{
-		double angleAim;
-		int vector1=vector;
-	    dx=0,dy=0;
-		//ToGoBonus();
-		MovingToPuty();
-		//NormalizeMovingToPuty();
-		MoveToVector();
-		if (x<=0||x+size*2>=800||y<=0||y+size*2>=560)// если врезался в границы поля игры
+		double angleAim=0;
+		static double angleOld=angle;// РЅСѓР¶РЅР° РґР»СЏ С‚РѕРіРѕ С‡С‚РѕР±С‹ РѕРїСЂРµРґРµР»РёС‚СЊ РёР·РјРµРЅСЏР»СЃСЏ Р»Рё СѓРіРѕР» РїРѕРІРѕСЂР°С‚Р° Р±Р°С€РЅРё
+		if (panzer.Get_Being()==true)// СѓСЃР»РѕРІРёРµ Р°С‚Р°РєРё Р±РѕС‚Р°
+		if (ammoMagazine>0)// РµСЃР»Рё РїСѓР»СЊ Р±РѕР»СЊС€Рµ 0
+		if (LookAcrossWall(x+size,y+size,panzer.Get_X()+panzer.Get_Size(),
+			panzer.Get_Y()+panzer.Get_Size()))// РµСЃР»Рё РІРёРґРёС‚ С‚Р°РЅРє РёРіСЂРѕРєР°
 		{
-			do// менять вектор пока он равен предыдушему вектору
+			// СЂР°СЃС‡РµС‚ СѓРіР»Р° РґР»СЏ Р°С‚Р°РєРё
+			angleAim=CalcAngle(x+size,y+size,panzer.Get_X()+panzer.Get_Size(),panzer.Get_Y()+panzer.Get_Size());
+			vector=0;// РѕСЃС‚Р°РЅРѕРІРёРј РґРІРёР¶РµРЅРёРµ С‚Р°РЅРєР°
+			looking=true;
+			angle=MovingToAngle(angle,angleAim);// РїСЂРёСЃРІРѕРµРј Р±Р°С€РЅРё С‚Р°РЅРєР° РЅРѕРІС‹Р№ СѓРіРѕР»
+			//angle=angleAim;
+			if(angle>=angleAim-1 && angle<=angleAim+1 && countAttack>=timeAttack && ammoMagazine>0)// СѓСЃР»РѕРІРёРµ СЃС‚СЂРµР»СЊР±С‹ Р±РѕС‚Р°
+ 			{
+					double angleVustrel=angle+(rand() % 7)-4;
+ 					Shot(turnX,turnY,angleVustrel,0,0);
+					ammoMagazine--;
+	 				countAttack=0;
+					if(networkGame==true)
+					{
+						client.Send(5,turnX,turnY,0,angleVustrel);
+					}
+			}	
+			if (networkGame==true)
+			{
+				if (angle>=angleOld+1 || angle<=angleOld-1  )
+				{
+					//client.Send(4,0,0,0,angle);
+					angleOld=angle;
+				}
+			}
+
+		}
+		else 
+		{
+			if(looking==true)// РµСЃР»Рё РёРіСЂРѕРє СѓС€РµР» СЃ РїРѕР»СЏ РІРёРґРёРјРѕСЃС‚Рё
+			{
+				vector=(rand()%4)+1;
+				looking=false;
+			}
+
+		}
+		if (vector==0 && looking==true && ammoMagazine<=0)// РµСЃР»Рё Р±РѕС‚ РІРёРґРµР» РёРіСЂРѕРєР° РЅРѕ Сѓ Р±РѕС‚Р° Р·Р°РєРѕРЅС‡РёР»РёСЃСЊ РїР°С‚СЂРѕРЅС‹
+			{
+				vector=(rand()%4)+1;
+				looking=false;
+			}
+		Turn(angle);// РїРѕРІРµСЂРЅРµРј Р±Р°С€РЅСЋ Р±РѕС‚Р° РІ СЂР°СЃС‡РёС‚Р°РЅРЅС‹Р№ СЂР°РЅРµРµ СѓРіРѕР»
+	}
+	void AutoUpravlenie()// С„СѓРЅРєС†СѓСЏ РїРѕРІРµРґРёРµРЅРёРµ Р±РѕС‚Р°
+	{
+		int vector1=vector;
+	    dx=0;
+		dy=0;
+		if (motionToPuty==false) 	UpravlenieAttack();
+
+		if (rand()%200==1) vector=(rand()%4)+1;// СЃРјРµРЅРёС‚СЊ РІРµРєС‚РѕСЂ СЃР»СѓС‡Р°Р№РЅo СЃ РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊСЋ 1 РЅР° 200
+		MovingToRoute();
+		ToGoBonus();
+		
+		NormalizeMovingToRoute();
+		MoveToVector();
+		if (x<=0||x+size*2>=800||y<=0||y+size*2>=560)// РµСЃР»Рё РІСЂРµР·Р°Р»СЃСЏ РІ РіСЂР°РЅРёС†С‹ РїРѕР»СЏ РёРіСЂС‹
+		{
+			do// РјРµРЅСЏС‚СЊ РІРµРєС‚РѕСЂ РїРѕРєР° РѕРЅ СЂР°РІРµРЅ РїСЂРµРґС‹РґСѓС€РµРјСѓ РІРµРєС‚РѕСЂСѓ
 			{
 				vector=(rand()%4)+1;
 			}while(vector1==vector);
 			vector1=vector;
 			Move(-dx,-dy);
 		}
-		//if (rand()%200==1) vector=(rand()%4)+1;// сменить вектор случайну с вероятностью 1 на 200
+		if (motionToPuty==true) Turn(angle);
 		
-		if (panzer.Get_Being()==true && 0!=0)// условие атаки бота
-		if (pyluInMagaz>0)// если пуль больше 0
-		if (Vidimosty(x+size,y+size,panzer.Get_X()+panzer.Get_Size(),
-			panzer.Get_Y()+panzer.Get_Size()))// если видит танк игрока
+	}
+	void Upravlenie(Event event)//С„СѓРЅРєС†РёСЏ СѓРїСЂР°РІР»РµРЅРёСЏ С‚Р°РЅРєРѕРј СЃ РєР»Р°РІРёР°С‚СѓСЂС‹
+	{
+		double angleMouse, // СѓРіРѕР» РїСЂРёС†С†РµР»Р° РєСѓРґР° СЃРјРѕС‚СЂРёС‚ РјС‹С€СЊ
+			speed=1.5,// СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ С‚Р°РЅРєР°
+			dx=0,dy=0;// СЃРєРѕСЂРѕСЃС‚Рё РґРІРёР¶РµРЅРёСЏ РїРѕ РІРµСЂС‚РёРєР°Р»Рё Рё РіРѕСЂРёР·РѕРЅС‚Р°Р»Рё
+		static double angleOld=angle;// РїРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С‚РѕРіРѕ С‡С‚Рѕ Р±С‹ РїРµСЂРµРґРѕРІР°С‚СЊ РґР°РЅРЅС‹Рµ РѕР± СѓРіР»Рµ РІ С‚РѕРј СЃР»СѓС‡Р°Рµ СЃР»Рё СѓРіРѕР» РёР·РјРµРЅРёР»СЃСЏ
+		int vector=0;
+		if (Keyboard::isKeyPressed(Keyboard::W)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
 		{
-			// расчет угла для атаки
-			angleAim=RaschetAngle(x+size,y+size,panzer.Get_X()+panzer.Get_Size(),panzer.Get_Y()+panzer.Get_Size());
-			vector=0;// остановим движение танка
-			vidit=true;
-			angle=MovingToAngle(angle,angleAim);// присвоем башни танка новый угол
-			//angle=angleAim;
-			if(angle>=angleAim-1 && angle<=angleAim+1 && chetAttack>=timeAttack && pyluInMagaz>0)// условие стрельбы бота
- 			{
- 					vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
-					pyluInMagaz--;
-	 				chetAttack=0;
-			}
-		}
-		else 
-		{
-			if(vidit==true)// если игрок ушел с поля видимости
+			if (walls.CrossWall(x,y-speed,size*2,size*2)==false)// РµСЃР»Рё РЅРµ РІСЂРµР·Р°Р»СЃСЏ РІ СЃС‚РµРЅСѓ
 			{
-				vector=(rand()%4)+1;
-				vidit=false;
-			}
+				Move(0,-speed);
+				dy=-speed;
 
-		}
-		if (vector==0 && vidit==true && pyluInMagaz<=0)// если бот видел игрока но у бота закончились патроны
-			{
-				vector=(rand()%4)+1;
-				vidit=false;
 			}
-		Turn(angle);// повернем башню бота в расчитанный ранее угол
+		}
+		if (Keyboard::isKeyPressed(Keyboard::D)) // РґРІРёР¶РµРЅРёРµ РІРїСЂР°РІРѕ
+		{
+			if (walls.CrossWall(x+speed,y,size*2,size*2)==false)
+			{
+				Move(speed,0);
+				dx=speed;
+			}
+		}
+		if (Keyboard::isKeyPressed(Keyboard::S)) // РґРІРёР¶РµРЅРёРµ РІРЅРёР·
+		{
+			if (walls.CrossWall(x,y+speed,size*2,size*2)==false)
+			{
+				Move(0,speed);
+				dy=speed;
+			}
+		}
+		if (Keyboard::isKeyPressed(Keyboard::A)) // РґРІРёРµРЅРёРµ РІР»РµРІРѕ
+		{
+			if (walls.CrossWall(x-speed,y,size*2,size*2)==false)
+			{
+				Move(-speed,0);
+				dx-=speed;
+			}
+		}
+		if (x<=0||x+size*2>=800||y<=0||y+size*2>=560)// РµСЃР»Рё РІСЂРµР·Р°Р»СЃСЏ РІ РіСЂР°РЅРёС†Сѓ РёРіСЂРѕРІРѕРіРѕ РїРѕР»СЏ
+		{
+			Move(-dx,-dy);
+		}
+		Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+		
+		angleMouse=CalcAngle(x+size,y+size,mousePos.x,mousePos.y);// СЂР°СЃС‡РµС‚ СѓРіР»Р° РјС‹С€Рё
+		//cout<<angle<<"\n";
+		if (NoShotFocus==false)
+		if( ClickMouseLeft(event) && countAttack>=timeAttack && ammoMagazine>0)// СѓСЃР»РѕРІРёРµ РІС‹СЃС‚СЂРµР»Р°
+		{
+				double angleVustrel=angle+(rand() % 7)-4;
+				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
+				Shot(turnX,turnY,angleVustrel,0,0);
+				ammoMagazine--;
+				countAttack=0;
+				if(networkGame==true)
+				{
+					client.Send(5,turnX,turnY,0,angleVustrel);
+				}
+		}
+		// РґРІРёРіР°С‚СЊ Р±Р°С€РЅСЋ С‚СѓРґР° РєСѓРґР° СѓРєР°Р·С‹РІР°РµС‚ РјС‹С€СЊ
+		angle=MovingToAngle(angle,angleMouse,speedTurn);	 
+		Turn(angle);
+		
+		if (networkGame==true)
+		{
+		
+			if (mode=='c')
+			{
+				if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::D)
+				|| Keyboard::isKeyPressed(Keyboard::S) || Keyboard::isKeyPressed(Keyboard::W))
+				{
+					client.Send(3,x,y,0,0);
+				}
+				if (angle>=angleOld+1 || angle<=angleOld-1  )
+				{
+					client.Send(4,0,0,0,angle);
+					angleOld=angle;
+				}
+			}
+		}
+	}
+	void PanzerBotRace() // РїСЂРѕС†РµРґСѓСЂР° СѓРїСЂРІР»РµРЅРёСЏ Р±РѕС‚РѕРј СЃ РїРѕРјРѕС€СЊСЋ РїСЂРёРЅРёСЏС‚С‹С… РґР°РЅРЅС‹С… СЃ РєР»РёРµРЅС‚Р°
+	{
+
+			Data data;
+			for (int i=0 ;i<countPacked ;i++)
+			{
+				data=dataServerRace[i];
+				if(data.key==3)
+				{
+					x=data.x;
+					y=data.y;
+					Turn(angle);
+				}
+				if (data.key==4)
+				{
+					angle=data.angle;
+					Turn(angle);
+				}
+				if (data.key==5)
+				{
+					Shot(data.x,data.y,data.angle,0,0);
+				}
+			}
+		
 	}
 };
 PanzerBot panzerBot;
-void NewBonusPyle()// размешение бонусов пуль в случайно 
+Vector2i NewCoordinateBonus()// СЂР°СЃС‡РµС‚ РЅРѕРІС‹С… РєРѕРѕСЂРґРёРЅР°С‚ РґР»СЏ Р±РѕРЅСѓСЃР°
 {
-	static int chet=0;
-	int x,y,kolvoBonusPylu=0;
-	if (chet>170)
-	{
-		chet=0;
+	int x,y;
+	Vector2i vect;
 		do
 		{
 			x=(rand()% 740)+30;
 			y=(rand()%530)+30;
 		}
-	    while (stens.InStens(x,y)==true|| bonuses.InBonus(x,y)!=-1
-			||	panzer.InMe(x-40,y-40,80,80)==true||panzerBot.InMe(x-40,y-40,80,80)==true);
+	    while (walls.CrossWall(x,y)==true|| bonuses.CrossBonus(x,y)!=-1
+			||	panzer.CrossMe(x-40,y-40,80,80)==true||panzerBot.CrossMe(x-40,y-40,80,80)==true);
+		vect.x=x;
+		vect.y=y;
+		return vect;
+}
+void NewBonusGame()// СЂР°Р·РјРµС€РµРЅРёРµ Р±РѕРЅСѓСЃРѕРІ РїСѓР»СЊ РІ СЃР»СѓС‡Р°Р№РЅРѕ 
+{
+	static int chet=0,chet1=0;
+	int x,y,kolvoBonusPylu=0,kolvoBonusPricel=0;
+	Vector2i pos;
+	if (chet>270 )
+	{
+		if (chet>270) chet=0;
+		pos=NewCoordinateBonus();
+
 		//bonuses.NewBonus(x,y,(rand()%2)+2);
-		bonuses.NewBonus(x,y,1);
+		if (networkGame==false)	bonuses.NewBonus(pos.x,pos.y,1);
+		if (networkGame==true)
+		{
+			if (mode=='s')
+			{
+				bonuses.NewBonus(pos.x,pos.y,1);
+				server.Send(2,pos.x,pos.y,1,0);
+			}
+		}
 	}
-	// если 5 бонусов пуль размешенно то не считать время поевления нового бонуса
-	for (int i=0 ;i<kolvoBonus;i++)
+	// РµСЃР»Рё 5 Р±РѕРЅСѓСЃРѕРІ РїСѓР»СЊ СЂР°Р·РјРµС€РµРЅРЅРѕ С‚Рѕ РЅРµ СЃС‡РёС‚Р°С‚СЊ РІСЂРµРјСЏ РїРѕРµРІР»РµРЅРёСЏ РЅРѕРІРѕРіРѕ Р±РѕРЅСѓСЃР°
+	for (int i=0 ;i<amountBonus;i++)
 	{
 
 		if (bonuses.bonus[i].being==true)
-		if (bonuses.bonus[i].tip==1) kolvoBonusPylu++;
+		if (bonuses.bonus[i].type==1) kolvoBonusPylu++;
 	}
 	if (kolvoBonusPylu!=5) chet++; else chet=0;
-}
+	//if (chet1>1000 )
+	//{
+	//	if (chet>270) chet=0;
+	//	pos=NewCoordinateBonus();
 
-class GameInterface// класс показа игровых параметров внизу крана
+	//	//bonuses.NewBonus(x,y,(rand()%2)+2);
+	//	//bonuses.NewBonus(pos.x,pos.y,4,true);
+	//	if (networkGame==false)	bonuses.NewBonus(pos.x,pos.y,4,true);
+	//	if (networkGame==true)
+	//	{
+	//		if (mode=='s')
+	//		{
+	//			bonuses.NewBonus(pos.x,pos.y,4,true);
+	//			server.Send(2,pos.x,pos.y,4,0);
+	//		}
+	//	}
+	//}
+	//for (int i=0 ;i<kolvoBonus;i++)
+	//{
+
+	//	if (bonuses.bonus[i].being==true)
+	//	if (bonuses.bonus[i].tip==4) kolvoBonusPricel++;
+	//}
+	//if (kolvoBonusPricel==0 && panzer.speedTurn==false) chet1++ ;else chet1=0;
+}
+void ClientBonusRace()// РїСЂРёРµРј Р±РѕРЅСѓСЃРѕРІ СЃ СЃРµСЂРІРµСЂР° Рё СЂР°СЃС‚Р°РЅРѕРІРєР° РёС… РЅР° РєР°СЂС‚Рµ РєР»РёРµРЅС‚Р°
 {
-	int HP,BRONY,PYLU,TimeAttack,ChetAttack;
+	Data data;
+	for (int i=0;i<countPacked;i++)
+	{
+		data=dataClientRace[i];
+		if (data.key==2)
+		{
+			if (data.tip==1) bonuses.NewBonus((int)data.x,(int)data.y,1);
+			else
+			{
+				bonuses.NewBonus((int)data.x,(int)data.y,data.tip,true);
+			}
+			dataClientRace[i].key=0;
+		}
+	}
+}
+class GameInterface// РєР»Р°СЃСЃ РїРѕРєР°Р·Р° РёРіСЂРѕРІС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ РІРЅРёР·Сѓ РєСЂР°РЅР°
+{
+	int HP,BRONY,BULLET,TimeAttack,CountAttack;
+	bool bonusAim;//Р±РѕРЅСѓСЃ РїСЂРёС†РµР»
+	Image interfaceImage;
+	Texture interfaceTexture;
+	Sprite interfaceSprite;
+	int mixingUp;
 public:
-	void LoadData(int hp,int brony,int pylu1,int chetattack,int timeattack)// собрать данные
+	GameInterface ()
+	{
+
+		interfaceImage.loadFromFile("InterfaceImage.png");//Р·Р°РіСЂСѓР¶Р°РµРј РІ РЅРµРіРѕ С„Р°Р№Р»
+		interfaceImage.createMaskFromColor(Color(255,255,255));
+		
+		interfaceTexture.loadFromImage(interfaceImage);//РїРµСЂРµРґР°РµРј РІ РЅРµРіРѕ РѕР±СЉРµРєС‚ Image (РёР·РѕР±СЂР°Р¶РµРЅРёСЏ)
+		interfaceSprite.setTexture(interfaceTexture);
+		bonusAim=false;
+		mixingUp = 40;
+	}
+	void LoadData(int hp,int brony,int pylu1,int chetattack,int timeattack)// СЃРѕР±СЂР°С‚СЊ РґР°РЅРЅС‹Рµ
 	{
 		HP=hp;
 		BRONY=brony;
-		PYLU=pylu1;
+		BULLET=pylu1;
 		TimeAttack=timeattack;
-		ChetAttack=chetattack;
+		CountAttack=chetattack;
 
 	}
-	void DrawPylu()// нарисывать количество пуль
+	void LoadDataBonus(bool bonusPric)
 	{
-		for (int i=1;i<=PYLU;i++)
+		bonusAim=bonusPric;
+	}
+	void DrawAim()
+	{
+		DrawLine(screenWidth/2-5,screenHeigth/2-mixingUp, screenWidth / 2 - 1, screenHeigth / 2 - mixingUp,Color::White);
+		DrawLine(screenWidth / 2+1, screenHeigth / 2 - mixingUp, screenWidth / 2 + 5, screenHeigth / 2 - mixingUp, Color::White);
+		
+		DrawLine(screenWidth / 2 , screenHeigth / 2 - mixingUp -1, screenWidth / 2 , screenHeigth / 2 - mixingUp -5, Color::White);
+		DrawLine(screenWidth / 2 , screenHeigth / 2 - mixingUp +1, screenWidth / 2 , screenHeigth / 2 - mixingUp +5, Color::White);
+
+
+
+
+	}
+	void DrawBonusAim()
+	{
+		if (bonusAim==true)
+		{
+			interfaceSprite.setTextureRect(IntRect(1,1,40,40));
+			interfaceSprite.setPosition(250,559);
+			window.draw(interfaceSprite);
+		}
+	}
+	void DrawBullet()// РЅР°СЂРёСЃС‹РІР°С‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСѓР»СЊ
+	{
+		for (int i=1;i<=BULLET;i++)
 		{
 			DrawLine(299+i*3,590,299+i*3,575,Color(255,255,0) );
 		}
 
 	}
-	void DrawTimeAttack()// нарисовать время перезарядки
+	void DrawTimeAttack()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РІСЂРµРјСЏ РїРµСЂРµР·Р°СЂСЏРґРєРё
 	{
-		RectangleShape rectangle(sf::Vector2f((int)((float)ChetAttack / (float)TimeAttack*90),5 ));
+		RectangleShape rectangle(sf::Vector2f((int)((float)CountAttack / (float)TimeAttack*90),5 ));
 		rectangle.setPosition(302,569);
 		rectangle.setFillColor(Color(128, 255,128));
 		window.draw(rectangle);
 	}
-	void DrawHP()// нарисовать полусы здоровья
+	void DrawHP()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РїРѕР»СѓСЃС‹ Р·РґРѕСЂРѕРІСЊСЏ
 	{
 		RectangleShape rectangle(sf::Vector2f((int)((float)HP / (float)100*90),10 ));
 		rectangle.setPosition(10,579);
 		rectangle.setFillColor(Color(255, 125,128));
 		window.draw(rectangle);
 	}
-	void DrawBRONY()// нарисовать полосу брони
+	void DrawARMOR()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РїРѕР»РѕСЃСѓ Р±СЂРѕРЅРё
 	{
 		RectangleShape rectangle(sf::Vector2f((int)((float)BRONY / (float)100*90),10 ));
 		rectangle.setPosition(10,569);
 		rectangle.setFillColor(Color(128, 125,255));
 		window.draw(rectangle);
 	}
-	class Statistika
+	class Statistics
 	{
 		Image starsImage;
-		Texture starsTexture;//создаем объект Texture (текстура)
+		Texture starsTexture;//СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚ Texture (С‚РµРєСЃС‚СѓСЂР°)
 		Sprite starsSprite;
 	public:
-		Statistika()
+		Statistics()
 		{
-			starsImage.loadFromFile("Stars.png");//загружаем в него файл
+			starsImage.loadFromFile("Stars.png");//Р·Р°РіСЂСѓР¶Р°РµРј РІ РЅРµРіРѕ С„Р°Р№Р»
 			starsImage.createMaskFromColor(Color(255,255,255));
 		
-			starsTexture.loadFromImage(starsImage);//передаем в него объект Image (изображения)
+			starsTexture.loadFromImage(starsImage);//РїРµСЂРµРґР°РµРј РІ РЅРµРіРѕ РѕР±СЉРµРєС‚ Image (РёР·РѕР±СЂР°Р¶РµРЅРёСЏ)
 			starsSprite.setTexture(starsTexture);
 		}
 		void DrawStarsPlayer(Text text)
 		{
 			if (starsPlayer<16)text.setColor(Color(255,255,0)); else text.setColor(Color(255,0,0));
-			std::ostringstream starsString;    // объявили переменную
+			std::ostringstream starsString;    // РѕР±СЉСЏРІРёР»Рё РїРµСЂРµРјРµРЅРЅСѓСЋ
 			starsString <<starsPlayer;
 
 			text.setString(starsString.str());
@@ -1170,7 +2072,7 @@ public:
 		void DrawStarsBot(Text text)
 		{
 			if (starsBot<16)text.setColor(Color(255,255,0)); else text.setColor(Color(255,0,0));
-			std::ostringstream starsString;    // объявили переменную
+			std::ostringstream starsString;    // РѕР±СЉСЏРІРёР»Рё РїРµСЂРµРјРµРЅРЅСѓСЋ
 			starsString <<starsBot;
 
 			text.setString(starsString.str());
@@ -1180,85 +2082,102 @@ public:
 			window.draw(starsSprite);
 			window.draw(text);
 		}
-		void DrawTablo(Text text)
+		void DrawBoardScore(Text text)
 		{
-			text.setColor(Color(255,255,255));//покрасили текст в красный. если убрать эту строку, то по умолчанию он белый
-			std::ostringstream scoreString[2];    // объявили переменную
+			text.setColor(Color(255,255,255));//РїРѕРєСЂР°СЃРёР»Рё С‚РµРєСЃС‚ РІ РєСЂР°СЃРЅС‹Р№. РµСЃР»Рё СѓР±СЂР°С‚СЊ СЌС‚Сѓ СЃС‚СЂРѕРєСѓ, С‚Рѕ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РѕРЅ Р±РµР»С‹Р№
+			std::ostringstream scoreString[2];    // РѕР±СЉСЏРІРёР»Рё РїРµСЂРµРјРµРЅРЅСѓСЋ
 			scoreString[0] <<scorePlayer;
 			scoreString[1] <<scoreBot;
 			text.setString(scoreString[0].str()+" : "+scoreString[1].str());
 			if (scorePlayer<10) text.setPosition(550,565); else text.setPosition(542,565);
 			window.draw(text);
-		//	text.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
+		//	text.setStyle(sf::Text::Bold | sf::Text::Underlined);//Р¶РёСЂРЅС‹Р№ Рё РїРѕРґС‡РµСЂРєРЅСѓС‚С‹Р№ С‚РµРєСЃС‚. РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РѕРЅ "С…СѓРґРѕР№":)) Рё РЅРµ РїРѕРґС‡РµСЂРєРЅСѓС‚С‹Р№
 		    
 		}
 		void Draw(Text text)
 		{
-			 DrawTablo(text);
+			 DrawBoardScore(text);
 			 DrawStarsPlayer(text);
 			 DrawStarsBot(text);
+			 
 		}
 	};
-	Statistika statistika;
+	Statistics statistics;
 	
-	void Draw()// нарисовать интервейс
+	void Draw()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РёРЅС‚РµСЂРІРµР№СЃ
 	{
 		DrawLine(1,560,800,560,Color(128,128,128));
-		DrawPylu();
+		DrawBullet();
 		DrawTimeAttack();
 		DrawHP();
-		DrawBRONY();
+		DrawARMOR();
+		DrawBonusAim();
+		DrawAim();
 	}
 	
 };
 GameInterface gameInterface;
-void BodborBonus()// функция подбора бонусов
+void GrabBonus()// С„СѓРЅРєС†РёСЏ РїРѕРґР±РѕСЂР° Р±РѕРЅСѓСЃРѕРІ
 {
- int valuePanzer=-1,// номер подобранного бонуса игроком
-	 valuePanzerBot=-1;// номер подобранного бонуса ботом
- valuePanzer=bonuses.InBonus(panzer.Get_X(),panzer.Get_Y(),panzer.Get_Size()*2,panzer.Get_Size()*2);
- valuePanzerBot=bonuses.InBonus(panzerBot.Get_X(),panzerBot.Get_Y(),
+ int valuePanzer=-1,// РЅРѕРјРµСЂ РїРѕРґРѕР±СЂР°РЅРЅРѕРіРѕ Р±РѕРЅСѓСЃР° РёРіСЂРѕРєРѕРј
+	 valuePanzerBot=-1;// РЅРѕРјРµСЂ РїРѕРґРѕР±СЂР°РЅРЅРѕРіРѕ Р±РѕРЅСѓСЃР° Р±РѕС‚РѕРј
+ if (panzer.Get_Being()==true)
+ {
+  valuePanzer=bonuses.CrossBonus(panzer.Get_X(),panzer.Get_Y(),panzer.Get_Size()*2,panzer.Get_Size()*2);
+ }
+ if (panzerBot.Get_Being()==true)
+ {
+  valuePanzerBot=bonuses.CrossBonus(panzerBot.Get_X(),panzerBot.Get_Y(),
 							panzerBot.Get_Size()*2,panzerBot.Get_Size()*2);
+ }
  if (valuePanzer!=-1) 
  {
 		 bonuses.KillBonus(valuePanzer);
-		 if (bonuses.bonus[valuePanzer].tip==1) panzer.Add_Pylu(5);// 1- бонус пуль
-		 if (bonuses.bonus[valuePanzer].tip==2)// 2- бонус звездочка
+		 if (bonuses.bonus[valuePanzer].type==1) panzer.Add_Pylu(5);// 1- Р±РѕРЅСѓСЃ РїСѓР»СЊ
+		 if (bonuses.bonus[valuePanzer].type==2)// 2- Р±РѕРЅСѓСЃ Р·РІРµР·РґРѕС‡РєР°
 		 {
 			 panzer.Add_TimeAttack(-3);
 			 starsPlayer++;
 		 }
-		 if (bonuses.bonus[valuePanzer].tip==3) panzer.Add_Brony(100);// 3-бонус брони
+		 if (bonuses.bonus[valuePanzer].type==3) panzer.Add_Brony(100);// 3-Р±РѕРЅСѓСЃ Р±СЂРѕРЅРё
+		 if (bonuses.bonus[valuePanzer].type==4) 
+		 {
+			 panzer.speedTurn=true;// 3-Р±РѕРЅСѓСЃ Р±СЂРѕРЅРё
+
+		 }
  }
  if (valuePanzerBot!=-1) 
  {
 		 bonuses.KillBonus(valuePanzerBot);
-		 if (bonuses.bonus[valuePanzerBot].tip==1) panzerBot.Add_Pylu(5);
-		 if (bonuses.bonus[valuePanzerBot].tip==2) 
+		 if (bonuses.bonus[valuePanzerBot].type==1) panzerBot.Add_Pylu(5);
+		 if (bonuses.bonus[valuePanzerBot].type==2) 
 		 {
 			 panzerBot.Add_TimeAttack(-3);
 			 starsBot++;
+			 // panzerBot.CancelMovingToPuty();
 		 }
-		 if (bonuses.bonus[valuePanzerBot].tip==3) panzerBot.Add_Brony(100);
+		 if (bonuses.bonus[valuePanzerBot].type==3)
+		 {
+				 panzerBot.Add_Brony(100);
+				// panzerBot.CancelMovingToPuty();
+		 }
  }
 }
-void NewCoordinateKill()// новые координаты после смерти танка
-	{
-		bool killPanzer=false,killPanzerBot=false;
-	  for (int i=0;i<kolvoPylu;i++)
-	  {
-	  if (pylu[i].being==true)
-	  {
-			if (panzer.InMe(pylu[i].x,pylu[i].y))// если в игрока попала пуля
+bool BulletInPanzer()
+{
+	for (int i=0;i<amountBullet;i++)
+	  if (bullets[i].being==true)
+			if (panzer.CrossMe(bullets[i].x,bullets[i].y))// РµСЃР»Рё РІ РёРіСЂРѕРєР° РїРѕРїР°Р»Р° РїСѓР»СЏ
 			{
+				bullets[i].being=false;
 				//if (panzer.Get_Brony()>=25)
-				//расчет здоровья и брони
-				if(panzer.Get_Brony()>0) 
+				//СЂР°СЃС‡РµС‚ Р·РґРѕСЂРѕРІСЊСЏ Рё Р±СЂРѕРЅРё
+			/*	if(panzer.Get_Brony()>0) 
 				{
 					panzer.Add_Brony(-25);	
 					if (panzer.Get_Brony()==0)
 					{
-					 pylu[i].being=false;
+					 bullets[i].being=false;
 					  break;
 					}
 				}
@@ -1266,237 +2185,989 @@ void NewCoordinateKill()// новые координаты после смерти танка
 				{
 					panzer.Add_HP(-25);
 				
-				}
-			
-			
-				if (panzer.Get_HP()<=0)	// если здоровья нет
+				}*/
+				if (panzer.Get_HP()<=0)	// РµСЃР»Рё Р·РґРѕСЂРѕРІСЊСЏ РЅРµС‚
 				{
-						killPanzer=true;
-						panzer.KIlled();
-						// регистрация взрвва
-						babahs.Registration(panzer.Get_X()+panzer.Get_Size(),
-							                 panzer.Get_Y()+panzer.Get_Size());
-						// регистрация бонуса
-						bonuses.NewBonus(panzer.Get_X()+panzer.Get_Size(),
-							panzer.Get_Y()+panzer.Get_Size(),(rand()%2)+2,true);
-						scoreBot++;
+					return true;
 				}
 				else
 				{
-					babahs.Registration(pylu[i].x,pylu[i].y,true);
+					burstes.Registration(bullets[i].x,bullets[i].y,true);
 				}
-				pylu[i].being=false;
-				break;
 			}
-			// анологично так как для танка игрока
-			if (panzerBot.InMe(pylu[i].x,pylu[i].y))
+			return false;
+}
+bool PyleInPanzerBot()
+{
+	for (int i=0;i<amountBullet;i++)
+	  if (bullets[i].being==true)
+			if (panzerBot.CrossMe(bullets[i].x,bullets[i].y))// РµСЃР»Рё РІ РёРіСЂРѕРєР° РїРѕРїР°Р»Р° РїСѓР»СЏ
 			{
+				//if (panzer.Get_Brony()>=25)
+				//СЂР°СЃС‡РµС‚ Р·РґРѕСЂРѕРІСЊСЏ Рё Р±СЂРѕРЅРё
+				bullets[i].being=false;
 				if(panzerBot.Get_Brony()>0) 
 				{
 					panzerBot.Add_Brony(-25);	
 					if (panzerBot.Get_Brony()==0)
 					{
-						pylu[i].being=false;
-						break;
+					 bullets[i].being=false;
+					  break;
 					}
 				}
 				if (panzerBot.Get_Brony()<=0) 
 				{
 					panzerBot.Add_HP(-25);
-					
-				}
 				
-				if (panzerBot.Get_HP()<=0)	
+				}
+				if (panzerBot.Get_HP()<=0)	// РµСЃР»Рё Р·РґРѕСЂРѕРІСЊСЏ РЅРµС‚
 				{
-						killPanzerBot=true;
-						panzerBot.KIlled();
-						babahs.Registration(panzerBot.Get_X()+panzerBot.Get_Size(),
-							                 panzerBot.Get_Y()+panzerBot.Get_Size());
-						bonuses.NewBonus(panzerBot.Get_X()+panzerBot.Get_Size(),
-										panzerBot.Get_Y()+panzerBot.Get_Size(),(rand()%2)+2,true);
-						scorePlayer++;
+					return true;
 				}
 				else
 				{
-					babahs.Registration(pylu[i].x,pylu[i].y,true);
+					burstes.Registration(bullets[i].x,bullets[i].y,true);
 				}
-				pylu[i].being=false;
-				break;
 			}
-	  }
-	  }
-	  int x,y;
-	  if (Keyboard::isKeyPressed(Keyboard::Q)) 
+			return false;
+}
+Vector2i CalcPanzerCoordinate(bool killPanzer,bool killPanzerBot)
+{
+	 bool notLocking=false;
+	  bool notWalls=false;
+	  int x=0,y=0;
+	  Vector2i result;
+	  result.x=0;
+	  result.y=0;
+	  if (killPanzer || killPanzerBot)// РµСЃР»Рё СѓР±РёС‚ РёРіСЂРѕРє РёР»Рё Р±РѕС‚ С‚Рѕ СЂР°СЃС‡РёС‚Р°РµРј РЅРѕРІС‹РµРЅ РєРѕРѕСЂРґРёРЅР°С‚С‹
 	  {
-		  killPanzer=true;
-		  Sleep (10);
-		  //for (int i=0;i<10000000;i++);
-	  }
-	    if (Keyboard::isKeyPressed(Keyboard::R)) 
-	  {
-		  killPanzerBot=true;
-		  Sleep (10);
-	  }
-	  bool noVidit=false;
-	  bool noStens=false;
-	  if (killPanzer || killPanzerBot)// если убит игрок или бот то расчитаем новыен координаты
-	  {
+
 		do
 		{
-			noVidit=false;
-	        noStens=false;
+			notLocking=false;
+	        notWalls=false;
 			x=(rand()% 740)+30;
 			y=(rand()%500)+30;
-			// если х и у не попадают в стену 
-			if (stens.InStens(x,y,panzer.Get_Size()*2,panzer.Get_Size()*2)==false) noStens=true;
+			// РµСЃР»Рё С… Рё Сѓ РЅРµ РїРѕРїР°РґР°СЋС‚ РІ СЃС‚РµРЅСѓ 
+			if (walls.CrossWall(x,y,panzer.Get_Size()*2,panzer.Get_Size()*2)==false) notWalls=true;
 			
 			{
-				//если х и у не попадают под зону видиости врага
+				//РµСЃР»Рё С… Рё Сѓ РЅРµ РїРѕРїР°РґР°СЋС‚ РїРѕРґ Р·РѕРЅСѓ РІРёРґРёРѕСЃС‚Рё РІСЂР°РіР°
 				if (killPanzer)
 				{
-					if (Vidimosty (x+panzer.Get_Size(),y+panzer.Get_Size(),
+					if (LookAcrossWall (x+panzer.Get_Size(),y+panzer.Get_Size(),
 					panzerBot.Get_X()+panzerBot.Get_Size(),
 					panzerBot.Get_Y()+panzerBot.Get_Size() )==false )
 					{
-						noVidit=true;
+						notLocking=true;
 					
 					}
 				}
 				if (killPanzerBot)
 				{
-					if (Vidimosty (x+panzerBot.Get_Size(),y+panzerBot.Get_Size(),
+					if (LookAcrossWall (x+panzerBot.Get_Size(),y+panzerBot.Get_Size(),
 					panzer.Get_X()+panzer .Get_Size(),
 					panzer.Get_Y()+panzer.Get_Size() )==false )
 					{
-						noVidit=true;
+						notLocking=true;
 					
 					}
 				}
 			}
-	// если х и у не попадают в стену , не попадапют в зону видимости врага, и не попадают на бонус
-		}while ((noStens==false || noVidit==false)
-				||bonuses.InBonus(x-panzer.Get_Size(),y-panzer.Get_Size(),
+	// РµСЃР»Рё С… Рё Сѓ РЅРµ РїРѕРїР°РґР°СЋС‚ РІ СЃС‚РµРЅСѓ , РЅРµ РїРѕРїР°РґР°РїСЋС‚ РІ Р·РѕРЅСѓ РІРёРґРёРјРѕСЃС‚Рё РІСЂР°РіР°, Рё РЅРµ РїРѕРїР°РґР°СЋС‚ РЅР° Р±РѕРЅСѓСЃ
+		}while ((notWalls==false || notLocking==false)
+				||bonuses.CrossBonus(x-panzer.Get_Size(),y-panzer.Get_Size(),
 				                  panzer.Get_Size()*3,panzer.Get_Size()*3)!=-1
-				||bonuses.InBonus(x-panzerBot.Get_Size(),y-panzerBot.Get_Size(),
+				||bonuses.CrossBonus(x-panzerBot.Get_Size(),y-panzerBot.Get_Size(),
 				                  panzerBot.Get_Size()*3,panzerBot.Get_Size()*3)!=-1);
-		if (killPanzer)// если танк игрока был убит 
+		
+	  }
+	  result.x=x;
+	  result.y=y;
+	  return result;
+}
+
+
+void NewCoordinateKill()// РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё С‚Р°РЅРєР°
+	{
+		bool killPanzer=false,killPanzerBot=false,flagPanzer=false,flagPanzerBot=false;
+		int oldPanzerX=0,oldPanzerY=0,oldPanzerBotX=0,oldPanzerBotY=0;
+	 			flagPanzer=BulletInPanzer();
+				if (flagPanzer==true)	// РµСЃР»Рё Р·РґРѕСЂРѕРІСЊСЏ РЅРµС‚ Сѓ Р·РµР»РµРЅРѕРіРѕ С‚Р°РЅРєР°
+				{
+					if (networkGame==false)
+					{
+						killPanzer=true;
+						panzer.KIlled();
+						// СЂРµРіРёСЃС‚СЂР°С†РёСЏ РІР·СЂРІРІР°
+						burstes.Registration(panzer.Get_X()+panzer.Get_Size(),
+							                 panzer.Get_Y()+panzer.Get_Size());
+						// СЂРµРіРёСЃС‚СЂР°С†РёСЏ Р±РѕРЅСѓСЃР°
+						/*bonuses.NewBonus(panzer.Get_X()+panzer.Get_Size(),
+							panzer.Get_Y()+panzer.Get_Size(),(rand()%2)+2,true);*/
+						oldPanzerX=panzer.Get_X();
+						oldPanzerY=panzer.Get_Y();
+						scoreBot++;
+					}
+					if (networkGame==true)
+					{
+						if (mode=='s')
+						{
+							killPanzer=true;
+							panzer.KIlled();
+							// СЂРµРіРёСЃС‚СЂР°С†РёСЏ РІР·СЂРІРІР°
+							burstes.Registration(panzer.Get_X()+panzer.Get_Size(),
+												 panzer.Get_Y()+panzer.Get_Size());
+							// СЂРµРіРёСЃС‚СЂР°С†РёСЏ Р±РѕРЅСѓСЃР°
+							/*bonuses.NewBonus(panzer.Get_X()+panzer.Get_Size(),
+								panzer.Get_Y()+panzer.Get_Size(),(rand()%2)+2,true);*/
+							oldPanzerX=panzer.Get_X();
+							oldPanzerY=panzer.Get_Y();
+							scoreBot++;
+							server.Send(6,0,0,1,0);
+						}
+					}
+					
+				}		
+				flagPanzerBot=PyleInPanzerBot();
+				if (flagPanzerBot==true)	
+				{
+					if (networkGame==false)
+					{
+						killPanzerBot=true;
+						panzerBot.KIlled();
+						burstes.Registration(panzerBot.Get_X()+panzerBot.Get_Size(),
+							                 panzerBot.Get_Y()+panzerBot.Get_Size());
+						oldPanzerBotX=panzerBot.Get_X();
+						oldPanzerBotY=panzerBot.Get_Y();
+						scorePlayer++;
+					}
+					if (networkGame==true)
+					if (mode=='c')
+					{
+						killPanzerBot=true;// СѓР±РёРІР°РµРј РєСЂР°СЃРЅС‹Р№ С‚Р°РЅРє РЅР° РєР»РёРµРЅС‚Рµ
+						panzerBot.KIlled();
+						burstes.Registration(panzerBot.Get_X()+panzerBot.Get_Size(),
+							                 panzerBot.Get_Y()+panzerBot.Get_Size());
+						scorePlayer++;
+						client.Send(6,0,0,2,0);// РїРµСЂРµРґР°РµРј СЃРµСЂРІРµСЂСѓ РёРЅС„Сѓ Рѕ СЃРјРµСЂС‚Рё РєСЂР°СЃРЅРѕРіРѕ С‚Р°РЅРєР°
+					}
+					
+				}
+			
+	  if (networkGame==true)// РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј РїСЂРёРЅСЏС‚С‹Рµ РґР°РЅРЅС‹Рµ
+	  {
+		  if (mode=='s')// РЅР° СЃРµСЂРІРµСЂРµ
+		  {
+			  Data data;
+			  for (int i=0;i<countPacked;i++)
+			  {
+				  data=dataServerRace[i];
+				  if (data.key==6 && data.tip==2)// РµСЃР»Рё РїСЂРёРЅСЏlРё РЅР° СЃРµСЂРІРµСЂРµ РёРЅС„Сѓ Рѕ СЃРјРµСЂС‚Рµ РєСЂР°СЃРЅРѕРіРѕ С‚Р°РЅРєР°
+				  {
+					oldPanzerBotX=panzerBot.Get_X();// СЃРѕС…СЂР°РЅСЏРµРј СЃС‚Р°СЂС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹
+					oldPanzerBotY=panzerBot.Get_Y();
+					killPanzerBot=true;
+					panzerBot.KIlled();// СѓР±РёРІР°РµРј РєСЂР°СЃРЅС‹Р№ С‚Р°РЅРє РЅР° СЃРµСЂРІРµСЂРµ
+					scorePlayer++;
+					burstes.Registration(panzerBot.Get_X()+panzerBot.Get_Size(),
+											panzerBot.Get_Y()+panzerBot.Get_Size());
+					dataServerRace[i].key=0;
+				  }
+			  }
+			  
+		  }
+		  if (mode=='c')// РЅР° РєР»РёРµРЅС‚Рµ
+		  {
+			  Data data;
+			  for (int i=0;i<countPacked;i++)
+			  {
+				  data=dataClientRace[i];
+				  if (data.key==6 && data.tip==1)// РµСЃР»Рё РїСЂРёРЅСЏlРё РЅР° РєР»РёРµРЅС‚Рµ РёРЅС„Сѓ Рѕ СЃРјРµСЂС‚Рµ Р·РµР»РµРЅРѕРіРѕ С‚Р°РЅРєР°
+				  {
+					killPanzer=true;
+					panzer.KIlled();// СѓР±РёРІР°РµРј Р·РµР»РµРЅС‹Р№ С‚Р°РЅРє РЅР° РєР»РёРµРЅС‚Рµ
+					burstes.Registration(panzer.Get_X()+panzer.Get_Size(),
+											panzer.Get_Y()+panzer.Get_Size());
+					scoreBot++;
+					dataClientRace[i].key=0;
+				  }
+			  }
+		  }
+	  }
+	  int x=0,y=0;
+	  Vector2i newCoord;
+	  if (killPanzer || killPanzerBot)
+	  {
+		newCoord=CalcPanzerCoordinate(killPanzer,killPanzerBot);
+		 x=newCoord.x;
+		 y=newCoord.y;
+	  }
+	 
+	  	  
+		if (killPanzer)// РµСЃР»Рё С‚Р°РЅРє РёРіСЂРѕРєР° Р±С‹Р» СѓР±РёС‚ 
 		{
-			// то присвоить ему новые координты и обновить параметры
+			// С‚Рѕ РїСЂРёСЃРІРѕРёС‚СЊ РµРјСѓ РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅС‚С‹ Рё РѕР±РЅРѕРІРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹
 			killPanzer=false;
 			panzer.Put_Pylu(5);
 			panzer.Put_HP(100);
-			panzer.Put_X(x);
-			panzer.Put_Y(y);
+			
+			panzer.speedTurn=false;
+			if (networkGame==false)
+			{
+				bonuses.NewBonus(oldPanzerX+panzer.Get_Size(),
+										oldPanzerY+panzer.Get_Size(),(rand()%2)+2,true);
+				panzer.Put_X(x);
+				panzer.Put_Y(y);
+			}
+			// Р·РµР»РµРЅС‹Рµ С‚Р°РЅРє 
+			if (networkGame==true)
+			{
+				if (mode=='s')
+				{
+					int oldX=oldPanzerX+panzer.Get_Size();
+					int oldY=oldPanzerY+panzer.Get_Size();
+					int rTip=(rand()%2)+2;
+					bonuses.NewBonus(oldX,oldY,rTip,true);
+					server.Send(7,x,y,1,0);
+					server.Send(2,oldX,oldY,rTip,0);
+					//bonuses.NewBonus(oldPanzerX+panzer.Get_Size(),
+					//					oldPanzerY+panzer.Get_Size(),(rand()%2)+2,true);
+					panzer.Put_X(x);
+					panzer.Put_Y(y);
+					
+				//	server.Send(3,x,y,0,0);
+				}
+			}
 		}
-		// аналогично
-		if (killPanzerBot)
+		// Р°РЅР°Р»РѕРіРёС‡РЅРѕ
+		if (killPanzerBot)// РµСЃР»Рё СѓРјРµРЅСЂ РєСЂР°СЃРЅС‹Р№ С‚Р°РЅРє
 		{
 			killPanzerBot=false;
 			panzerBot.Put_Pylu(5);
-			panzerBot.Put_HP(100);
-			panzerBot.Put_X(x);
-			panzerBot.Put_Y(y);
-		}
-	  }
-	  /*
-	    if (killPanzerBot)
-	  {
-		do
-		{
-			noVidit=false;
-	        noStens=false;
-			x=(rand()% 740)+30;
-			y=(rand()%540)+30;
-			if (stens.InStens(x,y,panzerBot.Get_Size()*2,panzerBot.Get_Size()*2)==false) noStens=true;
+			panzerBot.Put_HP(10);
 			
+			if (networkGame==false)// РµСЃР»Рё РѕС„Р»Р°Р№РЅ РёРіСЂР°
 			{
-				if (Vidimosty (x+panzerBot.Get_Size(),y+panzerBot.Get_Size(),
-				panzer.Get_X()+panzer.Get_Size(),panzer.Get_Y()+panzer.Get_Size() )==false )
-				{
-					noVidit=true;
-					
-				}
+					bonuses.NewBonus(oldPanzerBotX+panzerBot.Get_Size(),
+										oldPanzerBotY+panzerBot.Get_Size(),(rand()%2)+2,true);
+				panzerBot.Put_X(x);
+				panzerBot.Put_Y(y);
 			}
-		}while (!(noStens==true && noVidit==true));
-		killPanzer=false;
-		panzer.Put_X(x);
-		panzer.Put_Y(y);
-	  }
-		*/
-	}
-int main()// главная функция 
+			if (networkGame==true)// РµСЃР»Рё СЃРµС‚РµРІР°СЏ РёРіСЂР°
+			{
+				if (mode=='s')// РЅР° СЃРµСЂРІРµСЂРµ
+				{
+					int oldX=oldPanzerBotX+panzerBot.Get_Size();
+					int oldY=oldPanzerBotY+panzerBot.Get_Size();
+					int rTip=(rand()%2)+2;
+					bonuses.NewBonus(oldX,oldY,rTip,true);
+					server.Send(2,oldX,oldY,rTip,0);
+					panzerBot.Put_X(x);
+					panzerBot.Put_Y(y);
+					server.Send(7,x,y,2,0);
+				}
+
+			}
+			// РєСЂР°СЃРЅС‹Рµ С‚Р°РЅРє
+			
+			if (panzerBot.motionToPuty==true) 
+			{
+				panzerBot.BonusControl(true);
+			}
+		}
+		if (networkGame==true)
+		{
+		    	if (mode=='c')
+				{
+					Data data;
+					for (int i=0;i<countPacked;i++)
+					{
+						data=dataClientRace[i];
+						if (data.key==7 && data.tip==2)
+						{
+							panzerBot.Put_X((int)data.x);
+							panzerBot.Put_Y((int)data.y);
+						}
+						if (data.key==7 && data.tip==1)
+						{
+							panzer.Put_X((int)data.x);
+							panzer.Put_Y((int)data.y);
+						}
+					}
+				}
+		}
+}
+
+
+void DrawLine(int x, int y, int x1, int y1, Color color, RenderWindow& window)// РїСЂРѕС†РµРґСѓСЂР° СЂРёСЃРѕРІР°РЅРёСЏ Р»РёРЅРёРё
+{
+	//СЃРѕР·РґР°РµРј РјР°СЃСЃРёРІ С‚РѕС‡РµРє, РїРѕ РєРѕС‚РѕСЂС‹Рј Р±СѓРґСѓС‚ СЂРёСЃРѕРІР°С‚СЊСЃСЏ Р»РёРЅРёРё:
+	sf::VertexArray lines(sf::Lines, 2/*РєРѕР»РёС‡РµСЃС‚РІРѕ С‚РѕС‡РµРє*/);
+
+	//РґР°Р»РµРµ РґР»СЏ РєР°Р¶РґРѕР№ РёР· С‚РѕС‡РµРє Р·Р°РґР°РµРј СЃРІРѕСЋ РїРѕР·РёС†РёСЋ:
+	lines[0].position = sf::Vector2f(x, y);
+	lines[1].position = sf::Vector2f(x1, y1);
+	//Рё С‚.Рґ.
+
+	//РґР°Р»РµРµ РґР»СЏ РєР°Р¶РґРѕР№ С‚РѕС‡РєРё СѓРєР°Р·С‹РІР°РµРј С†РІРµС‚(С‚Р°Рє РјРѕР¶РЅРѕ СЃРѕР·РґР°РІР°С‚СЊ РіСЂР°РґРёРµРЅС‚С‹):
+	lines[0].color = color;
+	lines[1].color = color;
+	//Рё С‚.Рґ.
+
+	//Рё РІ РєРѕРЅС†Рµ РІС‹РІРѕРґРёРј РІСЃРµ РЅР° СЌРєСЂР°РЅ:
+	window.draw(lines);
+}
+const int amountLines = 101;
+class Camera
 {
 	
-	double time1=0,time2=0; // переменые для таймера
+public:
+
+	Vector2f point;
+	enum Type// С‚РёРїС‹ РѕР±СЉРµРєС‚РѕРІ
+	{
+		EMPTY, WALL, BOTRED,BOTGREEN 
+	};
+	struct DataLine// РґР°РЅРЅС‹Рµ РѕР± РѕС‚СЂРµР·РєР°С… СЃС‚РµРЅ
+	{
+		Vector2f begin;
+		Vector2f end;
+	};
+	struct Data// РґР°РЅРЅС‹Рµ Рѕ Р»РёРЅРёСЏС…, РєРѕС‚РѕСЂС‹Рµ СЂРїР°СЃРїСЂРѕСЃС‚СЂР°РЅСЏСЋС‚СЃСЏ
+	{
+		float dist;// РґРёСЃС‚Р°РЅС†РёСЏ
+		Vector2f acrossPoint;// С‚РѕС‡РєР° РїРµСЂРµСЃРµС‡РµРЅРёСЏ
+		Color color;
+		Type type;
+	};
+	DataLine dataLine[amountWalls * 4];// РјР°СЃСЃРёРІ РґР°РЅРЅС‹С… Рѕ СЃС‚РµРЅР°С…
+	DataLine dataLinePanzerGreen[4];
+	DataLine dataLinePanzerRed[4];
+	Data data[amountLines];// РјР°СЃСЃРёРІ Р»РёРЅРёР№ РїСЂРѕСЃРјРѕС‚СЂР°
+	float dir;// РЅР°РїСЂРІР»РµРЅРёРµ
+	float FieldOfView;// СѓРіРѕР» РѕР±Р»Р°СЃС‚Рё РІРёРґРёРјРѕСЃС‚Рё РІ СЂР°Рґ
+	float StepOfField;// СѓРіРѕР» РјРµР¶РґСѓ Р»СѓС‡Р°РјРё
+	float WalkSpeed;// СЃРєРѕСЂРѕСЃС‚СЊ С…РѕРґСЊР±С‹
+	float ViewSpeed;//СЃРєРѕСЂРѕСЃС‚СЊ РѕР±Р·РѕСЂР° РјС‹С€СЊСЋ
+	float MaxDistance;// РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґРёСЃС‚Р°РЅС†РёСЏ РІРёРґРёРјРѕСЃС‚Рё
+
+	void BlockToLines()// С„СѓРЅРєС†РёСЏ РїРµСЂРµРІРµРґРµРЅРёСЏ Рє РєРІР°РґСЂР°С‚РёРєРѕРІ СЃРµСЂС‹С… Р±Р»РѕРєРѕРІ РІ Р»РёРЅРёРё СЃС‚РµРЅ
+	{
+	
+		for (int i = 0; i < amountWalls; i++)
+		{
+			Vector2f A = Vector2f(walls.wall[i].x, walls.wall[i].y);
+			Vector2f B = Vector2f(walls.wall[i].x + walls.size, walls.wall[i].y);
+			Vector2f C = Vector2f(walls.wall[i].x + walls.size, walls.wall[i].y + walls.size);
+			Vector2f D = Vector2f(walls.wall[i].x, walls.wall[i].y + walls.size);
+
+			dataLine[i * 4 + 0].begin = A;
+			dataLine[i * 4 + 0].end = B;
+
+			dataLine[i * 4 + 1].begin = B;
+			dataLine[i * 4 + 1].end = C;
+
+			dataLine[i * 4 + 2].begin = C;
+			dataLine[i * 4 + 2].end = D;
+
+			dataLine[i * 4 + 3].begin = D;
+			dataLine[i * 4 + 3].end = A;
+		}
+
+	}
+	void LinePanzerGreen()
+	{
+		Vector2f A = Vector2f(panzer.Get_X(), panzer.Get_Y());
+		Vector2f B = Vector2f(panzer.Get_X()+panzer.Get_Size(), panzer.Get_Y());
+		Vector2f C = Vector2f(panzer.Get_X() + panzer.Get_Size(), panzer.Get_Y() + panzer.Get_Size());
+		Vector2f D = Vector2f(panzer.Get_X(), panzer.Get_Y() + panzer.Get_Size());
+		dataLinePanzerGreen[0].begin = A;
+		dataLinePanzerGreen[0].end = B;
+
+		dataLinePanzerGreen[1].begin = B;
+		dataLinePanzerGreen[1].end = C;
+
+		dataLinePanzerGreen[2].begin = C;
+		dataLinePanzerGreen[2].end = D;
+
+		dataLinePanzerGreen[3].begin = D;
+		dataLinePanzerGreen[3].end = A;
+	}
+	void LinePanzerRed()
+	{
+		Vector2f A = Vector2f(panzerBot.Get_X(), panzerBot.Get_Y());
+		Vector2f B = Vector2f(panzerBot.Get_X() + (float)panzerBot.Get_Size()*1.443, panzerBot.Get_Y());
+		Vector2f C = Vector2f(panzerBot.Get_X() + (float)panzerBot.Get_Size()*1.443, panzerBot.Get_Y() + (float)panzerBot.Get_Size()*1.443);
+		Vector2f D = Vector2f(panzerBot.Get_X(), panzerBot.Get_Y() + (float)panzerBot.Get_Size()*1.443);
+		dataLinePanzerRed[0].begin = A;
+		dataLinePanzerRed[0].end = B;
+
+		dataLinePanzerRed[1].begin = B;
+		dataLinePanzerRed[1].end = C;
+
+		dataLinePanzerRed[2].begin = C;
+		dataLinePanzerRed[2].end = D;
+
+		dataLinePanzerRed[3].begin = D;
+		dataLinePanzerRed[3].end = A;
+	}
+	Camera()
+	{
+		point.x = screenWidth / 2;
+		point.y = screenHeigth / 2;
+		dir = 2.5;
+		FieldOfView = 1;
+		StepOfField = 0.01;
+		WalkSpeed = 0.04;
+		ViewSpeed = 0.002f;
+		MaxDistance = 250;
+	//	BlockToLines();
+	}
+
+	float distance(float x, float y, float x1, float y1)
+	{
+		float dx = abs(x1 - x),
+			dy = abs(y1 - y);
+		return sqrt(dx * dx + dy * dy);
+	}
+	float VectMult(float ax, float ay, float bx, float by)
+	{
+		return (ax * by) - (ay * bx);
+	}
+
+	bool IsCrossing(float a1x, float a1y, float a2x, float a2y, float b1x, float b1y, float b2x, float b2y)
+	{
+		float v1 = VectMult(b2x - b1x, b2y - b1y, a1x - b1x, a1y - b1y);
+		float v2 = VectMult(b2x - b1x, b2y - b1y, a2x - b1x, a2y - b1y);
+		float v3 = VectMult(a2x - a1x, a2y - a1y, b1x - a1x, b1y - a1y);
+		float v4 = VectMult(a2x - a1x, a2y - a1y, b2x - a1x, b2y - a1y);
+		return (v1 * v2) <= 0 && (v3 * v4) <= 0;
+	}
+
+	Vector2f CrossingPoint(float a1, float b1, float c1, float a2, float b2, float c2)
+	{
+		float d = a1 * b2 - b1 * a2;
+		float dx = -c1 * b2 + b1 * c2;
+		float dy = -a1 * c2 + c1 * a2;
+		return Vector2f(dx / d, dy / d);
+	}
+
+	Vector2f GetCrossVector(Vector2f aP1, Vector2f aP2, Vector2f bP1, Vector2f bP2)
+	{
+		float a1, b1, c1, a2, b2, c2;
+		a1 = aP2.y - aP1.y;
+		b1 = aP1.x - aP2.x;
+		c1 = -aP1.x * (aP2.y - aP1.y) + aP1.y * (aP2.x - aP1.x);
+		a2 = bP2.y - bP1.y;
+		b2 = bP1.x - bP2.x;
+		c2 = -bP1.x * (bP2.y - bP1.y) + bP1.y * (bP2.x - bP1.x);
+		return CrossingPoint(a1, b1, c1, a2, b2, c2);
+	}
+
+	void Control(RenderWindow& window)// С„СѓРЅРєС†РёСЏ СѓРїСЂР°РІР»РµРЅРёСЏ СЃ РєР»Р°РІРёР°С‚СѓСЂС‹
+	{
+		float speed = 1.5;
+		if (Keyboard::isKeyPressed(Keyboard::W))// РРґС‚Рё РІРїРµСЂРµРґ 
+		{
+			point.x += sin(dir) * speed;
+			point.y += cos(dir) * speed;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::S))// РРґС‚Рё РЅР°Р·Р°Рґ 
+		{
+			point.x -= sin(dir) * speed;
+			point.y -= cos(dir) * speed;
+
+		}
+		if (Keyboard::isKeyPressed(Keyboard::A))// РїРѕРІРѕСЂРѕС‚ РїСЂРѕС‚РёРІ С‡Р°СЃРѕРІРѕР№ 
+		{
+			point.x -= sin(dir - 1.57) * speed;
+			point.y -= cos(dir - 1.57) * speed;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::D))// РїРѕРІРѕСЂРѕС‚ РїРѕ С‡Р°СЃРѕРІРѕР№
+		{
+			point.x -= sin(dir + 1.57) * speed;
+			point.y -= cos(dir + 1.57) * speed;
+		}
+	}
+	//void ControlMouse()
+	//{
+	//	static int flagBeginProg = false;
+	//	if (flagBeginProg == false)
+	//	{
+	//		flagBeginProg = true;
+	//		window.setMouseCursorVisible(false);
+	//	}
+	//	if (Keyboard::isKeyPressed(Keyboard::M))// РїРѕРІРѕСЂРѕС‚ РїРѕ С‡Р°СЃРѕРІРѕР№
+	//	{
+	//		mouseCapture = !mouseCapture;
+	//		//window.setMouseCursorVisible() // СЃРїСЂСЏС‚Р°С‚СЊ РєСѓСЂСЃРѕСЂ
+	//		window.setMouseCursorVisible(!mouseCapture);
+
+
+	//		while (Keyboard::isKeyPressed(Keyboard::M))
+	//		{
+
+	//		}
+	//	}
+
+	//	if (mouseCapture == true)
+	//	{
+	//		static Vector2i oldMouse = Mouse::getPosition(window);
+	//		Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+	//		Vector2i winPos = window.getPosition();
+	//		if (oldMouse.x > mousePos.x)
+	//		{
+	//			dir += (oldMouse.x - mousePos.x) / (float)500;
+	//		}
+	//		else if (oldMouse.x < mousePos.x)
+	//		{
+	//			dir -= (mousePos.x - oldMouse.x) / (float)500;
+	//		}
+	//		Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// СѓСЃС‚Р°РЅРЅРѕРІРєР° РєСѓСЂСЃРѕСЂР° РІ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёРµ РєРѕРѕСЂРґРёРЅР°С‚С‹  
+	//		oldMouse = Mouse::getPosition(window);
+	//	}
+	//}
+	void Services(RenderWindow& window)// С„СѓРЅРєС†РёСЏ РєРѕС‚РѕСЂР°СЏ РІС‹РїРѕР»РЅСЏРµС‚СЃ СЏ РєР°Р¶Рґ С‚Р°РєС‚ РѕСЃРЅРѕРІРЅРѕРіРѕ С†РёРєР»Р° РёРіСЂС‹
+	{
+		//Control(window);
+		dir=ControlMouse();
+		point.x = panzer.Get_X() + panzer.Get_Size() / 2;
+		point.y = panzer.Get_Y() + panzer.Get_Size() / 2;
+		bool reyBotCenter = false;
+		float st = -FieldOfView / 2;// СЂР°СЃС‡РёС‚С‹РІР°РµРј РЅР°С‡Р°Р»СЊРЅС‹Р№ СѓРіРѕР» РѕР±Р·РѕСЂР° РґР»СЏ РїРµСЂРІРѕР№ Р»РёРЅРёРё
+		for (int i = 0; i < amountLines; i++)
+		{
+			// СЂР°СЃС‡РёС‚Р°РІР°РµРј С‚РѕС‡РєСѓ РїРµСЂРµСЃРµС‡РµРЅРёСЏ РІ СЃР°РјРѕР№ РґР°Р»РµРєРѕР№ РєРѕС‚РѕСЂР°СЏ РјРѕР¶РµС‚ Р±С‹С‚СЊ
+			data[i].type = EMPTY;
+			data[i].acrossPoint = Vector2f(
+				(float)(MaxDistance * sin(dir + st) + point.x),
+				(float)(MaxDistance * cos(dir + st) + point.y));
+
+			for (int j = 0; j < amountWalls * 4; j++)
+			{
+
+				if (data[i].type == EMPTY)
+				{
+					// РїСЂРѕРІРµСЂСЏРµРј РµСЃС‚СЊ РїРµСЂРµСЃРµС‡РµРЅРёРµ СЃРѕ СЃС‚РµРЅРѕР№
+					if (IsCrossing(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y,
+						dataLine[j].begin.x, dataLine[j].begin.y, dataLine[j].end.x, dataLine[j].end.y))
+					{
+						// РїСЂРёСЃРІРѕРµРІР°РµРІР°РµРј С‚РѕС‡РєСѓ РїРµСЂРµСЃРµС‡РµРЅСЏРёСЏ
+						data[i].acrossPoint = GetCrossVector(point, data[i].acrossPoint, dataLine[j].begin, dataLine[j].end);
+
+
+						//РµСЃР»Рё С‚РѕС‡РєР° РїРµСЂРµСЃРµСЏРµРЅРёСЏ СЂСЏРґРѕРј СЃ РєСЂР°РµРј Р»РёРЅРёРё СЃС‚РµРЅС‹
+						if (distance(data[i].acrossPoint.x, data[i].acrossPoint.y, dataLine[j].begin.x, dataLine[j].begin.y) < 0.5 ||
+							distance(data[i].acrossPoint.x, data[i].acrossPoint.y, dataLine[j].end.x, dataLine[j].end.y) < 0.5)
+							data[i].color = Color::White;
+						else
+							data[i].color = Color::Green;
+
+					}
+					//data[i].type = WALL;
+					// СЂР°СЃС‡РёС‚С‹РІР°РµРј РґРёСЃС‚Р°РЅС†РёСЋ РѕС‚ РёРіСЂРѕРєР° РґРѕ С‚РѕС‡РєРё РїРµСЂРµСЃРµС‡РµРЅРёСЏ СЃРѕ СЃС‚РµРЅРѕР№
+					data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
+					// СѓРјРЅРѕР¶Р°РµРј РЅР° РєРѕСЃРёРЅСѓСЃ РµСЃР»Рё С‚РѕС‡РєР° РїРµСЂРµСЃРµС‡РµРЅРёСЏ РЅРµ Р±РѕР»СЊС€Рµ РјР°РєСЃРёРјР°Р»СЊРЅРѕР№
+					if (data[i].dist < MaxDistance - 0.1)
+					{
+						data[i].dist *= cos(st);
+					}
+				}
+
+			}
+			for (int j = 0; j < 4; j++)
+			{
+				if (IsCrossing(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y,
+					dataLinePanzerRed[j].begin.x, dataLinePanzerRed[j].begin.y, dataLinePanzerRed[j].end.x, dataLinePanzerRed[j].end.y))
+				{
+					Data oneData;
+					oneData.acrossPoint = GetCrossVector(point, data[i].acrossPoint, dataLinePanzerRed[j].begin, dataLinePanzerRed[j].end);
+					data[i].acrossPoint = oneData.acrossPoint;
+					data[i].type = BOTRED;
+				}
+				data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
+				// СѓРјРЅРѕР¶Р°РµРј РЅР° РєРѕСЃРёРЅСѓСЃ РµСЃР»Рё С‚РѕС‡РєР° РїРµСЂРµСЃРµС‡РµРЅРёСЏ РЅРµ Р±РѕР»СЊС€Рµ РјР°РєСЃРёРјР°Р»СЊРЅРѕР№
+				if (data[i].dist < MaxDistance - 0.1)
+				{
+					data[i].dist *= cos(st);
+				}
+
+			}
+
+			st += StepOfField;// С‚РµРєСѓС€РµРјСѓ РїСЂРёР±Р°РІР»СЏРµРј С€Р°Рі
+		}
+
+
+
+	}
+	void Draw(RenderWindow& window)// С„СѓРЅРєС†РёСЏ РѕС‚СЂРёСЃРѕРІРєРё
+	{
+		// СЂРёСЃСѓРµРј РІРµСЂС…РЅРёР№ С„РѕРЅ
+		RectangleShape rectangle(Vector2f(screenWidth, screenHeigth / 2));
+		CircleShape shape;
+		rectangle.setFillColor(Color(128, 128, 255));
+		RectangleShape rectEdge(Vector2f(3, 3));
+		rectEdge.setFillColor(Color(255, 128, 0));
+		rectangle.setPosition(1, 1);
+		window.draw(rectangle);
+		// СЂРёСЃСѓРµРј РЅРёР¶РЅРёР№ С„РѕРЅ
+		rectangle.setFillColor(Color(255, 128, 128));
+		rectangle.setPosition(1, screenHeigth / 2 + 1-40);
+		window.draw(rectangle);
+		RectangleShape recWall3D;
+		for (int i = 0; i < amountLines; i++)
+		{
+			float dist = data[i].dist;// *cos((pi));
+			if (dist < MaxDistance - 0.1)
+			{
+
+				float lineHeight = dist * 0.5;
+				if (data[i].color == Color::Green)// СЂРёСЃСѓРµРј СЃРµСЂС‹Рµ Р»РёРЅРёРё РµСЃР»Рё СЌС‚Рѕ РЅРµ РєСЂР°Р№ РѕС‚СЂРµР·РєР° СЃС‚РµРЅС‹
+				{
+					recWall3D.setFillColor(Color(200 - lineHeight / 2, 200 - lineHeight / 2, 200 - lineHeight / 2));
+					recWall3D.setSize( Vector2f(10, 1000 / lineHeight*2));
+					recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+												screenHeigth / 2 - 40 - 1000 / lineHeight);
+
+					/*DrawLine((int)(screenWidth / (float)amountLines * (amountLines - i)), screenHeigth / 2-40 - 1000 / lineHeight,
+						(int)(screenWidth / (float)amountLines * (amountLines - i)), screenHeigth / 2-40 + 1000 / lineHeight,
+						Color(200 - lineHeight / 2, 200 - lineHeight / 2, 200 - lineHeight / 2), window);*/
+					window.draw(recWall3D);
+				}
+				else
+				{	// СЂРёСЃСѓРµРј Р±РµР»С‹Р№ Р»РёРЅРёРё РµСЃР»Рё СЌС‚Рѕ РєСЂР°Р№ СЃС‚РµРЅС‹
+					recWall3D.setFillColor(Color(100,255 - lineHeight / 2,100));
+					recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
+					recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+						screenHeigth / 2 - 40 - 1000 / lineHeight);
+					window.draw(recWall3D);
+					/*DrawLine((int)(screenWidth / (float)amountLines * (amountLines - i)), screenHeigth / 2-40 - 1000 / lineHeight,
+						(int)(screenWidth / (float)amountLines * (amountLines - i)), screenHeigth / 2-40 + 1000 / lineHeight,
+						Color::White, window);*/
+				}
+
+			}
+			if (data[i].type == BOTRED)
+			{
+				float lineHeight = dist * 0.5;
+				recWall3D.setFillColor(Color::Red);
+				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
+				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+					screenHeigth / 2 - 40 - 1000 / lineHeight);
+				window.draw(recWall3D);
+			}
+			if (i <= amountLines / 2 + 15 && i >= amountLines / 2 - 15)
+			{
+				// СЂРёСЃСѓРµРј Р»РёРЅРёРё РЅР° РєР°СЂС‚Рµ РЅР°РІРїСЂР°РІР»СЏРЅРёСЏ РєСѓРґР° СЃРјРѕС‚СЂРёС‚ РёРіСЂРѕРє
+				DrawLine(point.x / 4, point.y / 4, data[i].acrossPoint.x / 4, data[i].acrossPoint.y / 4, Color::Red, window);
+			}
+			else if (data[i].type == BOTRED)
+			{
+				DrawLine(point.x / 4, point.y / 4, data[i].acrossPoint.x / 4, data[i].acrossPoint.y / 4, Color::Blue, window);
+			}
+			else
+			{
+				// СЂРёСЃСѓРµРј Р¶РµР»С‚С‹Рµ Р»РёРЅРёРё С‡С‚Рѕ РІРёРґРёС‚ РёРіСЂРѕРє
+				DrawLine(point.x / 4, point.y / 4, data[i].acrossPoint.x / 4, data[i].acrossPoint.y / 4, Color::Yellow, window);
+			}
+
+		}
+		RectangleShape recWall(Vector2f(walls.size/4, walls.size/4));
+		rectangle.setFillColor(Color(128, 128, 128));
+		for (int i = 0; i < amountWalls; i++)
+		{
+			recWall.setPosition(walls.wall[i].x/4, walls.wall[i].y/4);
+			window.draw(recWall);
+		}
+		for (int i = 0; i < amountWalls*4; i++)
+		{
+			DrawLine(dataLine[i].begin.x / 4, dataLine[i].begin.y / 4,
+				dataLine[i].end.x / 4, dataLine[i].end.y / 4, Color::Blue, window);
+		}
+		// СЂРёСЃСѓРµРј Р»РёРЅРЅРё Р±РѕРєРѕРІС‹С… РґРІРёР¶РµРЅРёР№
+		Vector2f line1 = point, line2 = point;
+		float realDir = dir;
+		realDir = realDir * 180 / pi;
+
+		line1.y = 120 * cos(pi * (realDir + 90) / (float)180) + point.y;
+		line1.x = 120 * sin(pi * (realDir + 90) / (float)180) + point.x;
+
+		line2.y = 120 * cos(pi * (realDir - 90) / (float)180) + point.y;
+		line2.x = 120 * sin(pi * (realDir - 90) / (float)180) + point.x;
+		DrawLine(point.x / 4, point.y / 4, line1.x / 4, line1.y / 4, Color::Green, window);
+		DrawLine(point.x / 4, point.y / 4, line2.x / 4, line2.y / 4, Color::Green, window);
+	}
+	void DrawLinePanzerREd(RenderWindow& window)
+	{
+		DrawLine(dataLinePanzerRed[0].begin.x / 4, dataLinePanzerRed[0].begin.y / 4,
+				dataLinePanzerRed[0].end.x / 4, dataLinePanzerRed[0].end.y / 4, Color::Red, window);
+
+		DrawLine(dataLinePanzerRed[1].begin.x / 4, dataLinePanzerRed[1].begin.y / 4,
+			dataLinePanzerRed[1].end.x / 4, dataLinePanzerRed[1].end.y / 4, Color::Red, window);
+
+		DrawLine(dataLinePanzerRed[2].begin.x / 4, dataLinePanzerRed[2].begin.y / 4,
+			dataLinePanzerRed[2].end.x / 4, dataLinePanzerRed[2].end.y / 4, Color::Red, window);
+
+		DrawLine(dataLinePanzerRed[3].begin.x / 4, dataLinePanzerRed[3].begin.y / 4,
+			dataLinePanzerRed[3].end.x / 4, dataLinePanzerRed[3].end.y / 4, Color::Red, window);
+	
+	}
+}
+;
+
+	
+int main()// РіР»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ 
+{
+	
+	double time1=0,time2=0; // РїРµСЂРµРјРµРЅС‹Рµ РґР»СЏ С‚Р°Р№РјРµСЂР°
+	bool pause=false;
+	int countShotFocus=0; // СЃС‡РµС‚С‡РёРє Р·Р°РґРµСЂР¶РєРё РІС‹СЃС‚СЂРµР»Р° РїРѕСЃР»Рµ РїРѕРµРІР»РµРЅРёРµ РѕРєРЅРѕ РёРіСЂС‹ РІ С„РѕРєСѓСЃРµ
     srand(time(0));
+	int selectMenu=0;
 	Clock clock;
-	Font font;//шрифт 
-	font.loadFromFile("times-new-roman.ttf");//передаем нашему шрифту файл шрифта
-	Text text("", font, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
-			
+	Font font;//С€СЂРёС„С‚ 
+	font.loadFromFile("times-new-roman.ttf");//РїРµСЂРµРґР°РµРј РЅР°С€РµРјСѓ С€СЂРёС„С‚Сѓ С„Р°Р№Р» С€СЂРёС„С‚Р°
+	Text text("", font, 20);//СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚ С‚РµРєСЃС‚. Р·Р°РєРёРґС‹РІР°РµРј РІ РѕР±СЉРµРєС‚ С‚РµРєСЃС‚ СЃС‚pРѕРєСѓ, С€СЂРёС„С‚, СЂР°Р·РјРµСЂ С€СЂРёС„С‚Р°(РІ РїРёРєСЃРµР»СЏС…);//СЃР°Рј РѕР±СЉРµРєС‚ С‚РµРєСЃС‚ (РЅРµ СЃС‚СЂРѕРєР°)
+
+	font.loadFromFile("times-new-roman.ttf");//РїРµСЂРµРґР°РµРј РЅР°С€РµРјСѓ С€СЂРёС„С‚Сѓ С„Р°Р№Р» С€СЂРёС„С‚Р°
+	Text text1("", font, 40);//СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚ С‚РµРєСЃС‚. Р·Р°РєРёРґС‹РІР°РµРј РІ РѕР±СЉРµРєС‚ С‚РµРєСЃС‚ СЃС‚СЂРѕРєСѓ, С€СЂРёС„С‚, СЂР°Р·РјРµСЂ С€СЂРёС„С‚Р°(РІ РїРёРєСЃРµР»СЏС…);//СЃР°Рј РѕР±СЉРµРєС‚ С‚РµРєСЃС‚ (РЅРµ СЃС‚СЂРѕРєР°)
+	Camera camera;
+	
+	camera.LinePanzerGreen();
+	camera.LinePanzerRed();
+
 	while (window.isOpen())
 	{
 		clock.restart();
-		time1=clock.getElapsedTime().asMicroseconds();// присвоим время в начале цикла
+		time1=clock.getElapsedTime().asMicroseconds();// РїСЂРёСЃРІРѕРёРј РІСЂРµРјСЏ РІ РЅР°С‡Р°Р»Рµ С†РёРєР»Р°
 		Event event;
 		while (window.pollEvent(event))
 		{
 			if (event.type == Event::Closed)
 				window.close();
+			if (event.type==Event::LostFocus) 
+			{
+				pause=true;
+			
+			}
+			if (event.type==Event::GainedFocus) 
+			{
+				pause=false;	
+				NoShotFocus=true;
+			}
 		}
-		panzer.Upravlenie(event);
-		panzerBot.Upravlenie();
-		panzer.Server();
-		panzerBot.Server();
-		babahs.Server();
-		PoletPylus();
-		/*
-		if (Keyboard::isKeyPressed(Keyboard::R)) 
-	    {
-			bonuses.NewBonus(rand()%800,rand()%541,1);
-		  Sleep (10);
-	    }
-		if (Keyboard::isKeyPressed(Keyboard::Z)) 
-	    {
-			bonuses.NewBonus(rand()%800,rand()%541,1);
-		  Sleep (10);
-	    }
-		*/
-		if (Keyboard::isKeyPressed(Keyboard::M)) 
-	    {
-			Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
-			marshrut.LoadMapPoisk(panzerBot.Get_X()+15,panzerBot.Get_Y()+15,
-				mousePos.x,mousePos.y );
-			marshrut.VolnaPuti(25);
-			marshrut.LoadMarshrut();
-			panzerBot.RegPointAim(1,1);
-		  Sleep (10);
-	    }
-		NewBonusPyle();
-		BodborBonus();                                        //  Get_ChetAttack()
-		gameInterface.LoadData(panzer.Get_HP(),panzer.Get_Brony(),
-			       panzer.Get_Pylu(),panzer.Get_ChetAttack(),panzer.Get_TimeAttack());
-		NewCoordinateKill();
-		window.clear();
-		panzer.Draw();
-		panzerBot.Draw();
-		for (int i=0;i<kolvoPylu;i++)	pylu[i].Draw();
-		stens.DrawStens();
+		if (startGame==false)
+		{
+			
+			if (StartConnected==true && networkGame==false)// РµСЃР»Рё Р±С‹Р»Рѕ РІС‹Р±СЂР°РЅРЅРѕ РІ РјРµРЅСЋ РјРЅРѕРіРѕРїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєР°СЏ РёРіСЂР°
+			{
+				system ("cls");//РѕС‡РёСЃС‚РєР° РєРѕРЅСЃРѕР»Рё
+				std::cout<<"s - server; c - client"<<"\n";
+				std::cin>>mode;
+				if (mode=='s')server.Listen();
+				if (mode=='c')	
+				{
+						std::cout << "new ip:";
+						std::cin >> ip;
+						std::cout << "new port:";
+						std::cin >> port;
+						client.Connect();
+				}
+				// networkGame==true РІС‹РїРѕР»РЅСЏРµС‚СЊСЃСЏ РІ С‚РѕС‚ РјРѕРјРµРЅС‚ РєРѕРіРґР° СѓСЃС‚Р°РЅРѕРІР»РёРІР°С‚СЊ\РµС‚СЊСЃСЏ СЃРѕРµРґРёРЅРµРЅРёРµ
+				if (networkGame==true) // РµСЃР»Рё СЃРѕРµРґРёРЅРµРЅРёРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅРѕ
+				{
 
-		bonuses.Draw();
-		babahs.Draw();
-		gameInterface.Draw();
-		gameInterface.statistika.Draw(text);
-		marshrut.DrawPoisk(text);
+					if (mode=='s') 
+					{
+						srand(10);
+						walls.Placement(); // СЂР°СЃС‚РѕРЅРѕРІРєР° СЃС‚РµРЅ 
+					}
+				//	for (int i=0;i<kolvoStens;i++)
+					int k=0;
+					Data data;
+						////////////////////// РїРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С… Рѕ СЃС‚РµРЅР°С… РєР»РёРµРЅС‚Сѓ		
+						if (mode=='s')// РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ РЅР° СЃРµСЂРІРµСЂРµ
+						{
+							while(k<amountWalls)
+							{
+								if (k==0) 	walls.WallsSend(k);
+								data=server.Receive();
+								if (data.key==8)
+								{
+									if(data.tip-1==k) k=data.tip;// РµСЃР»Рё РїСЂРёРЅСЏС‚Р° РѕР±СЂР°С‚РЅР°СЏ СЃРІСЏР·СЊ Рё РѕРЅР° СЃРѕРІРїР°РґР°РµС‚ СЃ СѓСЃР»РѕРІРёРµРј
+									walls.WallsSend(k);// РїРµСЂРµРґР°РµРј СЃС‚РµРЅСѓ СЃ РЅРѕРјРµСЂРѕРІ Рє
+								}
+							}
+						}
+						if (mode=='c') // РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ РЅР° РєР»РёРµРЅС‚Рµ
+						{
+							while(k<amountWalls)
+							{
+								int flag=walls.WallsReceive();// РІРѕР·СЂР°С€Р°РµС‚ РЅРѕРјРµСЂ РїСЂРёРЅСЏС‚РѕР№ СЃС‚РµРЅС‹ Рё Р·Р°РіСЂСѓР¶Р°РµС‚ СЃС‚РµРЅСѓ
+								if (flag==k)
+					 			{
+					 				k++;
+									client.Send(8,0,0,k,0);// РїРµСЂРµРґР°РµРј РѕР±СЂР°С‚РЅСѓСЋ СЃРІСЏР·СЊ СЃРµСЂРІРµСЂСѓ СЃ РЅРѕРјРµСЂРѕРј СЃР»РµРґСѓРµС€РёРµ СЃС‚РµРЅС‹
+							    }
+							}
+						}
+					
+					startGame=true;
+				}
+			}
+			selectMenu=mainmenu.Service(event);// РіР»Р°РІРЅРЅРѕРµ РјРµРЅСЋ 
+			if (selectMenu==1) 
+			{
+				srand(10);
+				walls.Placement();
+				camera.BlockToLines();
+				srand(time(0));
+				startGame=true; // РµСЃР»Рё РІС‹Р±СЂР°РЅ 1 РїСѓРЅРєС‚ РіР»Р°РІРЅРѕРіРѕ РјРµРЅСЋ 
+			}
+			if (selectMenu==2)// РµСЃР»Рё РІС‹Р±СЂР°РЅ 2 РїСѓРЅРєС‚ РіР»Р°РІРЅРѕРіРѕ РјРµРЅСЋ
+			{
+				//network=true;
+				StartConnected=true;
+			}
+		}
+		if (startGame==true && networkGame==true)// РµСЃР»Рё РёРіСЂР° СЃРµС‚РµРІР°СЏ РёРіСЂР° СЃС‚Р°СЂС‚РѕРІР°Р»Р° 
+		{
+			if (networkGame==true)
+			{
+				if (mode=='s') 
+				{
+					//client.receive();
+					ServerRace();
+					panzerBot.PanzerBotRace();
+				}
+				if (mode=='c')
+				{
+					ClientRace();
+					panzer.PanzerRace();
+					ClientBonusRace();
+				}
+				burstes.Service();
+				FlyBullets();
+				NewCoordinateKill();
+				GrabBonus(); 
+				NewBonusGame();
+			}
+		}
+		if (pause==false  && startGame==true)// РµСЃР»Рё РѕРєРЅРѕ РёРіСЂС‹ РІ С„РѕРєСѓСЃРµ Рё Рё РёРіСЂР° СЃС‚Р°СЂС‚РѕРІР°Р»Р°
+		{
+			//panzer.Upravlenie(event);
+			if (networkGame==true)
+			{
+				if (mode=='s')
+				{
+					panzer.Control(event);
+					gameInterface.LoadData(panzer.Get_HP(),panzer.Get_Brony(),
+							panzer.Get_Pylu(),panzer.Get_ChetAttack(),panzer.Get_TimeAttack());
+					gameInterface.LoadDataBonus(panzer.speedTurn);
+				}
+				if (mode=='c')
+				{
+					panzerBot.Upravlenie(event);
+					gameInterface.LoadData(panzerBot.Get_HP(),panzerBot.Get_Brony(),
+							panzerBot.Get_Pylu(),panzerBot.Get_ChetAttack(),panzerBot.Get_TimeAttack());
+					gameInterface.LoadDataBonus(panzerBot.speedTurn);
+				}
+			}
+			else 
+			{
+				camera.LinePanzerGreen();
+				camera.LinePanzerRed();
+				camera.Services(window);
+				//panzerBot.AutoUpravlenie();
+				//if (isView3D == true)
+				{
+					//Control3D event)
+					panzer.Control3D(event);
+				}
+				/*else
+				{
+					panzer.Control(event);
+				}*/
+				gameInterface.LoadData(panzer.Get_HP(),panzer.Get_Brony(),
+					panzer.Get_Pylu(),panzer.Get_ChetAttack(),panzer.Get_TimeAttack());
+				gameInterface.LoadDataBonus(panzer.speedTurn);
+			}
+			panzerBot.MovingToKeyboard();
+			panzer.Servis();
+			panzerBot.Servis();
+			burstes.Service();
+			FlyBullets();
+		
+			/*
+			if (Keyboard::isKeyPressed(Keyboard::R)) 
+			{
+				bonuses.NewBonus(rand()%800,rand()%541,1);
+			  Sleep (10);
+			}
+			if (Keyboard::isKeyPressed(Keyboard::Z)) 
+			{
+				bonuses.NewBonus(rand()%800,rand()%541,1);
+			  Sleep (10);
+			}
+			*/
+			if (Keyboard::isKeyPressed(Keyboard::M)) 
+			{
+				Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+				panzerBot.RegPointAim(mousePos.x+20,mousePos.y+20);
+			  Sleep (10);
+			}
+			NewBonusGame();
+			GrabBonus();                                        //  Get_ChetAttack()
+			
+		
+			NewCoordinateKill();
+		
+			if ( ClickMouseLeft(event)==false )NoShotFocus=false;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::V))// РїРѕРІРѕСЂРѕС‚ РїРѕ С‡Р°СЃРѕРІРѕР№
+		{
+			isView3D = !isView3D;
+			while (Keyboard::isKeyPressed(Keyboard::V));
+		}
+		window.clear();
+		if (startGame==true)
+		{
+			if (isView3D == false)
+			{
+				panzer.Draw();
+				panzerBot.Draw();
+				for (int i = 0; i < amountBullet; i++)	bullets[i].Draw();
+				walls.DrawWalls();
+
+				bonuses.Draw();
+				burstes.Draw();
+			}
+			else
+			{
+				camera.Draw(window);
+				camera.DrawLinePanzerREd(window);
+			}
+			gameInterface.Draw();
+			gameInterface.statistics.Draw(text);
+			time2=clock.getElapsedTime().asMicroseconds();
+			fps.Server(time1,time2);
+			fps.Draw(text);
+	//		if (marshrut.being==true)marshrut.DrawPoisk(text);
+		}
+		else 
+		{
+			mainmenu.Draw(text1);
+		}
 		window.display();
 		
 		do 
 		{
-			time2=clock.getElapsedTime().asMicroseconds();// присвоив время в конце цикла
+			time2=clock.getElapsedTime().asMicroseconds();// РїСЂРёСЃРІРѕРёРІ РІСЂРµРјСЏ РІ РєРѕРЅС†Рµ С†РёРєР»Р°
 			//Sleep (1);
 		}
-		while (time2-time1<15000);// пока разница во времени между началом и концом цикла 
-		//меньше определенного цисла то считываем время заного 
+		while (time2-time1<15000);// РїРѕРєР° СЂР°Р·РЅРёС†Р° РІРѕ РІСЂРµРјРµРЅРё РјРµР¶РґСѓ РЅР°С‡Р°Р»РѕРј Рё РєРѕРЅС†РѕРј С†РёРєР»Р° 
+		//РјРµРЅСЊС€Рµ РѕРїСЂРµРґРµР»РµРЅРЅРѕРіРѕ С†РёСЃР»Р° С‚Рѕ СЃС‡РёС‚С‹РІР°РµРј РІСЂРµРјСЏ Р·Р°РЅРѕРіРѕ 
 	}
  
 	return 0;
