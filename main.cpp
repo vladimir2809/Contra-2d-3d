@@ -10,46 +10,49 @@ using namespace  sf;
 using namespace  std;
 int screenWidth = 800, screenHeigth = 600;
 const double  pi = 3.1415926;
-const int amountBullet = 200;// РєРѕР»РёС‡РµСЃС‚РІРѕ РїСѓР»СЊ
-int const amountWalls = 35;// РєРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚РµРЅ
-int const amountBonus = 20;// РєРѕР»РёС‡РµСЃС‚РІРѕ Р±РѕРЅСѓСЃРѕРІ
-int const amountBurst = 20;// РєРѕР»РёС‡РµСЃС‚РІРѕ РІР·СЂС‹РІРѕРІ
-int const timeBurst = 35;// РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РІР·СЂС‹РІР°
+const int amountBullet = 200;// количество пуль
+int const amountWalls = 35;// количество стен
+int const amountBonus = 20;// количество бонусов
+int const amountBurst = 20;// количество взрывов
+int const timeBurst = 35;// длительность взрыва
 int const map_Size_X = 20;
 int const map_Size_Y = 14;
 int const countPacked = 10;
 int scorePlayer = 0, scoreBot = 0, starsPlayer = 0, starsBot = 0;
-bool NoShotFocus = false; // Р·Р°РїСЂРµС‚ РІС‹СЃС‚СЂРµР»Р° С‚Р°РЅРєР° РєРѕРіРґР° РѕРєРЅРѕ РёРіСЂС‹ РІС…РѕРґРёС‚ РІ С„РѕРєСѓСЃ
-bool startGame = false;// СЃС‚Р°СЂС‚Р°РІР°Р»Р° Р»Рё РёРіСЂР°
-bool StartConnected = false;// РЅР°С‡Р°Р»РѕСЃСЊ Р»Рё СЃРѕРµРґРµРЅРёРµ С‚Рѕ-РµСЃС‚СЊ РІРІРѕРґ РёРї Рё РѕР¶РёРґР°РЅРёРµ
+bool NoShotFocus = false; // запрет выстрела танка когда окно игры входит в фокус
+bool startGame = false;// стартавала ли игра
+bool StartConnected = false;// началось ли соедение то-есть ввод ип и ожидание
 bool networkGame = false;
-bool mouseCapture = true;// Р·Р°С…РІР°С‚ РјС‹С€Рё РїСЂРёР»РѕР¶РµРЅРёРµРј
+bool mouseCapture = true;// захват мыши приложением
 bool isView3D = true;
 bool shakesCamera = false;
 IpAddress ip = "192.168.1.178";
 int port = 2000;
 char mode;
-
-sf::RenderWindow window(VideoMode(800, 600), "CONTRA ", Style::Close);
-void DrawLine(int x, int y, int x1, int y1, Color color)// РїСЂРѕС†РµРґСѓСЂР° СЂРёСЃРѕРІР°РЅРёСЏ Р»РёРЅРёРё
+enum typePanzer
 {
-	//СЃРѕР·РґР°РµРј РјР°СЃСЃРёРІ С‚РѕС‡РµРє, РїРѕ РєРѕС‚РѕСЂС‹Рј Р±СѓРґСѓС‚ СЂРёСЃРѕРІР°С‚СЊСЃСЏ Р»РёРЅРёРё:
-	sf::VertexArray lines(sf::Lines, 16 /*РєРѕР»РёС‡РµСЃС‚РІРѕ С‚РѕС‡РµРє*/);
+	GREEN, RED
+};
+sf::RenderWindow window(VideoMode(800, 600), "CONTRA ", Style::Close);
+void DrawLine(int x, int y, int x1, int y1, Color color)// процедура рисования линии
+{
+	//создаем массив точек, по которым будут рисоваться линии:
+	sf::VertexArray lines(sf::Lines, 16 /*количество точек*/);
 
-	//РґР°Р»РµРµ РґР»СЏ РєР°Р¶РґРѕР№ РёР· С‚РѕС‡РµРє Р·Р°РґР°РµРј СЃРІРѕСЋ РїРѕР·РёС†РёСЋ:
+	//далее для каждой из точек задаем свою позицию:
 	lines[0].position = sf::Vector2f(x, y);
 	lines[1].position = sf::Vector2f(x1, y1);
-	//Рё С‚.Рґ.
+	//и т.д.
 
-	//РґР°Р»РµРµ РґР»СЏ РєР°Р¶РґРѕР№ С‚РѕС‡РєРё СѓРєР°Р·С‹РІР°РµРј С†РІРµС‚(С‚Р°Рє РјРѕР¶РЅРѕ СЃРѕР·РґР°РІР°С‚СЊ РіСЂР°РґРёРµРЅС‚С‹):
+	//далее для каждой точки указываем цвет(так можно создавать градиенты):
 	lines[0].color = color;
 	lines[1].color = color;
-	//Рё С‚.Рґ.
+	//и т.д.
 
-	//Рё РІ РєРѕРЅС†Рµ РІС‹РІРѕРґРёРј РІСЃРµ РЅР° СЌРєСЂР°РЅ:
+	//и в конце выводим все на экран:
 	window.draw(lines);
 }
-double CalcAngle(int x, int y, int ArrivalX, int ArrivalY)// РїСЂРѕС†РµРґСѓСЂР° СЂР°СЃС‡РµС‚Р° СѓРіР»Р° РїРѕ 2Рј С‚РѕС‡РєР°Рј
+double CalcAngle(int x, int y, int ArrivalX, int ArrivalY)// процедура расчета угла по 2м точкам
 {
 	int fdx, fdy;
 	double fxy, ff;
@@ -67,11 +70,11 @@ double CalcAngle(int x, int y, int ArrivalX, int ArrivalY)// РїСЂРѕС†РµРґСѓСЂР° 
 	ff += 90;
 	return ff;
 }
-bool ClickMouseLeft(Event event)// РїСЂРѕС†РµРґСѓСЂР° РѕР±СЂР°Р±РѕС‚РєРё СЃРѕР±С‹С‚РёСЏ РЅР°Р¶Р°С‚РёРµ Р»РµРІРѕР№ РєРЅРѕРїРєРё РјС‹С‰Рё
+bool ClickMouseLeft(Event event)// процедура обработки события нажатие левой кнопки мыщи
 {
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-		//if (event.type == Event::MouseButtonPressed)//РµСЃР»Рё РЅР°Р¶Р°С‚Р° РєР»Р°РІРёС€Р° РјС‹С€Рё
-		//			if (event.key.code == Mouse::Left)//Р° РёРјРµРЅРЅРѕ Р»РµРІР°СЏ
+		//if (event.type == Event::MouseButtonPressed)//если нажата клавиша мыши
+		//			if (event.key.code == Mouse::Left)//а именно левая
 	{
 		//std::cout<<"ckick mouse"<<"\n";
 		return true;
@@ -79,7 +82,7 @@ bool ClickMouseLeft(Event event)// РїСЂРѕС†РµРґСѓСЂР° РѕР±СЂР°Р±РѕС‚РєРё СЃРѕР±С
 	}
 	return false;
 }
-double MovingToAngle(double angle, double angle1, bool speedTurn = false)// С„СѓРЅРєС†РёСЏ РїР»Р°РІРЅРѕРіРѕ РёР·РјРµРЅРµРёСЏ СѓРіР»Р° (РЅСѓР¶РЅР° РґР»СЏ С‚РѕРіРѕ С‡С‚Рѕ Р±С‹ РїСЂРёС†РµР» Р±С‹Р» РїР»Р°РІРЅС‹Рј) 
+double MovingToAngle(double angle, double angle1, bool speedTurn = false)// функция плавного изменеия угла (нужна для того что бы прицел был плавным) 
 {
 	int vector = 0;
 	//if (vector==0)
@@ -120,10 +123,10 @@ float ControlMouse()
 		flagBeginProg = true;
 		window.setMouseCursorVisible(false);
 	}
-	if (Keyboard::isKeyPressed(Keyboard::M))// РїРѕРІРѕСЂРѕС‚ РїРѕ С‡Р°СЃРѕРІРѕР№
+	if (Keyboard::isKeyPressed(Keyboard::M))// поворот по часовой
 	{
 		mouseCapture = !mouseCapture;
-		//window.setMouseCursorVisible() // СЃРїСЂСЏС‚Р°С‚СЊ РєСѓСЂСЃРѕСЂ
+		//window.setMouseCursorVisible() // спрятать курсор
 		window.setMouseCursorVisible(!mouseCapture);
 
 
@@ -136,7 +139,7 @@ float ControlMouse()
 	if (mouseCapture == true)
 	{
 		static Vector2i oldMouse = Mouse::getPosition(window);
-		Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
 		Vector2i winPos = window.getPosition();
 		if (oldMouse.x > mousePos.x)
 		{
@@ -149,7 +152,7 @@ float ControlMouse()
 			if (dir < 0) dir += 2 * pi;
 		}
 
-		Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// СѓСЃС‚Р°РЅРЅРѕРІРєР° РєСѓСЂСЃРѕСЂР° РІ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёРµ РєРѕРѕСЂРґРёРЅР°С‚С‹  
+		Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// устанновка курсора в пользовательские координаты  
 		oldMouse = Mouse::getPosition(window);
 		return dir;
 	}
@@ -159,8 +162,8 @@ struct Data
 	sf::Uint16 key, tip;
 	double x, y, angle;
 };
-Data dataServerRace[countPacked],// РґС„РЅРЅС‹Рµ РїСЂРёРµРјР° СЃРµСЂРІРµСЂР°
-dataClientRace[countPacked];// РґР°РЅРЅС‹Рµ РїСЂРёРµРјР° РєР»РёРµРЅС‚Р°
+Data dataServerRace[countPacked],// дфнные приема сервера
+dataClientRace[countPacked];// данные приема клиента
 class Server
 {
 
@@ -302,14 +305,14 @@ public:
 };
 
 Client client;
-void ServerRace()// РїСЂРёРµРј РґР°РЅРЅС‹С… СЃ РєР»РёРµРЅС‚Р° СЃРµСЂРІРµСЂРѕРј
+void ServerRace()// прием данных с клиента сервером
 {
 	for (int i = 0; i < countPacked; i++)
 	{
 		dataServerRace[i] = server.Receive();
 	}
 }
-void ClientRace()// РїСЂРёРµРј РґР°РЅРЅС‹С… СЃ СЃРµСЂРІРµСЂР° РєР»РёРµРЅС‚РѕРј
+void ClientRace()// прием данных с сервера клиентом
 {
 	for (int i = 0; i < countPacked; i++)
 	{
@@ -318,11 +321,11 @@ void ClientRace()// РїСЂРёРµРј РґР°РЅРЅС‹С… СЃ СЃРµСЂРІРµСЂР° РєР»РёРµРЅС‚РѕРј
 }
 class MainMenu
 {
-	int focus;// РЅРѕРјРµСЂ РїСѓРЅРєС‚Р° РјРµРЅСЋ РЅР° РєРѕС‚РѕСЂС‹Р№ РЅР°РІРµРґРµРЅ СѓРєР°Р·Р°С‚РµР»СЊ РјС‹С€Рё 
+	int focus;// номер пункта меню на который наведен указатель мыши 
 	bool network;
-	int startX, startY;//РєРѕРѕСЂРґРёРЅР°С‚С‹ РѕС‚ РєРѕС‚РѕСЂС‹С… Р±СѓРґРµС‚ РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°С‚СЊСЃСЏ РјРµРЅСЋ
-	int stepDown;// СЂР°СЃС‚РѕСЏРЅРёРµ РјРµР¶РґСѓ РїСѓРЅРєС‚Р°РјРё РјРµРЅСЋ
-	int widthPunct;// С€РёСЂРёРЅР° РїСѓРЅРєС‚Р° РґР»СЏ РЅР°РІРµРґРµРЅРёСЏ РјС‹С€Рё
+	int startX, startY;//координаты от которых будет позиционироваться меню
+	int stepDown;// растояние между пунктами меню
+	int widthPunct;// ширина пункта для наведения мыши
 public:
 	MainMenu()
 	{
@@ -335,7 +338,7 @@ public:
 	}
 	int Service(Event event)
 	{
-		Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
 		if (network == false)
 		{
 			focus = 0;
@@ -394,7 +397,7 @@ public:
 
 	void Draw(Text text)
 	{
-		std::ostringstream FPSString;    // РѕР±СЉСЏРІРёР»Рё РїРµСЂРµРјРµРЅРЅСѓСЋ
+		std::ostringstream FPSString;    // объявили переменную
 		FPSString << FPS;
 		text.setString(FPSString.str());
 		text.setPosition(400, 577);
@@ -408,17 +411,17 @@ public:
 	}
 };
 Fps fps;
-class Walls// РєР»Р°СЃСЃ СЃС‚РµРЅ
+class Walls// класс стен
 {
 
 public:
 	int size;
-	struct Wall// РѕРґРЅР° СЃС‚РµРЅРєР°
+	struct Wall// одна стенка
 	{
 		int x, y;
 	};
 	Wall wall[amountWalls];
-	Walls()// РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃС‚РµРЅ. СЂР°СЃСЃС‚Р°РІР»СЏСЏРµС‚ СЃР»СѓС‡Р°Р№РЅРѕ СЃС‚РµРЅС‹
+	Walls()// конструктор стен. расставляяет случайно стены
 	{
 		size = 40;
 	}
@@ -434,7 +437,7 @@ public:
 		}
 
 	}
-	void DrawWalls()// РЅР°СЂРёСЃРѕРІР°С‚СЊ СЃС‚РµРЅС‹
+	void DrawWalls()// нарисовать стены
 	{
 		RectangleShape rectangle(sf::Vector2f(size, size));
 		rectangle.setFillColor(Color(128, 128, 128));
@@ -444,13 +447,13 @@ public:
 			window.draw(rectangle);
 		}
 	}
-	bool CrossWall(int x, int y, int dx = -1, int dy = -1, bool baruer = false)// РїСЂРѕС†РµРґСѓСЂР° РїСЂРѕРІРµСЂРєРё РЅР°С…РѕР¶Р¶РґРµРЅСЏ РІ СЃС‚РµРЅРµ
+	bool CrossWall(int x, int y, int dx = -1, int dy = -1, bool baruer = false)// процедура проверки нахожжденя в стене
 	{
 		for (int i = 0; i < amountWalls; i++)
 		{
 			if (dx == -1 && dy == -1)
 			{
-				//РµСЃР»Рё РЅРµ Р·Р°РґР°РЅРѕ СЃРјРµС€РµРЅРёРµ dx, dy С‚Рѕ РїСЂРѕРІРµСЂСЏРµС‚ РѕРґРЅСѓ С‚РѕС‡РєСѓ
+				//если не задано смешение dx, dy то проверяет одну точку
 				if (baruer == false)
 				{
 
@@ -459,19 +462,19 @@ public:
 				}
 				else
 				{
-					// РµСЃР»Рё Р±Р°СЂСЊРµСЂ ==РёСЃС‚РёРЅР° С‚Рѕ РїСЂРѕРІРµСЂСЏРµС‚ СЂР°Р·РґРІРёРЅСѓРІ СЂР°РјРєРё
+					// если барьер ==истина то проверяет раздвинув рамки
 					if (x >= wall[i].x - 5 && x <= wall[i].x + size + 5 && y >= wall[i].y - 5 && y <= wall[i].y + size + 5) return true;
 				}
 			}
 			else
 			{
-				//РµСЃР»Рё СЃРјРµС€РµРЅРёРµ dy, dx  Р·Р°РґР°РЅРЅРѕ С‚Рѕ РїСЂРѕРІРµСЂСЏРµС‚ РЅР° РїРµСЂРµСЃРµС‡РµРЅРёРµ 2 РїСЂРёРјРѕСѓРіРѕР»СЊРЅРёРєР°
+				//если смешение dy, dx  заданно то проверяет на пересечение 2 примоугольника
 				if (x + dx >= wall[i].x && x <= wall[i].x + size && y + dy >= wall[i].y && y <= wall[i].y + size) return true;
 			}
 		}
 		return false;
 	}
-	void WallsSend(int k)// РїРµСЂРµРґР°С‡Р° РєРѕРѕСЂРґРёРЅР°С‚ СЃС‚РµРЅ СЃ СЃРµСЂРІРµСЂР° РєР»РёРµРЅС‚Сѓ
+	void WallsSend(int k)// передача координат стен с сервера клиенту
 	{
 
 
@@ -479,7 +482,7 @@ public:
 
 
 	}
-	int WallsReceive()// РїСЂРёРµРј СЃС‚РµРЅ СЃ СЃРµСЂРІРµСЂР° Рё РїСЂРёСЃРІРѕРµРЅРёРµ СЃС‚РµРЅР°Рј РєoРѕСЂРґРёРЅР°С‚
+	int WallsReceive()// прием стен с сервера и присвоение стенам кoординат
 	{
 
 		Data data;
@@ -494,14 +497,14 @@ public:
 	}
 };
 Walls walls;
-class Route //РєР»Р°СЃСЃ РєРѕС‚РѕСЂС‹Р№ С…СЂР°РЅРёС‚ РјР°СЂС€СЂСѓС‚ РґР»СЏ РґРІРёР¶РµРЅРёСЏ СЋРЅРёС‚РѕРІ
+class Route //класс который хранит маршрут для движения юнитов
 {
-	int MapSearch[map_Size_X][map_Size_Y];// РјР°СЃСЃРёРІ РєРѕС‚РѕСЂС‹Р№ С…СЂР°РЅРёС‚ Р·РЅР°С‡РµРЅРёСЏ Р¶РґР»СЏ РїРѕРёСЃРєР° РїСѓС‚Рё, РєРѕС‚РѕСЂС‹Р№ С…СЂР°РЅРёС‚СЊ РЅРѕРјРµСЂ РєР»РµС‚РєРё РѕС‚ РЅР°С‡Р°Р»Р° РїРѕРёСЃРєР°
+	int MapSearch[map_Size_X][map_Size_Y];// массив который хранит значения ждля поиска пути, который хранить номер клетки от начала поиска
 
 public:
 	int length, lengthRoute, arrivalX, arrivalY, beginX, beginY;
-	bool being;// СЃСѓС€РµСЃС‚РІСѓРµС‚ Р»Рё РјР°СЂС€СЂСѓС‚
-	struct PointPuti // С‚РѕС‡РєР° РїСѓС‚Рё
+	bool being;// сушествует ли маршрут
+	struct PointPuti // точка пути
 	{
 		int x, y;
 		bool being;
@@ -571,16 +574,16 @@ public:
 				MapSearch[i][j] = 0;
 			}
 	}
-	void PrepareMapForSearchRoute(int x, int y, int arrX, int arrY, int panzerX = -1, int panzerY = -1)// Р·Р°РіСЂСѓР·РёС‚С‚СЊ РґР°РЅРЅС‹Рµ РІ РјР°СЃСЃРёРІ РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅРЅР№ РґР»СЏ РїРѕРёСЃРєР° РїСѓС‚Рё
+	void PrepareMapForSearchRoute(int x, int y, int arrX, int arrY, int panzerX = -1, int panzerY = -1)// загрузитть данные в массив предназначеннй для поиска пути
 	{
 
 		for (int i = 0; i < map_Size_X; i++)
 			for (int j = 0; j < map_Size_Y; j++)
 			{
-				//РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјР°СЃСЃРёРІР° РґР»СЏ РїРѕРёСЃРєР° РїСѓС‚Рё   
+				//инициализация массива для поиска пути   
 				MapSearch[i][j] = 0;
 				for (int k = 0; k < amountWalls; k++)
-					if (walls.wall[k].x == i * 40 && walls.wall[k].y == j * 40) // Р·Р°РЅРѕСЃРёРј РІ РјР°СЃСЃРёРІ СЃС‚РµРЅС‹
+					if (walls.wall[k].x == i * 40 && walls.wall[k].y == j * 40) // заносим в массив стены
 					{
 						MapSearch[i][j] = -1;
 						break;
@@ -589,16 +592,16 @@ public:
 				{
 					beginX = i;
 					beginY = j;
-					MapSearch[i][j] = -2;// Р·Р°РЅРѕСЃРёРј РІ РјР°СЃСЃРёРІ С‚РѕС‡РєСѓ РЅР°С‡Р°Р»Р° РїСѓС‚Рё 
+					MapSearch[i][j] = -2;// заносим в массив точку начала пути 
 				}
 				if (arrX > i * 40 && arrX <= i * 40 + 40 && arrY > j * 40 && arrY <= j * 40 + 40)
 				{
 					arrivalX = i;
 					arrivalY = j;
-					//  MapPoisk[i][j]=-3;// Р·Р°РЅРѕСЃРёРј С‚РѕС‡РєСѓ РєРѕРЅС†Р° РїСѓС‚Рё
+					//  MapPoisk[i][j]=-3;// заносим точку конца пути
 				}
 				if (panzerX != -1 && panzerY != -1)
-					if (panzerX + 30 > i * 40 && panzerX<i * 40 + 40 && panzerY + 30>j * 40 && panzerY < j * 40 + 40) MapSearch[i][j] = -4; // Р·Р°РЅРѕСЃРёРј С‚РѕС‡РєРё РґРІРёР¶СѓС€РёС…СЃСЏ РїСЂРµРїСЏС‚СЃРІРёР№
+					if (panzerX + 30 > i * 40 && panzerX<i * 40 + 40 && panzerY + 30>j * 40 && panzerY < j * 40 + 40) MapSearch[i][j] = -4; // заносим точки движушихся препятсвий
 
 			}
 		for (int i = 0; i < 100; i++)
@@ -608,11 +611,11 @@ public:
 		arrX = arrX;
 	}
 
-	void  WaveSpread(int LENGTH)// СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅРµРµС‚ РІРѕР»РЅСѓ РїСѓС‚Рё РѕС‚ С…,Сѓ
+	void  WaveSpread(int LENGTH)// распространеет волну пути от х,у
 	{
 		length = LENGTH;
 
-		for (int k = 0; k < length; k++) // СЃР°РјРѕ СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅРµРЅРёРµ РІРѕР»РЅС‹
+		for (int k = 0; k < length; k++) // само распространение волны
 		{
 			for (int i = 0; i < map_Size_X; i++)
 				for (int j = 0; j < map_Size_Y; j++)
@@ -648,7 +651,7 @@ public:
 	}
 	void LoadRoute(int numStep = 0)
 	{
-		// numstep РїРµСЂРµРјРµРЅРЅР°СЏ РєРѕС‚РѕСЂР°СЏ С…СЂР°РЅРёС‚ РЅРѕРјРµСЂ С€Р°РіР° РѕС‚ РєРѕС‚РѕСЂРѕРіРѕ РЅР°С‡РёРЅР°РµС‚СЃСЏ С‚РѕС‡РєР° РЅР°С‡Р°Р»Р° РїСѓС‚Рё
+		// numstep переменная которая хранит номер шага от которого начинается точка начала пути
 		int pointX, pointY;
 		lengthRoute = MapSearch[arrivalX][arrivalY];
 		pointX = arrivalX;
@@ -696,7 +699,7 @@ public:
 			}
 		}
 		pointX = pointX;
-		being = true;// РјР°СЂС€СЂСѓС‚ СЃРѕР·РґР°РЅ Рё РїСЂРёСЃРІРѕРµРј РµРіРѕ СЃСѓС€РµСЃС‚РІРѕРІР°РЅРёСЋ РёСЃС‚РёРЅР°
+		being = true;// маршрут создан и присвоем его сушествованию истина
 		if (Keyboard::isKeyPressed(Keyboard::X))
 		{
 			pointX = pointX;
@@ -719,7 +722,7 @@ bool IsCrossing(float a1x, float a1y, float a2x, float a2y, float b1x, float b1y
 	float v4 = VectMult(a2x - a1x, a2y - a1y, b2x - a1x, b2y - a1y);
 	return (v1 * v2) <= 0 && (v3 * v4) <= 0;
 }
-bool LookAcrossWall(int x, int y, int arrivalX, int arrivalY)// С„СѓРЅРєС†РёСЏ РІРёРґРёРјРѕСЃС‚Рё С‡РµСЂРµР· СЃС‚РµРЅС‹
+bool LookAcrossWall(int x, int y, int arrivalX, int arrivalY)// функция видимости через стены
 {
 	for (size_t i = 0; i < amountWalls; i++)
 		if (IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x, walls.wall[i].y, walls.wall[i].x + walls.size, walls.wall[i].y) ||
@@ -741,9 +744,9 @@ bool LookAcrossWall(int x, int y, int arrivalX, int arrivalY)// С„СѓРЅРєС†РёСЏ Р
 	//}
 }
 
-class Burstes// РєР»Р°СЃСЃ РІР·СЂС‹РІРѕРІ
+class Burstes// класс взрывов
 {
-	struct burst// РІР·СЂС‹РІ
+	struct burst// взрыв
 	{
 		int x, y, count;
 		bool being;
@@ -751,13 +754,13 @@ class Burstes// РєР»Р°СЃСЃ РІР·СЂС‹РІРѕРІ
 	};
 	burst burst[amountBurst];
 public:
-	void Draw()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РІР·СЂС‹РІ
+	void Draw()// нарисовать взрыв
 	{
 		for (int i = 0; i < amountBurst; i++)
 			if (burst[i].being == true)
 			{
 				CircleShape shape(burst[i].count);
-				if (burst[i].count % 2 == 0) //РµСЃР»Рё С‡РµС‚РЅРѕРµ С‚Рѕ СЂРёСЃРѕРІР°С‚СЊ РєСЂСЃРЅС‹Рј РёРЅР°С‡Рµ Р¶РµР»С‚С‹Рј
+				if (burst[i].count % 2 == 0) //если четное то рисовать крсным иначе желтым
 				{
 					shape.setFillColor(Color(255, 0, 0));
 
@@ -770,7 +773,7 @@ public:
 				window.draw(shape);
 			}
 	}
-	void Registration(int xx, int yy, bool smallBabah = false)// СЂРµРіРёСЃС‚СЂР°С†РёСЏ РІР·СЂС‹РІР°
+	void Registration(int xx, int yy, bool smallBabah = false)// регистрация взрыва
 	{
 		for (int i = 0; i < amountBurst; i++)
 			if (burst[i].being == false)
@@ -782,7 +785,7 @@ public:
 				break;
 			}
 	}
-	void Service()// РѕР±СЃР»СѓР¶РёРІР°РЅРёРµ РІР·СЂС‹РІРѕРІ
+	void Service()// обслуживание взрывов
 	{
 		for (int i = 0; i < amountBurst; i++)
 			if (burst[i].being == true)
@@ -801,13 +804,13 @@ public:
 	}
 };
 Burstes burstes;
-class Bonuses// РєР»Р°СЃСЃ Р±РѕРЅС‹СЃС‹
+class Bonuses// класс бонысы
 {
 public:
-	Image bonusesImage; //СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚ Image (РёР·РѕР±СЂР°Р¶РµРЅРёРµ)
-	Texture bonusesTexture;//СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚ Texture (С‚РµРєСЃС‚СѓСЂР°)
+	Image bonusesImage; //создаем объект Image (изображение)
+	Texture bonusesTexture;//создаем объект Texture (текстура)
 	Sprite bonusesSprite;
-	struct Bonus // Р±РѕРЅСѓСЃ
+	struct Bonus // бонус
 	{
 	public:
 		int x, y, type;
@@ -826,13 +829,13 @@ public:
 	Bonuses()
 	{
 
-		bonusesImage.loadFromFile("Bonus.png");//Р·Р°РіСЂСѓР¶Р°РµРј РІ РЅРµРіРѕ С„Р°Р№Р»
+		bonusesImage.loadFromFile("Bonus.png");//загружаем в него файл
 		bonusesImage.createMaskFromColor(Color(255, 255, 255));
 
-		bonusesTexture.loadFromImage(bonusesImage);//РїРµСЂРµРґР°РµРј РІ РЅРµРіРѕ РѕР±СЉРµРєС‚ Image (РёР·РѕР±СЂР°Р¶РµРЅРёСЏ)
+		bonusesTexture.loadFromImage(bonusesImage);//передаем в него объект Image (изображения)
 		bonusesSprite.setTexture(bonusesTexture);
 	}
-	void Draw()// РЅР°СЂРёСЃРѕРІР°С‚СЊ Р±РѕРЅСѓСЃС‹
+	void Draw()// нарисовать бонусы
 	{
 		for (int i = 0; i < amountBonus; i++)
 			if (bonus[i].being == true)
@@ -845,11 +848,11 @@ public:
 				window.draw(bonusesSprite);
 			}
 	}
-	void NewBonus(int x, int y, int tip, bool rezerv = false)// СЂРµРіРёСЃС‚СЂР°С†РёСЏ РЅРѕРІРѕРіРѕ Р±РѕРЅСѓСЃР°
+	void NewBonus(int x, int y, int tip, bool rezerv = false)// регистрация нового бонуса
 	{
 		int realCountBonus = (rezerv == false ? amountBonus - 15 : amountBonus);
 		int i1, i;
-		// СЂР°СЃС‡РёС‚Р°РµРј РїРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ С†РёРєР»Р° С‡С‚Рѕ Р±С‹ Р±С‹Р» СЂРµР·РµСЂРІ
+		// расчитаем переменные для цикла что бы был резерв
 		if (rezerv == false)
 		{
 			i = 0;
@@ -880,7 +883,7 @@ public:
 		}
 		*/
 	}
-	int CrossBonus(int x, int y, int dx = -1, int dy = -1)// РїСЂРѕС†РµРґСѓСЂР° РїСЂРѕРІРµСЂРєРё РЅР°С…РѕР¶РґРµРЅРёСЏ С‚РѕС‡РєРё РёР»Рё РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєР° РІ Р±РѕРЅСѓСЃРµ
+	int CrossBonus(int x, int y, int dx = -1, int dy = -1)// процедура проверки нахождения точки или прямоугольника в бонусе
 	{
 
 		for (int i = 0; i < amountBonus; i++)
@@ -899,36 +902,36 @@ public:
 			}
 		return -1;
 	}
-	void KillBonus(int n)// СѓРґР°Р»РёС‚СЊ Р±РѕРЅСѓСЃ
+	void KillBonus(int n)// удалить бонус
 	{
 		bonus[n].being = false;
 	}
 };
 Bonuses bonuses;
 
-class Bullet// РєР»Р°СЃСЃ РїСѓР»СЏ
+class Bullet// класс пуля
 {
 public:
-	double x, y,// РєРѕРѕСЂРґРёРЅР°С‚С‹
-		angle, // СѓРіРѕР»
-		dx, dy;// СЃРјРµС€РµРЅРёРµ РїСЂРё РїРѕР»РµС‚Рµ
+	double x, y,// координаты
+		angle, // угол
+		dx, dy;// смешение при полете
 	bool being;
 	Bullet()
 	{
 		being = false;
 	}
-	void Draw()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РїСѓР»СЋ
+	void Draw()// нарисовать пулю
 	{
 		if (being == true)
 		{
 			CircleShape shape(2);
-			// Р·Р°РґР°С‘Рј С„РёРіСѓСЂРµ Р·РµР»С‘РЅС‹Р№ С†РІРµС‚
+			// задаём фигуре зелёный цвет
 			shape.setFillColor(Color(250, 250, 0));
 			shape.setPosition(x, y);
 			window.draw(shape);
 		}
 	}
-	void Registration(int xx, int yy, double angle1, double dx1 = 0, double dy1 = 0)// Р·Р°СЂРµРіР°С‚СЊ РїСѓР»СЋ
+	void Registration(int xx, int yy, double angle1, double dx1 = 0, double dy1 = 0)// зарегать пулю
 	{
 		if (being == false)
 		{
@@ -940,7 +943,7 @@ public:
 			being = true;
 		}
 	}
-	void Service()// РѕР±СЃР»СѓР¶РёРІР°РЅРёРµ РїСѓР»СЊ
+	void Service()// обслуживание пуль
 	{
 		if (being == true)
 		{
@@ -958,14 +961,14 @@ public:
 
 };
 Bullet bullets[amountBullet];
-void FlyBullets()// С„СѓРЅС†РєС†РёСЏ РѕР±СЂР°Р±РѕС‚РєРё РїРѕР»РµС‚РѕРІ РїСѓР»СЊ
+void FlyBullets()// фунцкция обработки полетов пуль
 {
 	for (int i = 0; i < amountBullet; i++)
 	{
 		bullets[i].Service();
 	}
 }
-void Shot(int x, int y, double angle, double dx, double dy)// СЂРµРіРёСЃС‚СЂР°С†РёСЏ РЅРѕРІРѕР№ РїСѓР»Рё
+void Shot(int x, int y, double angle, double dx, double dy)// регистрация новой пули
 {
 	for (int i = 0; i < amountBullet; i++)
 	{
@@ -976,25 +979,25 @@ void Shot(int x, int y, double angle, double dx, double dy)// СЂРµРіРёСЃС‚СЂР°С†
 		}
 	}
 }
-class Panzer// РєР»Р°СЃСЃ С‚Р°РЅРє РёРіСЂРѕРєР°
+class Panzer// класс танк игрока
 {
 protected:
 	float x, y;
 	bool being;
-	int countKill;// СЃС‡РµС‚С‡РёРє РІСЂРµРјРµРЅРё РєРѕРіРґР° СѓРјРµСЂ С‚Р°РЅРє
+	int countKill;// счетчик времени когда умер танк
 	int pos;
 	int size;
-	int countAttack,// СЃС‡РµС‚С‡РёРє РїРµСЂРµР·Р°СЂСЏРґРєРё
-		timeAttack;// РІСЂРµРјСЏ РїРµСЂРµР·Р°СЂСЏРґРєРё
-	int ammoMagazine;// РњР°РіР°Р·РёРЅ РїР°С‚СЂРѕРЅРѕРІ
+	int countAttack,// счетчик перезарядки
+		timeAttack;// время перезарядки
+	int ammoMagazine;// Магазин патронов
 	int HP;
-	int ARMOR;// Р±СЂРѕРЅСЏ
+	int ARMOR;// броня
 	Color color;
 	double angle;
-	double turnX, turnY, turnX1, turnY1;// С‚РѕС‡РєРё СЂРёСЃРѕРІР°РЅРёСЏ РїСѓС€РєРё
+	double turnX, turnY, turnX1, turnY1;// точки рисования пушки
 
 public:
-	bool speedTurn;// Р±С‹СЃС‚СЂРѕРµ РІСЂР°С‰РµРЅРёРµ Р±Р°С€РЅРё
+	bool speedTurn;// быстрое вращение башни
 	Panzer()
 	{
 		size = 15;
@@ -1011,7 +1014,7 @@ public:
 		color = Color::Green;
 		speedTurn = false;
 	}
-	void Draw()// РЅР°СЂРёСЃРѕРІР°С‚СЊ С‚Р°РЅРє 
+	void Draw()// нарисовать танк 
 	{
 		if (being == true)
 		{
@@ -1025,14 +1028,14 @@ public:
 	void ChangePosition(int newPos)
 	{
 	}
-	void Move(double dx, double dy) // РґРІРёР¶РµРЅРёСЏ С‚Р°РЅРєР°
+	void Move(double dx, double dy) // движения танка
 	{
 		x += dx;
 		y += dy;
 
 
 	}
-	void Turn(double angle)// РїРѕРІРѕСЂРѕС‚ Р±Р°С€РЅРё РІ РѕРїСЂРµРґРµР»РµРЅРЅС‹Р№ СѓРіРѕР»
+	void Turn(double angle)// поворот башни в определенный угол
 	{
 		//int size1=size/3;
 		turnY = size * 2 * sin(pi * (angle - 90) / 180) + y + size;
@@ -1042,10 +1045,11 @@ public:
 	}
 	void Control3D(Event event)
 	{
-		float speed = 1.5;// СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ С‚Р°РЅРєР°
+		float speed = 1.5;// скорость движения танка
 		float dx = 0, dy = 0;
-		// РЅСѓР¶РЅРѕ РІСЃС‚Р°РІРёС‚СЊ РІ СѓСЃР»РѕРІРёРµ РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРѕРє СѓРїСЂР°РІР»РµРёСЏ
-		//if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// РµСЃР»Рё РЅРµ РІСЂРµР·Р°Р»СЃСЏ РІ СЃС‚РµРЅСѓ
+		static double angleOld = angle;// переменная для того что бы передовать данные об угле в том случае сли угол изменился
+		// нужно вставить в условие нажатия кнопок управлеия
+		//if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// если не врезался в стену
 		//{
 		//	Move(0, -speed);
 		//	dy. = -speed;
@@ -1054,7 +1058,7 @@ public:
 		angle = (180 * -ControlMouse() / pi); ;
 		/*if (angle < -180) angle += 360;
 		else if (angle > 180) angle -= 360;*/
-		if (Keyboard::isKeyPressed(Keyboard::W)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		if (Keyboard::isKeyPressed(Keyboard::W)) // движение вверх
 		{
 
 			dy = speed * sin(pi * (angle + 90) / 180);
@@ -1062,7 +1066,7 @@ public:
 			Move(dx, dy);
 
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::S)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		else if (Keyboard::isKeyPressed(Keyboard::S)) // движение вверх
 		{
 
 			dy = -speed * sin(pi * (angle + 90) / 180);
@@ -1070,7 +1074,7 @@ public:
 			Move(dx, dy);
 
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::D)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		else if (Keyboard::isKeyPressed(Keyboard::D)) // движение вверх
 		{
 
 			dy = speed * sin(pi * (angle + 90 + 90) / 180);
@@ -1078,7 +1082,7 @@ public:
 			Move(dx, dy);
 
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::A)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		else if (Keyboard::isKeyPressed(Keyboard::A)) // движение вверх
 		{
 
 			dy = speed * sin(pi * (angle + 90 - 90) / 180);
@@ -1086,26 +1090,26 @@ public:
 			Move(dx, dy);
 
 		}
-		
+
 		if (walls.CrossWall(x + dx, y, size * 2, size * 2))
 		{
 			dx = -dx;
 			//dy = -dy;
 			Move(dx, 0);
 		}
-		if (walls.CrossWall(x , y+dy, size * 2, size * 2))
+		if (walls.CrossWall(x, y + dy, size * 2, size * 2))
 		{
 			//dx = -dx;
 			dy = -dy;
 			Move(0, dy);
 		}
-		
-		//Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
 
-		//angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// СЂР°СЃС‡РµС‚ СѓРіР»Р° РјС‹С€Рё
+		//Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+
+		//angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// расчет угла мыши
 		//cout<<angle<<"\n";
 		if (NoShotFocus == false)
-			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// СѓСЃР»РѕРІРёРµ РІС‹СЃС‚СЂРµР»Р°
+			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// условие выстрела
 			{
 				double angleVustrel = angle + 180/*+(rand() % 7) - 4*/;
 				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
@@ -1117,28 +1121,45 @@ public:
 					server.Send(5, turnX, turnY, 0, angleVustrel);
 				}
 			}
-		// РґРІРёРіР°С‚СЊ Р±Р°С€РЅСЋ С‚СѓРґР° РєСѓРґР° СѓРєР°Р·С‹РІР°РµС‚ РјС‹С€СЊ
+		// двигать башню туда куда указывает мышь
 		//angle = MovingToAngle(angle, angleMouse, speedTurn);
 		Turn(angle + 180);
 		cout << angle << "   " << angle + 90 << '\n';
-	}
-	virtual void Control(Event event)//С„СѓРЅРєС†РёСЏ СѓРїСЂР°РІР»РµРЅРёСЏ С‚Р°РЅРєРѕРј СЃ РєР»Р°РІРёР°С‚СѓСЂС‹
-	{
-		double angleMouse, // СѓРіРѕР» РїСЂРёС†С†РµР»Р° РєСѓРґР° СЃРјРѕС‚СЂРёС‚ РјС‹С€СЊ
-			speed = 1.5,// СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ С‚Р°РЅРєР°
-			dx = 0, dy = 0;// СЃРєРѕСЂРѕСЃС‚Рё РґРІРёР¶РµРЅРёСЏ РїРѕ РІРµСЂС‚РёРєР°Р»Рё Рё РіРѕСЂРёР·РѕРЅС‚Р°Р»Рё
-		static double angleOld = angle;// РїРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С‚РѕРіРѕ С‡С‚Рѕ Р±С‹ РїРµСЂРµРґРѕРІР°С‚СЊ РґР°РЅРЅС‹Рµ РѕР± СѓРіР»Рµ РІ С‚РѕРј СЃР»СѓС‡Р°Рµ СЃР»Рё СѓРіРѕР» РёР·РјРµРЅРёР»СЃСЏ
-		int vector = 0;
-		if (Keyboard::isKeyPressed(Keyboard::W)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		if (networkGame == true)
 		{
-			if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// РµСЃР»Рё РЅРµ РІСЂРµР·Р°Р»СЃСЏ РІ СЃС‚РµРЅСѓ
+
+			if (mode == 's')
+			{
+				if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::D)
+					|| Keyboard::isKeyPressed(Keyboard::S) || Keyboard::isKeyPressed(Keyboard::W))
+				{
+					server.Send(3, x, y, 0, 0);
+				}
+				if (angle >= angleOld + 1 || angle <= angleOld - 1)
+				{
+					server.Send(4, 0, 0, 0, angle+180);
+					angleOld = angle;
+				}
+			}
+		}
+	}
+	virtual void Control(Event event)//функция управления танком с клавиатуры
+	{
+		double angleMouse, // угол приццела куда смотрит мышь
+			speed = 1.5,// скорость движения танка
+			dx = 0, dy = 0;// скорости движения по вертикали и горизонтали
+		static double angleOld = angle;// переменная для того что бы передовать данные об угле в том случае сли угол изменился
+		int vector = 0;
+		if (Keyboard::isKeyPressed(Keyboard::W)) // движение вверх
+		{
+			if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// если не врезался в стену
 			{
 				Move(0, -speed);
 				dy = -speed;
 
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::D)) // РґРІРёР¶РµРЅРёРµ РІРїСЂР°РІРѕ
+		if (Keyboard::isKeyPressed(Keyboard::D)) // движение вправо
 		{
 			if (walls.CrossWall(x + speed, y, size * 2, size * 2) == false)
 			{
@@ -1146,7 +1167,7 @@ public:
 				dx = speed;
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::S)) // РґРІРёР¶РµРЅРёРµ РІРЅРёР·
+		if (Keyboard::isKeyPressed(Keyboard::S)) // движение вниз
 		{
 			if (walls.CrossWall(x, y + speed, size * 2, size * 2) == false)
 			{
@@ -1154,7 +1175,7 @@ public:
 				dy = speed;
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::A)) // РґРІРёРµРЅРёРµ РІР»РµРІРѕ
+		if (Keyboard::isKeyPressed(Keyboard::A)) // двиение влево
 		{
 			if (walls.CrossWall(x - speed, y, size * 2, size * 2) == false)
 			{
@@ -1162,16 +1183,16 @@ public:
 				dx -= speed;
 			}
 		}
-		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// РµСЃР»Рё РІСЂРµР·Р°Р»СЃСЏ РІ РіСЂР°РЅРёС†Сѓ РёРіСЂРѕРІРѕРіРѕ РїРѕР»СЏ
+		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// если врезался в границу игрового поля
 		{
 			Move(-dx, -dy);
 		}
-		Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
 
-		angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// СЂР°СЃС‡РµС‚ СѓРіР»Р° РјС‹С€Рё
+		angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// расчет угла мыши
 																		   //cout<<angle<<"\n";
 		if (NoShotFocus == false)
-			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// СѓСЃР»РѕРІРёРµ РІС‹СЃС‚СЂРµР»Р°
+			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// условие выстрела
 			{
 				double angleVustrel = angle + (rand() % 7) - 4;
 				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
@@ -1183,7 +1204,7 @@ public:
 					server.Send(5, turnX, turnY, 0, angleVustrel);
 				}
 			}
-		// РґРІРёРіР°С‚СЊ Р±Р°С€РЅСЋ С‚СѓРґР° РєСѓРґР° СѓРєР°Р·С‹РІР°РµС‚ РјС‹С€СЊ
+		// двигать башню туда куда указывает мышь
 		angle = MovingToAngle(angle, angleMouse, speedTurn);
 		Turn(angle);
 		cout << angle << '\n';
@@ -1205,7 +1226,7 @@ public:
 			}
 		}
 	}
-	bool CrossMe(int xx, int yy, int dx1 = -1, int dy1 = -1)//РЅР°С…РѕР¶РґРµРЅРёРµ С‚РѕС‡РєРё РёР»Рё РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєР° РІ С‚Р°РЅРєРµ
+	bool CrossMe(int xx, int yy, int dx1 = -1, int dy1 = -1)//нахождение точки или прямоугольника в танке
 	{
 
 		if (dx1 == -1 && dy1 == -1)
@@ -1220,7 +1241,7 @@ public:
 		return false;
 	}
 
-	void Servis()// РїСЂРѕС†РµРґСѓСЂР° РґР»СЏ РѕР±СЃР»СѓР¶РёРІР°РЅРёСЏ С‚Р°РЅРєР°
+	void Servis()// процедура для обслуживания танка
 	{
 		if (being == true)
 		{
@@ -1228,7 +1249,7 @@ public:
 		}
 		else
 		{
-			if (countKill < timeBurst)// РїРѕРєР° С‚Р°РЅРє РІР·С‹СЂРІР°РµС‚СЊСЃСЏ 
+			if (countKill < timeBurst)// пока танк взырваеться 
 			{
 				countKill++;
 			}
@@ -1241,7 +1262,7 @@ public:
 		}
 
 	}
-	void PanzerRace() // РїСЂРѕС†РµРґСѓСЂР° СѓРїСЂР°РІРµРЅРёСЏ Р·РµР»РµРЅС‹Рј С‚Р°РЅРєРѕРј СЃ РїРѕРјРѕС€СЊСЋ РґР°РЅРЅС‹С… РїРѕР»СѓС‡РµРЅРЅС‹С… СЃ СЃРµСЂРІРµСЂР°
+	void PanzerRace() // процедура управения зеленым танком с помошью данных полученных с сервера
 	{
 
 		Data data;
@@ -1356,17 +1377,17 @@ public:
 	}
 };
 Panzer panzer;
-class PanzerBot : public Panzer// РєР»Р°СЃСЃ С‚Р°РЅРєР° Р±РѕС‚Р° РЅР°СЃР»РµРґСѓРµС‚СЊСЃСЏ РѕС‚ С‚Р°РЅРєР° РёРіСЂРѕРєР°
+class PanzerBot : public Panzer// класс танка бота наследуеться от танка игрока
 {
-	int vector;// РІРµРєС‚РѕСЂ РґРІРёР¶РµРЅРёРµ С‚Р°РЅРєР°
-	int numStep;// С‡РёСЃР»Рѕ РїСЂРѕР№РґРµРЅРЅС‹С… РєР»РµС‚РѕРє, Р±РѕС‚РѕРј РїРѕ РїСѓС‚Рё
-	double speed, dx, dy;// СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ Рё СЃРјРµС€РµРЅРёРµ РїРѕ С… Рё Сѓ
-	bool looking;// РІРёРґРёС‚ Р»Рё Р±РѕС‚ РёРіСЂРѕРєР° 
+	int vector;// вектор движение танка
+	int numStep;// число пройденных клеток, ботом по пути
+	double speed, dx, dy;// скорость движения и смешение по х и у
+	bool looking;// видит ли бот игрока 
 
-	bool motion;// РїСЂРѕС€РµР» Р»Рё Р±РѕС‚ РѕС‚ РєР»РµС‚РєРё Рє РєР»РµС‚РєРµ РїСѓС‚Рё
-	bool normalizePuty;// РЅРѕСЂРјР°Р»РёР·СѓРµС‚ Р»Рё С‚Р°РЅРє РїСѓС‚СЊ 
+	bool motion;// прошел ли бот от клетки к клетке пути
+	bool normalizePuty;// нормализует ли танк путь 
 public:
-	bool motionToPuty;// РґРІРёР¶РµС‚СЃСЏ Р»Рё Р±РѕС‚ РїРѕ РїСѓС‚Рё
+	bool motionToPuty;// движется ли бот по пути
 	PanzerBot()
 	{
 		x = (int)10 * 40 + 5;
@@ -1382,14 +1403,14 @@ public:
 		motionToPuty = false;
 
 	}
-	void CancelMovingToRoute()// РѕС‚РјРµРЅРёС‚СЊ РґРІРёР¶РµРЅРё Р±РѕС‚Р° РїРѕ РїСѓС‚Рё
+	void CancelMovingToRoute()// отменить движени бота по пути
 	{
 		motionToPuty = false;
 		numStep = 0;
 		route.being = false;
 		route.CancelRoute();
 	}
-	void RegPointAim(int arrivalX, int arrivalY)// СЂРµРіРёСЃС‚СЂР°С†РёСЏ С‚РѕС‡РєРё РєСѓРґР° РґРѕР»Р¶РµРЅ РїСЂРёРµС…Р°С‚СЊ Р±РѕС‚
+	void RegPointAim(int arrivalX, int arrivalY)// регистрация точки куда должен приехать бот
 	{
 		CancelMovingToRoute();
 		numStep = 0;
@@ -1403,7 +1424,7 @@ public:
 	}
 	void RefreshRoute(int arrivalX, int arrivalY)
 	{
-		Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
 		route.PrepareMapForSearchRoute(x + size, y + size, arrivalX, arrivalY,
 			panzer.Get_X() + panzer.Get_Size(), panzer.Get_Y() + panzer.Get_Size());
 		/*marshrut.LoadMapPoisk(x+size,y+size,arrivalX,arrivalY,
@@ -1460,7 +1481,7 @@ public:
 			}
 		}
 	}
-	void ToGoBonus()// РёР·РјРµРЅРµРЅРёРµ РІРµРєС‚РѕСЂР° Р±РѕС‚Р°, РєРѕРіРґР° СѓРІРёРґРёР» Р±РѕРЅСѓСЃ
+	void ToGoBonus()// изменение вектора бота, когда увидил бонус
 	{
 
 		for (int i = 0; i < amountBonus; i++)
@@ -1470,12 +1491,12 @@ public:
 				{
 					if (LookAcrossWall(x + size, y + size, bonuses.bonus[i].x + 20, bonuses.bonus[i].y + 20))
 					{
-						if (bonuses.bonus[i].x + 20 >= x + size - 2 && bonuses.bonus[i].x + 20 <= x + size + 2)// РµСЃР»Рё Р±РѕРЅСѓСЃ РЅРёР¶Рµ РёР»Рё РІС‹С€Рµ
+						if (bonuses.bonus[i].x + 20 >= x + size - 2 && bonuses.bonus[i].x + 20 <= x + size + 2)// если бонус ниже или выше
 						{
 							if (bonuses.bonus[i].y + 20 >= y + size) vector = 3;
 							if (bonuses.bonus[i].y + 20 <= y + size) vector = 1;
 						}
-						if (bonuses.bonus[i].y + 20 >= y + size - 2 && bonuses.bonus[i].y + 20 <= y + size + 2)//РµСЃР»Рё Р±РѕРЅСѓСЃ Р»РµРІРµРµ РёР»Рё РїСЂР°РІРµРµ
+						if (bonuses.bonus[i].y + 20 >= y + size - 2 && bonuses.bonus[i].y + 20 <= y + size + 2)//если бонус левее или правее
 						{
 							if (bonuses.bonus[i].x + 20 >= x + size) vector = 2;
 							if (bonuses.bonus[i].x + 20 <= x + size) vector = 4;
@@ -1487,39 +1508,39 @@ public:
 			}
 		BonusControl();
 	}
-	void MovingToKeyboard()// СѓРїСЂР°РІР»СЏС‚СЊ Р±РѕС‚РѕРј СЃ РєР»Р°РІРёР°С‚СѓСЂС‹
+	void MovingToKeyboard()// управлять ботом с клавиатуры
 	{
-		if (Keyboard::isKeyPressed(Keyboard::Up)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		if (Keyboard::isKeyPressed(Keyboard::Up)) // движение вверх
 		{
 
 			Move(0, -speed);
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Right)) // РґРІРёР¶РµРЅРёРµ РІРїСЂР°РІРѕ
+		if (Keyboard::isKeyPressed(Keyboard::Right)) // движение вправо
 		{
 			Move(speed, 0);
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Down)) // РґРІРёР¶РµРЅРёРµ РІРЅРёР·
+		if (Keyboard::isKeyPressed(Keyboard::Down)) // движение вниз
 		{
 
 			Move(0, speed);
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Left)) // РґРІРёРµРЅРёРµ РІР»РµРІРѕ
+		if (Keyboard::isKeyPressed(Keyboard::Left)) // двиение влево
 		{
 
 			Move(-speed, 0);
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Space)) // РґРІРёРµРЅРёРµ РІР»РµРІРѕ
+		if (Keyboard::isKeyPressed(Keyboard::Space)) // двиение влево
 		{
 			vector = 0;
 		}
 	}
-	void MoveToVector()// РїРµСЂРµРјРµС€РµРЅРёРµ Р±РѕС‚Р° РїРѕ Р·Р°РґРѕРЅРѕРјСѓ РІРµРєС‚РѕСЂСѓ
+	void MoveToVector()// перемешение бота по задоному вектору
 	{
-		if (vector == 1) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		if (vector == 1) // движение вверх
 		{
 			if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)
 			{
@@ -1529,7 +1550,7 @@ public:
 			}
 			else vector = (rand() % 4) + 1;
 		}
-		if (vector == 2) // РґРІРёР¶РµРЅРёРµ РІРїСЂР°РІРѕ
+		if (vector == 2) // движение вправо
 		{
 			if (walls.CrossWall(x + speed, y, size * 2, size * 2) == false)
 			{
@@ -1538,7 +1559,7 @@ public:
 			}
 			else vector = (rand() % 4) + 1;
 		}
-		if (vector == 3) // РґРІРёР¶РµРЅРёРµ РІРЅРёР·
+		if (vector == 3) // движение вниз
 		{
 			if (walls.CrossWall(x, y + speed, size * 2, size * 2) == false)
 			{
@@ -1547,7 +1568,7 @@ public:
 			}
 			else vector = (rand() % 4) + 1;
 		}
-		if (vector == 4)// РґРІРёР¶РµРЅРёРµ РЅР°Р»РµРІРѕ
+		if (vector == 4)// движение налево
 		{
 			if (walls.CrossWall(x - speed, y, size * 2, size * 2) == false)
 			{
@@ -1571,26 +1592,26 @@ public:
 
 
 
-	bool NormalizeX()// РёСЃС‚РёРЅР° РµСЃР»Рё РЅРѕСЂРјРёР»РёР·РѕРІР°Р»СЃСЏ РїРѕ РҐ
+	bool NormalizeX()// истина если нормилизовался по Х
 	{
 		if (x + size >= route.pointRoute[numStep].x * 40 + 20 - speed
 			&& x + size <= route.pointRoute[numStep].x * 40 + 20 + speed) return true;
 		return false;
 	}
-	bool NormalizeY()// РёСЃС‚С‚РёРЅР° РµСЃР»Рё РЅРѕСЂРјР°Р»РёР·РѕРІР°Р»СЃСЏ РїРѕ РЈ
+	bool NormalizeY()// исттина если нормализовался по У
 	{
 		if (y + size >= route.pointRoute[numStep].y * 40 + 20 - speed
 			&& y + size <= route.pointRoute[numStep].y * 40 + 20 + speed) return true;
 		return false;
 	}
-	void BeginNormalize()// РЅР°С‡Р°С‚СЊ РЅРѕСЂРјР°Р»РёР·Р°Р°С†РёСЋ РїРѕР·РёС†С†РёРё РІ С†РµРЅС‚СЂР°Р»СЊРЅСѓСЋ Р»РёРЅРёСЋ РєР»РµС‚РєРё
+	void BeginNormalize()// начать нормализаацию позицции в центральную линию клетки
 	{
 		if (NormalizeX() != true || NormalizeY() != true)
 		{
 			normalizePuty = true;
 		}
 	}
-	// С„СѓРЅРєС†РёСЏ РєРѕС‚РѕСЂР°СЏ РїРµСЂРµРјРµС€Р°РµС‚ РЅР° С†РµРЅС‚СЂ Р»РёРЅРёСЋ РєР»РµС‚РєРё РєР°СЂС‚С‹ РґР»СЏ С‚РѕРіРѕ С‡С‚РѕР±С‹ Р±РѕС‚ РЅРµ РІСЂРµР·Р°Р»СЃСЏ РІ СЃС‚РµРЅС‹
+	// функция которая перемешает на центр линию клетки карты для того чтобы бот не врезался в стены
 	void NormalizeMovingToRoute()
 	{
 		/*
@@ -1608,7 +1629,7 @@ public:
 					if ((route.pointRoute[numStep].y * 40 + 20 <= y + size
 						|| route.pointRoute[numStep].y * 40 + 20 >= y + size)
 						&& !(x + size >= route.pointRoute[numStep].x * 40 + 20 - speed
-							&& x + size < route.pointRoute[numStep].x * 40 + 20 + speed))// РµСЃР»Рё С‚РѕС‡РєР° РїСѓС‚Рё РЅР°С…РѕРґРёС‚СЃСЏ РІС‹С€Рµ РёР»Рё РЅРёР¶Рµ
+							&& x + size < route.pointRoute[numStep].x * 40 + 20 + speed))// если точка пути находится выше или ниже
 					{
 						if (route.pointRoute[numStep].x * 40 + 20 <= x + size)		vector = 4;
 						if (route.pointRoute[numStep].x * 40 + 20 > x + size)		vector = 2;
@@ -1624,7 +1645,7 @@ public:
 					if ((route.pointRoute[numStep].x * 40 + 20 <= x + size
 						|| route.pointRoute[numStep].x * 40 + 20 >= x + size)
 						&& !(y + size >= route.pointRoute[numStep].y * 40 + 20 - speed
-							&& y + size < route.pointRoute[numStep].y * 40 + 20 + speed)) // РµСЃР»Рё С‚РѕС‡РєР° РїСѓС‚Рё РЅР°С…РѕРґРёС‚СЃСЏ Р»РµРІРµРµ РёР»Рё РїСЂР°РІРµРµ
+							&& y + size < route.pointRoute[numStep].y * 40 + 20 + speed)) // если точка пути находится левее или правее
 					{
 						if (route.pointRoute[numStep].y * 40 + 20 <= y + size)		vector = 1;
 						if (route.pointRoute[numStep].y * 40 + 20 > y + size)		vector = 3;
@@ -1650,7 +1671,7 @@ public:
 
 	}
 
-	void MovingToRoute()// С„СѓРЅРєС†РёСЏ РґРІРёР¶РµРЅРёСЏ Р±РѕС‚Р° РїРѕ РїСѓС‚Рё
+	void MovingToRoute()// функция движения бота по пути
 	{
 
 		if (route.pointRoute[numStep].being == true)
@@ -1705,22 +1726,22 @@ public:
 			Sleep(10);
 		}
 	}
-	void ControlAttack()// РІСѓРЅРєС†РёСЏ РєРѕС‚РѕСЂР°СЏ СѓРїСЂР°РІР»РµСЏС‚ Р°С‚С‚Р°РєРѕР№ Р±РѕС‚Р°
+	void ControlAttack()// вункция которая управлеят аттакой бота
 	{
 		double angleAim = 0;
-		static double angleOld = angle;// РЅСѓР¶РЅР° РґР»СЏ С‚РѕРіРѕ С‡С‚РѕР±С‹ РѕРїСЂРµРґРµР»РёС‚СЊ РёР·РјРµРЅСЏР»СЃСЏ Р»Рё СѓРіРѕР» РїРѕРІРѕСЂР°С‚Р° Р±Р°С€РЅРё
-		if (panzer.Get_Being() == true)// СѓСЃР»РѕРІРёРµ Р°С‚Р°РєРё Р±РѕС‚Р°
-			if (ammoMagazine > 0)// РµСЃР»Рё РїСѓР»СЊ Р±РѕР»СЊС€Рµ 0
+		static double angleOld = angle;// нужна для того чтобы определить изменялся ли угол повората башни
+		if (panzer.Get_Being() == true)// условие атаки бота
+			if (ammoMagazine > 0)// если пуль больше 0
 				if (LookAcrossWall(x + size, y + size, panzer.Get_X() + panzer.Get_Size(),
-					panzer.Get_Y() + panzer.Get_Size()))// РµСЃР»Рё РІРёРґРёС‚ С‚Р°РЅРє РёРіСЂРѕРєР°
+					panzer.Get_Y() + panzer.Get_Size()))// если видит танк игрока
 				{
-					// СЂР°СЃС‡РµС‚ СѓРіР»Р° РґР»СЏ Р°С‚Р°РєРё
+					// расчет угла для атаки
 					angleAim = CalcAngle(x + size, y + size, panzer.Get_X() + panzer.Get_Size(), panzer.Get_Y() + panzer.Get_Size());
-					vector = 0;// РѕСЃС‚Р°РЅРѕРІРёРј РґРІРёР¶РµРЅРёРµ С‚Р°РЅРєР°
+					vector = 0;// остановим движение танка
 					looking = true;
-					angle = MovingToAngle(angle, angleAim);// РїСЂРёСЃРІРѕРµРј Р±Р°С€РЅРё С‚Р°РЅРєР° РЅРѕРІС‹Р№ СѓРіРѕР»
+					angle = MovingToAngle(angle, angleAim);// присвоем башни танка новый угол
 														   //angle=angleAim;
-					if (angle >= angleAim - 1 && angle <= angleAim + 1 && countAttack >= timeAttack && ammoMagazine > 0)// СѓСЃР»РѕРІРёРµ СЃС‚СЂРµР»СЊР±С‹ Р±РѕС‚Р°
+					if (angle >= angleAim - 1 && angle <= angleAim + 1 && countAttack >= timeAttack && ammoMagazine > 0)// условие стрельбы бота
 					{
 						double angleVustrel = angle + (rand() % 7) - 4;
 						Shot(turnX, turnY, angleVustrel, 0, 0);
@@ -1743,36 +1764,36 @@ public:
 				}
 				else
 				{
-					if (looking == true)// РµСЃР»Рё РёРіСЂРѕРє СѓС€РµР» СЃ РїРѕР»СЏ РІРёРґРёРјРѕСЃС‚Рё
+					if (looking == true)// если игрок ушел с поля видимости
 					{
 						vector = (rand() % 4) + 1;
 						looking = false;
 					}
 
 				}
-		if (vector == 0 && looking == true && ammoMagazine <= 0)// РµСЃР»Рё Р±РѕС‚ РІРёРґРµР» РёРіСЂРѕРєР° РЅРѕ Сѓ Р±РѕС‚Р° Р·Р°РєРѕРЅС‡РёР»РёСЃСЊ РїР°С‚СЂРѕРЅС‹
+		if (vector == 0 && looking == true && ammoMagazine <= 0)// если бот видел игрока но у бота закончились патроны
 		{
 			vector = (rand() % 4) + 1;
 			looking = false;
 		}
-		Turn(angle);// РїРѕРІРµСЂРЅРµРј Р±Р°С€РЅСЋ Р±РѕС‚Р° РІ СЂР°СЃС‡РёС‚Р°РЅРЅС‹Р№ СЂР°РЅРµРµ СѓРіРѕР»
+		Turn(angle);// повернем башню бота в расчитанный ранее угол
 	}
-	void AutoControl()// С„СѓРЅРєС†СѓСЏ РїРѕРІРµРґРёРµРЅРёРµ Р±РѕС‚Р°
+	void AutoControl()// функцуя поведиение бота
 	{
 		int vector1 = vector;
 		dx = 0;
 		dy = 0;
 		if (motionToPuty == false) 	ControlAttack();
 
-		if (rand() % 200 == 1) vector = (rand() % 4) + 1;// СЃРјРµРЅРёС‚СЊ РІРµРєС‚РѕСЂ СЃР»СѓС‡Р°Р№РЅo СЃ РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊСЋ 1 РЅР° 200
+		if (rand() % 200 == 1) vector = (rand() % 4) + 1;// сменить вектор случайнo с вероятностью 1 на 200
 		MovingToRoute();
 		ToGoBonus();
 
 		NormalizeMovingToRoute();
 		MoveToVector();
-		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// РµСЃР»Рё РІСЂРµР·Р°Р»СЃСЏ РІ РіСЂР°РЅРёС†С‹ РїРѕР»СЏ РёРіСЂС‹
+		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// если врезался в границы поля игры
 		{
-			do// РјРµРЅСЏС‚СЊ РІРµРєС‚РѕСЂ РїРѕРєР° РѕРЅ СЂР°РІРµРЅ РїСЂРµРґС‹РґСѓС€РµРјСѓ РІРµРєС‚РѕСЂСѓ
+			do// менять вектор пока он равен предыдушему вектору
 			{
 				vector = (rand() % 4) + 1;
 			} while (vector1 == vector);
@@ -1782,23 +1803,23 @@ public:
 		if (motionToPuty == true) Turn(angle);
 
 	}
-	void Control(Event event)//С„СѓРЅРєС†РёСЏ СѓРїСЂР°РІР»РµРЅРёСЏ С‚Р°РЅРєРѕРј СЃ РєР»Р°РІРёР°С‚СѓСЂС‹
+	void Control(Event event)//функция управления танком с клавиатуры
 	{
-		double angleMouse, // СѓРіРѕР» РїСЂРёС†С†РµР»Р° РєСѓРґР° СЃРјРѕС‚СЂРёС‚ РјС‹С€СЊ
-			speed = 1.5,// СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ С‚Р°РЅРєР°
-			dx = 0, dy = 0;// СЃРєРѕСЂРѕСЃС‚Рё РґРІРёР¶РµРЅРёСЏ РїРѕ РІРµСЂС‚РёРєР°Р»Рё Рё РіРѕСЂРёР·РѕРЅС‚Р°Р»Рё
-		static double angleOld = angle;// РїРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С‚РѕРіРѕ С‡С‚Рѕ Р±С‹ РїРµСЂРµРґРѕРІР°С‚СЊ РґР°РЅРЅС‹Рµ РѕР± СѓРіР»Рµ РІ С‚РѕРј СЃР»СѓС‡Р°Рµ СЃР»Рё СѓРіРѕР» РёР·РјРµРЅРёР»СЃСЏ
+		double angleMouse, // угол приццела куда смотрит мышь
+			speed = 1.5,// скорость движения танка
+			dx = 0, dy = 0;// скорости движения по вертикали и горизонтали
+		static double angleOld = angle;// переменная для того что бы передовать данные об угле в том случае сли угол изменился
 		int vector = 0;
-		if (Keyboard::isKeyPressed(Keyboard::W)) // РґРІРёР¶РµРЅРёРµ РІРІРµСЂС…
+		if (Keyboard::isKeyPressed(Keyboard::W)) // движение вверх
 		{
-			if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// РµСЃР»Рё РЅРµ РІСЂРµР·Р°Р»СЃСЏ РІ СЃС‚РµРЅСѓ
+			if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// если не врезался в стену
 			{
 				Move(0, -speed);
 				dy = -speed;
 
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::D)) // РґРІРёР¶РµРЅРёРµ РІРїСЂР°РІРѕ
+		if (Keyboard::isKeyPressed(Keyboard::D)) // движение вправо
 		{
 			if (walls.CrossWall(x + speed, y, size * 2, size * 2) == false)
 			{
@@ -1806,7 +1827,7 @@ public:
 				dx = speed;
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::S)) // РґРІРёР¶РµРЅРёРµ РІРЅРёР·
+		if (Keyboard::isKeyPressed(Keyboard::S)) // движение вниз
 		{
 			if (walls.CrossWall(x, y + speed, size * 2, size * 2) == false)
 			{
@@ -1814,7 +1835,7 @@ public:
 				dy = speed;
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::A)) // РґРІРёРµРЅРёРµ РІР»РµРІРѕ
+		if (Keyboard::isKeyPressed(Keyboard::A)) // двиение влево
 		{
 			if (walls.CrossWall(x - speed, y, size * 2, size * 2) == false)
 			{
@@ -1822,16 +1843,16 @@ public:
 				dx -= speed;
 			}
 		}
-		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// РµСЃР»Рё РІСЂРµР·Р°Р»СЃСЏ РІ РіСЂР°РЅРёС†Сѓ РёРіСЂРѕРІРѕРіРѕ РїРѕР»СЏ
+		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// если врезался в границу игрового поля
 		{
 			Move(-dx, -dy);
 		}
-		Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
 
-		angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// СЂР°СЃС‡РµС‚ СѓРіР»Р° РјС‹С€Рё
+		angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// расчет угла мыши
 																		   //cout<<angle<<"\n";
 		if (NoShotFocus == false)
-			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// СѓСЃР»РѕРІРёРµ РІС‹СЃС‚СЂРµР»Р°
+			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// условие выстрела
 			{
 				double angleVustrel = angle + (rand() % 7) - 4;
 				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
@@ -1843,7 +1864,7 @@ public:
 					client.Send(5, turnX, turnY, 0, angleVustrel);
 				}
 			}
-		// РґРІРёРіР°С‚СЊ Р±Р°С€РЅСЋ С‚СѓРґР° РєСѓРґР° СѓРєР°Р·С‹РІР°РµС‚ РјС‹С€СЊ
+		// двигать башню туда куда указывает мышь
 		angle = MovingToAngle(angle, angleMouse, speedTurn);
 		Turn(angle);
 
@@ -1865,7 +1886,107 @@ public:
 			}
 		}
 	}
-	void PanzerBotRace() // РїСЂРѕС†РµРґСѓСЂР° СѓРїСЂРІР»РµРЅРёСЏ Р±РѕС‚РѕРј СЃ РїРѕРјРѕС€СЊСЋ РїСЂРёРЅРёСЏС‚С‹С… РґР°РЅРЅС‹С… СЃ РєР»РёРµРЅС‚Р°
+	void Control3D(Event event)
+	{
+		float speed = 1.5;// скорость движения танка
+		float dx = 0, dy = 0;
+		static double angleOld = angle;// переменная для того что бы передовать данные об угле в том случае сли угол изменился
+		// нужно вставить в условие нажатия кнопок управлеия
+		//if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// если не врезался в стену
+		//{
+		//	Move(0, -speed);
+		//	dy. = -speed;
+
+		//}
+		angle = (180 * -ControlMouse() / pi); ;
+		/*if (angle < -180) angle += 360;
+		else if (angle > 180) angle -= 360;*/
+		if (Keyboard::isKeyPressed(Keyboard::W)) // движение вверх
+		{
+
+			dy = speed * sin(pi * (angle + 90) / 180);
+			dx = speed * cos(pi * (angle + 90) / 180);
+			Move(dx, dy);
+
+		}
+		else if (Keyboard::isKeyPressed(Keyboard::S)) // движение вверх
+		{
+
+			dy = -speed * sin(pi * (angle + 90) / 180);
+			dx = -speed * cos(pi * (angle + 90) / 180);
+			Move(dx, dy);
+
+		}
+		else if (Keyboard::isKeyPressed(Keyboard::D)) // движение вверх
+		{
+
+			dy = speed * sin(pi * (angle + 90 + 90) / 180);
+			dx = speed * cos(pi * (angle + 90 + 90) / 180);
+			Move(dx, dy);
+
+		}
+		else if (Keyboard::isKeyPressed(Keyboard::A)) // движение вверх
+		{
+
+			dy = speed * sin(pi * (angle + 90 - 90) / 180);
+			dx = speed * cos(pi * (angle + 90 - 90) / 180);
+			Move(dx, dy);
+
+		}
+
+		if (walls.CrossWall(x + dx, y, size * 2, size * 2))
+		{
+			dx = -dx;
+			//dy = -dy;
+			Move(dx, 0);
+		}
+		if (walls.CrossWall(x, y + dy, size * 2, size * 2))
+		{
+			//dx = -dx;
+			dy = -dy;
+			Move(0, dy);
+		}
+
+		//Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+
+		//angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// расчет угла мыши
+		//cout<<angle<<"\n";
+		if (NoShotFocus == false)
+			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// условие выстрела
+			{
+				double angleVustrel = angle + 180/*+(rand() % 7) - 4*/;
+				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
+				Shot(turnX, turnY, angleVustrel, 0, 0);
+				//ammoMagazine--;
+				countAttack = 0;
+				if (networkGame == true)
+				{
+					server.Send(5, turnX, turnY, 0, angleVustrel);
+				}
+			}
+		// двигать башню туда куда указывает мышь
+		//angle = MovingToAngle(angle, angleMouse, speedTurn);
+		Turn(angle + 180);
+	//	cout << angle << "   " << angle + 90 << '\n';
+		if(networkGame == true)
+		{
+
+			if (mode == 'c')
+			{
+				if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::D)
+					|| Keyboard::isKeyPressed(Keyboard::S) || Keyboard::isKeyPressed(Keyboard::W))
+				{
+					client.Send(3, x, y, 0, 0);
+				}
+				if (angle >= angleOld + 1 || angle <= angleOld - 1)
+				{
+					client.Send(4, 0, 0, 0, angle+180);
+					angleOld = angle;
+				}
+			}
+		}
+	}
+	void PanzerBotRace() // процедура упрвления ботом с помошью приниятых данных с клиента
 	{
 
 		Data data;
@@ -1892,7 +2013,7 @@ public:
 	}
 };
 PanzerBot panzerBot;
-Vector2i NewCoordinateBonus()// СЂР°СЃС‡РµС‚ РЅРѕРІС‹С… РєРѕРѕСЂРґРёРЅР°С‚ РґР»СЏ Р±РѕРЅСѓСЃР°
+Vector2i NewCoordinateBonus()// расчет новых координат для бонуса
 {
 	int x, y;
 	Vector2i vect;
@@ -1906,7 +2027,7 @@ Vector2i NewCoordinateBonus()// СЂР°СЃС‡РµС‚ РЅРѕРІС‹С… РєРѕРѕСЂРґРёРЅР°С‚ РґР»С
 	vect.y = y;
 	return vect;
 }
-void NewBonusGame()// СЂР°Р·РјРµС€РµРЅРёРµ Р±РѕРЅСѓСЃРѕРІ РїСѓР»СЊ РІ СЃР»СѓС‡Р°Р№РЅРѕ 
+void NewBonusGame()// размешение бонусов пуль в случайно 
 {
 	static int chet = 0, chet1 = 0;
 	int x, y, kolvoBonusPylu = 0, kolvoBonusPricel = 0;
@@ -1927,7 +2048,7 @@ void NewBonusGame()// СЂР°Р·РјРµС€РµРЅРёРµ Р±РѕРЅСѓСЃРѕРІ РїСѓР»СЊ РІ СЃР»СѓС‡Р°
 			}
 		}
 	}
-	// РµСЃР»Рё 5 Р±РѕРЅСѓСЃРѕРІ РїСѓР»СЊ СЂР°Р·РјРµС€РµРЅРЅРѕ С‚Рѕ РЅРµ СЃС‡РёС‚Р°С‚СЊ РІСЂРµРјСЏ РїРѕРµРІР»РµРЅРёСЏ РЅРѕРІРѕРіРѕ Р±РѕРЅСѓСЃР°
+	// если 5 бонусов пуль размешенно то не считать время поевления нового бонуса
 	for (int i = 0; i < amountBonus; i++)
 	{
 
@@ -1960,7 +2081,7 @@ void NewBonusGame()// СЂР°Р·РјРµС€РµРЅРёРµ Р±РѕРЅСѓСЃРѕРІ РїСѓР»СЊ РІ СЃР»СѓС‡Р°
 	//}
 	//if (kolvoBonusPricel==0 && panzer.speedTurn==false) chet1++ ;else chet1=0;
 }
-void ClientBonusRace()// РїСЂРёРµРј Р±РѕРЅСѓСЃРѕРІ СЃ СЃРµСЂРІРµСЂР° Рё СЂР°СЃС‚Р°РЅРѕРІРєР° РёС… РЅР° РєР°СЂС‚Рµ РєР»РёРµРЅС‚Р°
+void ClientBonusRace()// прием бонусов с сервера и растановка их на карте клиента
 {
 	Data data;
 	for (int i = 0; i < countPacked; i++)
@@ -1977,10 +2098,10 @@ void ClientBonusRace()// РїСЂРёРµРј Р±РѕРЅСѓСЃРѕРІ СЃ СЃРµСЂРІРµСЂР° Рё СЂР°СЃС‚
 		}
 	}
 }
-class GameInterface// РєР»Р°СЃСЃ РїРѕРєР°Р·Р° РёРіСЂРѕРІС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ РІРЅРёР·Сѓ РєСЂР°РЅР°
+class GameInterface// класс показа игровых параметров внизу крана
 {
 	int HP, BRONY, BULLET, TimeAttack, CountAttack;
-	bool bonusAim;//Р±РѕРЅСѓСЃ РїСЂРёС†РµР»
+	bool bonusAim;//бонус прицел
 	Image interfaceImage;
 	Texture interfaceTexture;
 	Sprite interfaceSprite;
@@ -1989,15 +2110,15 @@ public:
 	GameInterface()
 	{
 
-		interfaceImage.loadFromFile("InterfaceImage.png");//Р·Р°РіСЂСѓР¶Р°РµРј РІ РЅРµРіРѕ С„Р°Р№Р»
+		interfaceImage.loadFromFile("InterfaceImage.png");//загружаем в него файл
 		interfaceImage.createMaskFromColor(Color(255, 255, 255));
 
-		interfaceTexture.loadFromImage(interfaceImage);//РїРµСЂРµРґР°РµРј РІ РЅРµРіРѕ РѕР±СЉРµРєС‚ Image (РёР·РѕР±СЂР°Р¶РµРЅРёСЏ)
+		interfaceTexture.loadFromImage(interfaceImage);//передаем в него объект Image (изображения)
 		interfaceSprite.setTexture(interfaceTexture);
 		bonusAim = false;
 		mixingUp = 40;
 	}
-	void LoadData(int hp, int brony, int pylu1, int chetattack, int timeattack)// СЃРѕР±СЂР°С‚СЊ РґР°РЅРЅС‹Рµ
+	void LoadData(int hp, int brony, int pylu1, int chetattack, int timeattack)// собрать данные
 	{
 		HP = hp;
 		BRONY = brony;
@@ -2031,7 +2152,7 @@ public:
 			window.draw(interfaceSprite);
 		}
 	}
-	void DrawBullet()// РЅР°СЂРёСЃС‹РІР°С‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСѓР»СЊ
+	void DrawBullet()// нарисывать количество пуль
 	{
 		for (int i = 1; i <= BULLET; i++)
 		{
@@ -2039,21 +2160,21 @@ public:
 		}
 
 	}
-	void DrawTimeAttack()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РІСЂРµРјСЏ РїРµСЂРµР·Р°СЂСЏРґРєРё
+	void DrawTimeAttack()// нарисовать время перезарядки
 	{
 		RectangleShape rectangle(sf::Vector2f((int)((float)CountAttack / (float)TimeAttack * 90), 5));
 		rectangle.setPosition(302, 569);
 		rectangle.setFillColor(Color(128, 255, 128));
 		window.draw(rectangle);
 	}
-	void DrawHP()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РїРѕР»СѓСЃС‹ Р·РґРѕСЂРѕРІСЊСЏ
+	void DrawHP()// нарисовать полусы здоровья
 	{
 		RectangleShape rectangle(sf::Vector2f((int)((float)HP / (float)100 * 90), 10));
 		rectangle.setPosition(10, 579);
 		rectangle.setFillColor(Color(255, 125, 128));
 		window.draw(rectangle);
 	}
-	void DrawARMOR()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РїРѕР»РѕСЃСѓ Р±СЂРѕРЅРё
+	void DrawARMOR()// нарисовать полосу брони
 	{
 		RectangleShape rectangle(sf::Vector2f((int)((float)BRONY / (float)100 * 90), 10));
 		rectangle.setPosition(10, 569);
@@ -2063,21 +2184,21 @@ public:
 	class Statistics
 	{
 		Image starsImage;
-		Texture starsTexture;//СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚ Texture (С‚РµРєСЃС‚СѓСЂР°)
+		Texture starsTexture;//создаем объект Texture (текстура)
 		Sprite starsSprite;
 	public:
 		Statistics()
 		{
-			starsImage.loadFromFile("Stars.png");//Р·Р°РіСЂСѓР¶Р°РµРј РІ РЅРµРіРѕ С„Р°Р№Р»
+			starsImage.loadFromFile("Stars.png");//загружаем в него файл
 			starsImage.createMaskFromColor(Color(255, 255, 255));
 
-			starsTexture.loadFromImage(starsImage);//РїРµСЂРµРґР°РµРј РІ РЅРµРіРѕ РѕР±СЉРµРєС‚ Image (РёР·РѕР±СЂР°Р¶РµРЅРёСЏ)
+			starsTexture.loadFromImage(starsImage);//передаем в него объект Image (изображения)
 			starsSprite.setTexture(starsTexture);
 		}
 		void DrawStarsPlayer(Text text)
 		{
 			if (starsPlayer < 16)text.setFillColor(Color(255, 255, 0)); else text.setFillColor(Color(255, 0, 0));
-			std::ostringstream starsString;    // РѕР±СЉСЏРІРёР»Рё РїРµСЂРµРјРµРЅРЅСѓСЋ
+			std::ostringstream starsString;    // объявили переменную
 			starsString << starsPlayer;
 
 			text.setString(starsString.str());
@@ -2090,7 +2211,7 @@ public:
 		void DrawStarsBot(Text text)
 		{
 			if (starsBot < 16)text.setFillColor(Color(255, 255, 0)); else text.setFillColor(Color(255, 0, 0));
-			std::ostringstream starsString;    // РѕР±СЉСЏРІРёР»Рё РїРµСЂРµРјРµРЅРЅСѓСЋ
+			std::ostringstream starsString;    // объявили переменную
 			starsString << starsBot;
 
 			text.setString(starsString.str());
@@ -2102,14 +2223,14 @@ public:
 		}
 		void DrawBoardScore(Text text)
 		{
-			text.setFillColor(Color(255, 255, 255));//РїРѕРєСЂР°СЃРёР»Рё С‚РµРєСЃС‚ РІ РєСЂР°СЃРЅС‹Р№. РµСЃР»Рё СѓР±СЂР°С‚СЊ СЌС‚Сѓ СЃС‚СЂРѕРєСѓ, С‚Рѕ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РѕРЅ Р±РµР»С‹Р№
-			std::ostringstream scoreString[2];    // РѕР±СЉСЏРІРёР»Рё РїРµСЂРµРјРµРЅРЅСѓСЋ
+			text.setFillColor(Color(255, 255, 255));//покрасили текст в красный. если убрать эту строку, то по умолчанию он белый
+			std::ostringstream scoreString[2];    // объявили переменную
 			scoreString[0] << scorePlayer;
 			scoreString[1] << scoreBot;
 			text.setString(scoreString[0].str() + " : " + scoreString[1].str());
 			if (scorePlayer < 10) text.setPosition(550, 565); else text.setPosition(542, 565);
 			window.draw(text);
-			//	text.setStyle(sf::Text::Bold | sf::Text::Underlined);//Р¶РёСЂРЅС‹Р№ Рё РїРѕРґС‡РµСЂРєРЅСѓС‚С‹Р№ С‚РµРєСЃС‚. РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РѕРЅ "С…СѓРґРѕР№":)) Рё РЅРµ РїРѕРґС‡РµСЂРєРЅСѓС‚С‹Р№
+			//	text.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
 
 		}
 		void Draw(Text text)
@@ -2122,7 +2243,7 @@ public:
 	};
 	Statistics statistics;
 
-	void Draw()// РЅР°СЂРёСЃРѕРІР°С‚СЊ РёРЅС‚РµСЂРІРµР№СЃ
+	void Draw()// нарисовать интервейс
 	{
 		DrawLine(1, 560, 800, 560, Color(128, 128, 128));
 		DrawBullet();
@@ -2135,10 +2256,10 @@ public:
 
 };
 GameInterface gameInterface;
-void GrabBonus()// С„СѓРЅРєС†РёСЏ РїРѕРґР±РѕСЂР° Р±РѕРЅСѓСЃРѕРІ
+void GrabBonus()// функция подбора бонусов
 {
-	int valuePanzer = -1,// РЅРѕРјРµСЂ РїРѕРґРѕР±СЂР°РЅРЅРѕРіРѕ Р±РѕРЅСѓСЃР° РёРіСЂРѕРєРѕРј
-		valuePanzerBot = -1;// РЅРѕРјРµСЂ РїРѕРґРѕР±СЂР°РЅРЅРѕРіРѕ Р±РѕРЅСѓСЃР° Р±РѕС‚РѕРј
+	int valuePanzer = -1,// номер подобранного бонуса игроком
+		valuePanzerBot = -1;// номер подобранного бонуса ботом
 	if (panzer.Get_Being() == true)
 	{
 		valuePanzer = bonuses.CrossBonus(panzer.Get_X(), panzer.Get_Y(), panzer.Get_Size() * 2, panzer.Get_Size() * 2);
@@ -2151,16 +2272,16 @@ void GrabBonus()// С„СѓРЅРєС†РёСЏ РїРѕРґР±РѕСЂР° Р±РѕРЅСѓСЃРѕРІ
 	if (valuePanzer != -1)
 	{
 		bonuses.KillBonus(valuePanzer);
-		if (bonuses.bonus[valuePanzer].type == 1) panzer.Add_Pylu(5);// 1- Р±РѕРЅСѓСЃ РїСѓР»СЊ
-		if (bonuses.bonus[valuePanzer].type == 2)// 2- Р±РѕРЅСѓСЃ Р·РІРµР·РґРѕС‡РєР°
+		if (bonuses.bonus[valuePanzer].type == 1) panzer.Add_Pylu(5);// 1- бонус пуль
+		if (bonuses.bonus[valuePanzer].type == 2)// 2- бонус звездочка
 		{
 			panzer.Add_TimeAttack(-3);
 			starsPlayer++;
 		}
-		if (bonuses.bonus[valuePanzer].type == 3) panzer.Add_Brony(100);// 3-Р±РѕРЅСѓСЃ Р±СЂРѕРЅРё
+		if (bonuses.bonus[valuePanzer].type == 3) panzer.Add_Brony(100);// 3-бонус брони
 		if (bonuses.bonus[valuePanzer].type == 4)
 		{
-			panzer.speedTurn = true;// 3-Р±РѕРЅСѓСЃ Р±СЂРѕРЅРё
+			panzer.speedTurn = true;// 3-бонус брони
 
 		}
 	}
@@ -2185,11 +2306,11 @@ bool BulletInPanzer()
 {
 	for (int i = 0; i < amountBullet; i++)
 		if (bullets[i].being == true)
-			if (panzer.CrossMe(bullets[i].x, bullets[i].y))// РµСЃР»Рё РІ РёРіСЂРѕРєР° РїРѕРїР°Р»Р° РїСѓР»СЏ
+			if (panzer.CrossMe(bullets[i].x, bullets[i].y))// если в игрока попала пуля
 			{
 				bullets[i].being = false;
 				//	if (panzer.Get_Brony()>=25)
-					//СЂР°СЃС‡РµС‚ Р·РґРѕСЂРѕРІСЊСЏ Рё Р±СЂРѕРЅРё
+				//расчет здоровья и брони
 				if (panzer.Get_Brony() > 0)
 				{
 					panzer.Add_Brony(-25);
@@ -2204,7 +2325,7 @@ bool BulletInPanzer()
 				{
 					panzer.Add_HP(-25);
 				}
-				if (panzer.Get_HP() <= 0)	// РµСЃР»Рё Р·РґРѕСЂРѕРІСЊСЏ РЅРµС‚
+				if (panzer.Get_HP() <= 0)	// если здоровья нет
 				{
 
 					return true;
@@ -2221,10 +2342,10 @@ bool PyleInPanzerBot()
 {
 	for (int i = 0; i < amountBullet; i++)
 		if (bullets[i].being == true)
-			if (panzerBot.CrossMe(bullets[i].x, bullets[i].y))// РµСЃР»Рё РІ РёРіСЂРѕРєР° РїРѕРїР°Р»Р° РїСѓР»СЏ
+			if (panzerBot.CrossMe(bullets[i].x, bullets[i].y))// если в игрока попала пуля
 			{
 				//if (panzer.Get_Brony()>=25)
-				//СЂР°СЃС‡РµС‚ Р·РґРѕСЂРѕРІСЊСЏ Рё Р±СЂРѕРЅРё
+				//расчет здоровья и брони
 				bullets[i].being = false;
 				if (panzerBot.Get_Brony() > 0)
 				{
@@ -2240,7 +2361,7 @@ bool PyleInPanzerBot()
 					panzerBot.Add_HP(-25);
 
 				}
-				if (panzerBot.Get_HP() <= 0)	// РµСЃР»Рё Р·РґРѕСЂРѕРІСЊСЏ РЅРµС‚
+				if (panzerBot.Get_HP() <= 0)	// если здоровья нет
 				{
 					return true;
 				}
@@ -2259,7 +2380,7 @@ Vector2i CalcPanzerCoordinate(bool killPanzer, bool killPanzerBot)
 	Vector2i result;
 	result.x = 0;
 	result.y = 0;
-	if (killPanzer || killPanzerBot)// РµСЃР»Рё СѓР±РёС‚ РёРіСЂРѕРє РёР»Рё Р±РѕС‚ С‚Рѕ СЂР°СЃС‡РёС‚Р°РµРј РЅРѕРІС‹РµРЅ РєРѕРѕСЂРґРёРЅР°С‚С‹
+	if (killPanzer || killPanzerBot)// если убит игрок или бот то расчитаем новыен координаты
 	{
 
 		do
@@ -2268,11 +2389,11 @@ Vector2i CalcPanzerCoordinate(bool killPanzer, bool killPanzerBot)
 			notWalls = false;
 			x = (rand() % 740) + 30;
 			y = (rand() % 500) + 30;
-			// РµСЃР»Рё С… Рё Сѓ РЅРµ РїРѕРїР°РґР°СЋС‚ РІ СЃС‚РµРЅСѓ 
+			// если х и у не попадают в стену 
 			if (walls.CrossWall(x, y, panzer.Get_Size() * 2, panzer.Get_Size() * 2) == false) notWalls = true;
 
 			{
-				//РµСЃР»Рё С… Рё Сѓ РЅРµ РїРѕРїР°РґР°СЋС‚ РїРѕРґ Р·РѕРЅСѓ РІРёРґРёРѕСЃС‚Рё РІСЂР°РіР°
+				//если х и у не попадают под зону видиости врага
 				if (killPanzer)
 				{
 					if (LookAcrossWall(x + panzer.Get_Size(), y + panzer.Get_Size(),
@@ -2294,7 +2415,7 @@ Vector2i CalcPanzerCoordinate(bool killPanzer, bool killPanzerBot)
 					}
 				}
 			}
-			// РµСЃР»Рё С… Рё Сѓ РЅРµ РїРѕРїР°РґР°СЋС‚ РІ СЃС‚РµРЅСѓ , РЅРµ РїРѕРїР°РґР°РїСЋС‚ РІ Р·РѕРЅСѓ РІРёРґРёРјРѕСЃС‚Рё РІСЂР°РіР°, Рё РЅРµ РїРѕРїР°РґР°СЋС‚ РЅР° Р±РѕРЅСѓСЃ
+			// если х и у не попадают в стену , не попадапют в зону видимости врага, и не попадают на бонус
 		} while ((notWalls == false || notLocking == false)
 			|| bonuses.CrossBonus(x - panzer.Get_Size(), y - panzer.Get_Size(),
 				panzer.Get_Size() * 3, panzer.Get_Size() * 3) != -1
@@ -2308,21 +2429,21 @@ Vector2i CalcPanzerCoordinate(bool killPanzer, bool killPanzerBot)
 }
 
 
-void NewCoordinateKill()// РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё С‚Р°РЅРєР°
+void NewCoordinateKill()// новые координаты после смерти танка
 {
 	bool killPanzer = false, killPanzerBot = false, flagPanzer = false, flagPanzerBot = false;
 	int oldPanzerX = 0, oldPanzerY = 0, oldPanzerBotX = 0, oldPanzerBotY = 0;
 	flagPanzer = BulletInPanzer();
-	if (flagPanzer == true)	// РµСЃР»Рё Р·РґРѕСЂРѕРІСЊСЏ РЅРµС‚ Сѓ Р·РµР»РµРЅРѕРіРѕ С‚Р°РЅРєР°
+	if (flagPanzer == true)	// если здоровья нет у зеленого танка
 	{
 		if (networkGame == false)
 		{
 			killPanzer = true;
 			panzer.KIlled();
-			// СЂРµРіРёСЃС‚СЂР°С†РёСЏ РІР·СЂРІРІР°
+			// регистрация взрвва
 			burstes.Registration(panzer.Get_X() + panzer.Get_Size(),
 				panzer.Get_Y() + panzer.Get_Size());
-			// СЂРµРіРёСЃС‚СЂР°С†РёСЏ Р±РѕРЅСѓСЃР°
+			// регистрация бонуса
 			/*bonuses.NewBonus(panzer.Get_X()+panzer.Get_Size(),
 			panzer.Get_Y()+panzer.Get_Size(),(rand()%2)+2,true);*/
 			oldPanzerX = panzer.Get_X();
@@ -2335,10 +2456,10 @@ void NewCoordinateKill()// РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РїРѕСЃР»Рµ СЃРјРµСЂС‚
 			{
 				killPanzer = true;
 				panzer.KIlled();
-				// СЂРµРіРёСЃС‚СЂР°С†РёСЏ РІР·СЂРІРІР°
+				// регистрация взрвва
 				burstes.Registration(panzer.Get_X() + panzer.Get_Size(),
 					panzer.Get_Y() + panzer.Get_Size());
-				// СЂРµРіРёСЃС‚СЂР°С†РёСЏ Р±РѕРЅСѓСЃР°
+				// регистрация бонуса
 				/*bonuses.NewBonus(panzer.Get_X()+panzer.Get_Size(),
 				panzer.Get_Y()+panzer.Get_Size(),(rand()%2)+2,true);*/
 				oldPanzerX = panzer.Get_X();
@@ -2365,30 +2486,30 @@ void NewCoordinateKill()// РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РїРѕСЃР»Рµ СЃРјРµСЂС‚
 		if (networkGame == true)
 			if (mode == 'c')
 			{
-				killPanzerBot = true;// СѓР±РёРІР°РµРј РєСЂР°СЃРЅС‹Р№ С‚Р°РЅРє РЅР° РєР»РёРµРЅС‚Рµ
+				killPanzerBot = true;// убиваем красный танк на клиенте
 				panzerBot.KIlled();
 				burstes.Registration(panzerBot.Get_X() + panzerBot.Get_Size(),
 					panzerBot.Get_Y() + panzerBot.Get_Size());
 				scorePlayer++;
-				client.Send(6, 0, 0, 2, 0);// РїРµСЂРµРґР°РµРј СЃРµСЂРІРµСЂСѓ РёРЅС„Сѓ Рѕ СЃРјРµСЂС‚Рё РєСЂР°СЃРЅРѕРіРѕ С‚Р°РЅРєР°
+				client.Send(6, 0, 0, 2, 0);// передаем серверу инфу о смерти красного танка
 			}
 
 	}
 
-	if (networkGame == true)// РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј РїСЂРёРЅСЏС‚С‹Рµ РґР°РЅРЅС‹Рµ
+	if (networkGame == true)// обрабатываем принятые данные
 	{
-		if (mode == 's')// РЅР° СЃРµСЂРІРµСЂРµ
+		if (mode == 's')// на сервере
 		{
 			Data data;
 			for (int i = 0; i < countPacked; i++)
 			{
 				data = dataServerRace[i];
-				if (data.key == 6 && data.tip == 2)// РµСЃР»Рё РїСЂРёРЅСЏlРё РЅР° СЃРµСЂРІРµСЂРµ РёРЅС„Сѓ Рѕ СЃРјРµСЂС‚Рµ РєСЂР°СЃРЅРѕРіРѕ С‚Р°РЅРєР°
+				if (data.key == 6 && data.tip == 2)// если приняlи на сервере инфу о смерте красного танка
 				{
-					oldPanzerBotX = panzerBot.Get_X();// СЃРѕС…СЂР°РЅСЏРµРј СЃС‚Р°СЂС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹
+					oldPanzerBotX = panzerBot.Get_X();// сохраняем старые координаты
 					oldPanzerBotY = panzerBot.Get_Y();
 					killPanzerBot = true;
-					panzerBot.KIlled();// СѓР±РёРІР°РµРј РєСЂР°СЃРЅС‹Р№ С‚Р°РЅРє РЅР° СЃРµСЂРІРµСЂРµ
+					panzerBot.KIlled();// убиваем красный танк на сервере
 					scorePlayer++;
 					burstes.Registration(panzerBot.Get_X() + panzerBot.Get_Size(),
 						panzerBot.Get_Y() + panzerBot.Get_Size());
@@ -2397,16 +2518,16 @@ void NewCoordinateKill()// РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РїРѕСЃР»Рµ СЃРјРµСЂС‚
 			}
 
 		}
-		if (mode == 'c')// РЅР° РєР»РёРµРЅС‚Рµ
+		if (mode == 'c')// на клиенте
 		{
 			Data data;
 			for (int i = 0; i < countPacked; i++)
 			{
 				data = dataClientRace[i];
-				if (data.key == 6 && data.tip == 1)// РµСЃР»Рё РїСЂРёРЅСЏlРё РЅР° РєР»РёРµРЅС‚Рµ РёРЅС„Сѓ Рѕ СЃРјРµСЂС‚Рµ Р·РµР»РµРЅРѕРіРѕ С‚Р°РЅРєР°
+				if (data.key == 6 && data.tip == 1)// если приняlи на клиенте инфу о смерте зеленого танка
 				{
 					killPanzer = true;
-					panzer.KIlled();// СѓР±РёРІР°РµРј Р·РµР»РµРЅС‹Р№ С‚Р°РЅРє РЅР° РєР»РёРµРЅС‚Рµ
+					panzer.KIlled();// убиваем зеленый танк на клиенте
 					burstes.Registration(panzer.Get_X() + panzer.Get_Size(),
 						panzer.Get_Y() + panzer.Get_Size());
 					scoreBot++;
@@ -2425,9 +2546,9 @@ void NewCoordinateKill()// РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РїРѕСЃР»Рµ СЃРјРµСЂС‚
 	}
 
 
-	if (killPanzer)// РµСЃР»Рё С‚Р°РЅРє РёРіСЂРѕРєР° Р±С‹Р» СѓР±РёС‚ 
+	if (killPanzer)// если танк игрока был убит 
 	{
-		// С‚Рѕ РїСЂРёСЃРІРѕРёС‚СЊ РµРјСѓ РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅС‚С‹ Рё РѕР±РЅРѕРІРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹
+		// то присвоить ему новые координты и обновить параметры
 		killPanzer = false;
 		panzer.Put_Pylu(5);
 		panzer.Put_HP(100);
@@ -2440,7 +2561,7 @@ void NewCoordinateKill()// РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РїРѕСЃР»Рµ СЃРјРµСЂС‚
 			panzer.Put_X(x);
 			panzer.Put_Y(y);
 		}
-		// Р·РµР»РµРЅС‹Рµ С‚Р°РЅРє 
+		// зеленые танк 
 		if (networkGame == true)
 		{
 			if (mode == 's')
@@ -2460,23 +2581,23 @@ void NewCoordinateKill()// РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РїРѕСЃР»Рµ СЃРјРµСЂС‚
 			}
 		}
 	}
-	// Р°РЅР°Р»РѕРіРёС‡РЅРѕ
-	if (killPanzerBot)// РµСЃР»Рё СѓРјРµРЅСЂ РєСЂР°СЃРЅС‹Р№ С‚Р°РЅРє
+	// аналогично
+	if (killPanzerBot)// если уменр красный танк
 	{
 		killPanzerBot = false;
 		panzerBot.Put_Pylu(5);
 		panzerBot.Put_HP(10);
 
-		if (networkGame == false)// РµСЃР»Рё РѕС„Р»Р°Р№РЅ РёРіСЂР°
+		if (networkGame == false)// если офлайн игра
 		{
 			bonuses.NewBonus(oldPanzerBotX + panzerBot.Get_Size(),
 				oldPanzerBotY + panzerBot.Get_Size(), (rand() % 2) + 2, true);
 			panzerBot.Put_X(x);
 			panzerBot.Put_Y(y);
 		}
-		if (networkGame == true)// РµСЃР»Рё СЃРµС‚РµРІР°СЏ РёРіСЂР°
+		if (networkGame == true)// если сетевая игра
 		{
-			if (mode == 's')// РЅР° СЃРµСЂРІРµСЂРµ
+			if (mode == 's')// на сервере
 			{
 				int oldX = oldPanzerBotX + panzerBot.Get_Size();
 				int oldY = oldPanzerBotY + panzerBot.Get_Size();
@@ -2489,7 +2610,7 @@ void NewCoordinateKill()// РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РїРѕСЃР»Рµ СЃРјРµСЂС‚
 			}
 
 		}
-		// РєСЂР°СЃРЅС‹Рµ С‚Р°РЅРє
+		// красные танк
 
 		if (panzerBot.motionToPuty == true)
 		{
@@ -2520,22 +2641,22 @@ void NewCoordinateKill()// РЅРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РїРѕСЃР»Рµ СЃРјРµСЂС‚
 }
 
 
-void DrawLine(int x, int y, int x1, int y1, Color color, RenderWindow& window)// РїСЂРѕС†РµРґСѓСЂР° СЂРёСЃРѕРІР°РЅРёСЏ Р»РёРЅРёРё
+void DrawLine(int x, int y, int x1, int y1, Color color, RenderWindow& window)// процедура рисования линии
 {
-	//СЃРѕР·РґР°РµРј РјР°СЃСЃРёРІ С‚РѕС‡РµРє, РїРѕ РєРѕС‚РѕСЂС‹Рј Р±СѓРґСѓС‚ СЂРёСЃРѕРІР°С‚СЊСЃСЏ Р»РёРЅРёРё:
-	sf::VertexArray lines(sf::Lines, 2/*РєРѕР»РёС‡РµСЃС‚РІРѕ С‚РѕС‡РµРє*/);
+	//создаем массив точек, по которым будут рисоваться линии:
+	sf::VertexArray lines(sf::Lines, 2/*количество точек*/);
 
-	//РґР°Р»РµРµ РґР»СЏ РєР°Р¶РґРѕР№ РёР· С‚РѕС‡РµРє Р·Р°РґР°РµРј СЃРІРѕСЋ РїРѕР·РёС†РёСЋ:
+	//далее для каждой из точек задаем свою позицию:
 	lines[0].position = sf::Vector2f(x, y);
 	lines[1].position = sf::Vector2f(x1, y1);
-	//Рё С‚.Рґ.
+	//и т.д.
 
-	//РґР°Р»РµРµ РґР»СЏ РєР°Р¶РґРѕР№ С‚РѕС‡РєРё СѓРєР°Р·С‹РІР°РµРј С†РІРµС‚(С‚Р°Рє РјРѕР¶РЅРѕ СЃРѕР·РґР°РІР°С‚СЊ РіСЂР°РґРёРµРЅС‚С‹):
+	//далее для каждой точки указываем цвет(так можно создавать градиенты):
 	lines[0].color = color;
 	lines[1].color = color;
-	//Рё С‚.Рґ.
+	//и т.д.
 
-	//Рё РІ РєРѕРЅС†Рµ РІС‹РІРѕРґРёРј РІСЃРµ РЅР° СЌРєСЂР°РЅ:
+	//и в конце выводим все на экран:
 	window.draw(lines);
 }
 const int amountLines = 101;
@@ -2545,35 +2666,35 @@ class Camera
 public:
 
 	Vector2f point;
-	enum Type// С‚РёРїС‹ РѕР±СЉРµРєС‚РѕРІ
+	enum Type// типы объектов
 	{
 		EMPTY, WALL, BOTRED, BOTGREEN
 	};
-	struct DataLine// РґР°РЅРЅС‹Рµ РѕР± РѕС‚СЂРµР·РєР°С… СЃС‚РµРЅ
+	struct DataLine// данные об отрезках стен
 	{
 		Vector2f begin;
 		Vector2f end;
 	};
-	struct Data// РґР°РЅРЅС‹Рµ Рѕ Р»РёРЅРёСЏС…, РєРѕС‚РѕСЂС‹Рµ СЂРїР°СЃРїСЂРѕСЃС‚СЂР°РЅСЏСЋС‚СЃСЏ
+	struct Data// данные о линиях, которые рпаспространяются
 	{
-		float dist;// РґРёСЃС‚Р°РЅС†РёСЏ
-		Vector2f acrossPoint;// С‚РѕС‡РєР° РїРµСЂРµСЃРµС‡РµРЅРёСЏ
+		float dist;// дистанция
+		Vector2f acrossPoint;// точка пересечения
 		Color color;
 		Type type;
 	};
-	DataLine dataLine[amountWalls * 4];// РјР°СЃСЃРёРІ РґР°РЅРЅС‹С… Рѕ СЃС‚РµРЅР°С…
+	DataLine dataLine[amountWalls * 4];// массив данных о стенах
 	DataLine dataLinePanzerGreen[4];
 	DataLine dataLinePanzerRed[4];
-	Data data[amountLines];// РјР°СЃСЃРёРІ Р»РёРЅРёР№ РїСЂРѕСЃРјРѕС‚СЂР°
+	Data data[amountLines];// массив линий просмотра
 
-	float dir;// РЅР°РїСЂРІР»РµРЅРёРµ
-	float FieldOfView;// СѓРіРѕР» РѕР±Р»Р°СЃС‚Рё РІРёРґРёРјРѕСЃС‚Рё РІ СЂР°Рґ
-	float StepOfField;// СѓРіРѕР» РјРµР¶РґСѓ Р»СѓС‡Р°РјРё
-	float WalkSpeed;// СЃРєРѕСЂРѕСЃС‚СЊ С…РѕРґСЊР±С‹
-	float ViewSpeed;//СЃРєРѕСЂРѕСЃС‚СЊ РѕР±Р·РѕСЂР° РјС‹С€СЊСЋ
-	float MaxDistance;// РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґРёСЃС‚Р°РЅС†РёСЏ РІРёРґРёРјРѕСЃС‚Рё
+	float dir;// напрвление
+	float FieldOfView;// угол области видимости в рад
+	float StepOfField;// угол между лучами
+	float WalkSpeed;// скорость ходьбы
+	float ViewSpeed;//скорость обзора мышью
+	float MaxDistance;// максимальная дистанция видимости
 
-	void BlockToLines()// С„СѓРЅРєС†РёСЏ РїРµСЂРµРІРµРґРµРЅРёСЏ Рє РєРІР°РґСЂР°С‚РёРєРѕРІ СЃРµСЂС‹С… Р±Р»РѕРєРѕРІ РІ Р»РёРЅРёРё СЃС‚РµРЅ
+	void BlockToLines()// функция переведения к квадратиков серых блоков в линии стен
 	{
 
 		for (int i = 0; i < amountWalls; i++)
@@ -2687,26 +2808,26 @@ public:
 		return CrossingPoint(a1, b1, c1, a2, b2, c2);
 	}
 
-	void Control(RenderWindow& window)// С„СѓРЅРєС†РёСЏ СѓРїСЂР°РІР»РµРЅРёСЏ СЃ РєР»Р°РІРёР°С‚СѓСЂС‹
+	void Control(RenderWindow& window)// функция управления с клавиатуры
 	{
 		float speed = 1.5;
-		if (Keyboard::isKeyPressed(Keyboard::W))// РРґС‚Рё РІРїРµСЂРµРґ 
+		if (Keyboard::isKeyPressed(Keyboard::W))// Идти вперед 
 		{
 			point.x += sin(dir) * speed;
 			point.y += cos(dir) * speed;
 		}
-		if (Keyboard::isKeyPressed(Keyboard::S))// РРґС‚Рё РЅР°Р·Р°Рґ 
+		if (Keyboard::isKeyPressed(Keyboard::S))// Идти назад 
 		{
 			point.x -= sin(dir) * speed;
 			point.y -= cos(dir) * speed;
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::A))// РїРѕРІРѕСЂРѕС‚ РїСЂРѕС‚РёРІ С‡Р°СЃРѕРІРѕР№ 
+		if (Keyboard::isKeyPressed(Keyboard::A))// поворот против часовой 
 		{
 			point.x -= sin(dir - 1.57) * speed;
 			point.y -= cos(dir - 1.57) * speed;
 		}
-		if (Keyboard::isKeyPressed(Keyboard::D))// РїРѕРІРѕСЂРѕС‚ РїРѕ С‡Р°СЃРѕРІРѕР№
+		if (Keyboard::isKeyPressed(Keyboard::D))// поворот по часовой
 		{
 			point.x -= sin(dir + 1.57) * speed;
 			point.y -= cos(dir + 1.57) * speed;
@@ -2720,10 +2841,10 @@ public:
 	//		flagBeginProg = true;
 	//		window.setMouseCursorVisible(false);
 	//	}
-	//	if (Keyboard::isKeyPressed(Keyboard::M))// РїРѕРІРѕСЂРѕС‚ РїРѕ С‡Р°СЃРѕРІРѕР№
+	//	if (Keyboard::isKeyPressed(Keyboard::M))// поворот по часовой
 	//	{
 	//		mouseCapture = !mouseCapture;
-	//		//window.setMouseCursorVisible() // СЃРїСЂСЏС‚Р°С‚СЊ РєСѓСЂСЃРѕСЂ
+	//		//window.setMouseCursorVisible() // спрятать курсор
 	//		window.setMouseCursorVisible(!mouseCapture);
 
 
@@ -2736,7 +2857,7 @@ public:
 	//	if (mouseCapture == true)
 	//	{
 	//		static Vector2i oldMouse = Mouse::getPosition(window);
-	//		Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+	//		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
 	//		Vector2i winPos = window.getPosition();
 	//		if (oldMouse.x > mousePos.x)
 	//		{
@@ -2746,7 +2867,7 @@ public:
 	//		{
 	//			dir -= (mousePos.x - oldMouse.x) / (float)500;
 	//		}
-	//		Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// СѓСЃС‚Р°РЅРЅРѕРІРєР° РєСѓСЂСЃРѕСЂР° РІ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёРµ РєРѕРѕСЂРґРёРЅР°С‚С‹  
+	//		Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// устанновка курсора в пользовательские координаты  
 	//		oldMouse = Mouse::getPosition(window);
 	//	}
 	//}
@@ -2776,7 +2897,7 @@ public:
 			}
 		}
 	}
-	void Services(RenderWindow& window)// С„СѓРЅРєС†РёСЏ РєРѕС‚РѕСЂР°СЏ РІС‹РїРѕР»РЅСЏРµС‚СЃ СЏ РєР°Р¶Рґ С‚Р°РєС‚ РѕСЃРЅРѕРІРЅРѕРіРѕ С†РёРєР»Р° РёРіСЂС‹
+	void Services(typePanzer tpPan,RenderWindow& window)// функция которая выполняетс я кажд такт основного цикла игры
 	{
 		//Control(window);
 		dir = ControlMouse();
@@ -2786,34 +2907,41 @@ public:
 		}
 		if (shakesCamera == false)
 		{
-			point.x = panzer.Get_X() + panzer.Get_Size();
-			point.y = panzer.Get_Y() + panzer.Get_Size();
+			if (tpPan == GREEN)
+			{
+				point.x = panzer.Get_X() + panzer.Get_Size();
+				point.y = panzer.Get_Y() + panzer.Get_Size();
+			}
+			else if (tpPan == RED)
+			{
+				point.x = panzerBot.Get_X() + panzerBot.Get_Size();
+				point.y = panzerBot.Get_Y() + panzerBot.Get_Size();
+			}
 		}
 		ShakeCamera();
 		bool reyBotCenter = false;
-		float st = -FieldOfView / 2;// СЂР°СЃС‡РёС‚С‹РІР°РµРј РЅР°С‡Р°Р»СЊРЅС‹Р№ СѓРіРѕР» РѕР±Р·РѕСЂР° РґР»СЏ РїРµСЂРІРѕР№ Р»РёРЅРёРё
+		float st = -FieldOfView / 2;// расчитываем начальный угол обзора для первой линии
 		for (int i = 0; i < amountLines; i++)
 		{
-			// СЂР°СЃС‡РёС‚Р°РІР°РµРј С‚РѕС‡РєСѓ РїРµСЂРµСЃРµС‡РµРЅРёСЏ РІ СЃР°РјРѕР№ РґР°Р»РµРєРѕР№ РєРѕС‚РѕСЂР°СЏ РјРѕР¶РµС‚ Р±С‹С‚СЊ
+			// расчитаваем точку пересечения в самой далекой которая может быть
 			data[i].type = EMPTY;
-			data[i].acrossPoint = Vector2f(
-				(float)(MaxDistance * sin(dir + st) + point.x),
-				(float)(MaxDistance * cos(dir + st) + point.y));
-
+				data[i].acrossPoint = Vector2f(
+					(float)(MaxDistance * sin(dir + st) + point.x),
+					(float)(MaxDistance * cos(dir + st) + point.y));
 			for (int j = 0; j < amountWalls * 4; j++)
 			{
 
 				if (data[i].type == EMPTY)
 				{
-					// РїСЂРѕРІРµСЂСЏРµРј РµСЃС‚СЊ РїРµСЂРµСЃРµС‡РµРЅРёРµ СЃРѕ СЃС‚РµРЅРѕР№
+					// проверяем есть пересечение со стеной
 					if (IsCrossing(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y,
 						dataLine[j].begin.x, dataLine[j].begin.y, dataLine[j].end.x, dataLine[j].end.y))
 					{
-						// РїСЂРёСЃРІРѕРµРІР°РµРІР°РµРј С‚РѕС‡РєСѓ РїРµСЂРµСЃРµС‡РµРЅСЏРёСЏ
+						// присвоеваеваем точку пересеченяия
 						data[i].acrossPoint = GetCrossVector(point, data[i].acrossPoint, dataLine[j].begin, dataLine[j].end);
 
 
-						//РµСЃР»Рё С‚РѕС‡РєР° РїРµСЂРµСЃРµСЏРµРЅРёСЏ СЂСЏРґРѕРј СЃ РєСЂР°РµРј Р»РёРЅРёРё СЃС‚РµРЅС‹
+						//если точка пересеяения рядом с краем линии стены
 						if (distance(data[i].acrossPoint.x, data[i].acrossPoint.y, dataLine[j].begin.x, dataLine[j].begin.y) < 0.5 ||
 							distance(data[i].acrossPoint.x, data[i].acrossPoint.y, dataLine[j].end.x, dataLine[j].end.y) < 0.5)
 							data[i].color = Color::White;
@@ -2822,9 +2950,9 @@ public:
 
 					}
 					//data[i].type = WALL;
-					// СЂР°СЃС‡РёС‚С‹РІР°РµРј РґРёСЃС‚Р°РЅС†РёСЋ РѕС‚ РёРіСЂРѕРєР° РґРѕ С‚РѕС‡РєРё РїРµСЂРµСЃРµС‡РµРЅРёСЏ СЃРѕ СЃС‚РµРЅРѕР№
+					// расчитываем дистанцию от игрока до точки пересечения со стеной
 					data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
-					// СѓРјРЅРѕР¶Р°РµРј РЅР° РєРѕСЃРёРЅСѓСЃ РµСЃР»Рё С‚РѕС‡РєР° РїРµСЂРµСЃРµС‡РµРЅРёСЏ РЅРµ Р±РѕР»СЊС€Рµ РјР°РєСЃРёРјР°Р»СЊРЅРѕР№
+					// умножаем на косинус если точка пересечения не больше максимальной
 					if (data[i].dist < MaxDistance - 0.1)
 					{
 						data[i].dist *= cos(st);
@@ -2843,7 +2971,7 @@ public:
 					data[i].type = BOTRED;
 				}
 				data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
-				// СѓРјРЅРѕР¶Р°РµРј РЅР° РєРѕСЃРёРЅСѓСЃ РµСЃР»Рё С‚РѕС‡РєР° РїРµСЂРµСЃРµС‡РµРЅРёСЏ РЅРµ Р±РѕР»СЊС€Рµ РјР°РєСЃРёРјР°Р»СЊРЅРѕР№
+				// умножаем на косинус если точка пересечения не больше максимальной
 				if (data[i].dist < MaxDistance - 0.1)
 				{
 					data[i].dist *= cos(st);
@@ -2851,16 +2979,16 @@ public:
 
 			}
 
-			st += StepOfField;// С‚РµРєСѓС€РµРјСѓ РїСЂРёР±Р°РІР»СЏРµРј С€Р°Рі
+			st += StepOfField;// текушему прибавляем шаг
 		}
 
 
 
 	}
 
-	void Draw(RenderWindow& window)// С„СѓРЅРєС†РёСЏ РѕС‚СЂРёСЃРѕРІРєРё
+	void Draw(RenderWindow& window)// функция отрисовки
 	{
-		// СЂРёСЃСѓРµРј РІРµСЂС…РЅРёР№ С„РѕРЅ
+		// рисуем верхний фон
 		RectangleShape rectangle(Vector2f(screenWidth, screenHeigth / 2));
 		CircleShape shape;
 		rectangle.setFillColor(Color(128, 128, 255));
@@ -2868,7 +2996,7 @@ public:
 		rectEdge.setFillColor(Color(255, 128, 0));
 		rectangle.setPosition(1, 1);
 		window.draw(rectangle);
-		// СЂРёСЃСѓРµРј РЅРёР¶РЅРёР№ С„РѕРЅ
+		// рисуем нижний фон
 		rectangle.setFillColor(Color(255, 128, 128));
 		rectangle.setPosition(1, screenHeigth / 2 + 1 - 40);
 		window.draw(rectangle);
@@ -2880,7 +3008,7 @@ public:
 			{
 
 				float lineHeight = dist * 0.5;
-				if (data[i].color == Color::Green)// СЂРёСЃСѓРµРј СЃРµСЂС‹Рµ Р»РёРЅРёРё РµСЃР»Рё СЌС‚Рѕ РЅРµ РєСЂР°Р№ РѕС‚СЂРµР·РєР° СЃС‚РµРЅС‹
+				if (data[i].color == Color::Green)// рисуем серые линии если это не край отрезка стены
 				{
 					recWall3D.setFillColor(Color(200 - lineHeight / 2, 200 - lineHeight / 2, 200 - lineHeight / 2));
 					recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
@@ -2893,7 +3021,7 @@ public:
 					window.draw(recWall3D);
 				}
 				else
-				{	// СЂРёСЃСѓРµРј Р±РµР»С‹Р№ Р»РёРЅРёРё РµСЃР»Рё СЌС‚Рѕ РєСЂР°Р№ СЃС‚РµРЅС‹
+				{	// рисуем белый линии если это край стены
 					recWall3D.setFillColor(Color(100, 255 - lineHeight / 2, 100));
 					recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
 					recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
@@ -2916,7 +3044,7 @@ public:
 			}
 			if (i <= amountLines / 2 + 15 && i >= amountLines / 2 - 15)
 			{
-				// СЂРёСЃСѓРµРј Р»РёРЅРёРё РЅР° РєР°СЂС‚Рµ РЅР°РІРїСЂР°РІР»СЏРЅРёСЏ РєСѓРґР° СЃРјРѕС‚СЂРёС‚ РёРіСЂРѕРє
+				// рисуем линии на карте навправляния куда смотрит игрок
 				DrawLine(point.x / 4, point.y / 4, data[i].acrossPoint.x / 4, data[i].acrossPoint.y / 4, Color::Red, window);
 			}
 			else if (data[i].type == BOTRED)
@@ -2925,7 +3053,7 @@ public:
 			}
 			else
 			{
-				// СЂРёСЃСѓРµРј Р¶РµР»С‚С‹Рµ Р»РёРЅРёРё С‡С‚Рѕ РІРёРґРёС‚ РёРіСЂРѕРє
+				// рисуем желтые линии что видит игрок
 				DrawLine(point.x / 4, point.y / 4, data[i].acrossPoint.x / 4, data[i].acrossPoint.y / 4, Color::Yellow, window);
 			}
 
@@ -2942,7 +3070,7 @@ public:
 			DrawLine(dataLine[i].begin.x / 4, dataLine[i].begin.y / 4,
 				dataLine[i].end.x / 4, dataLine[i].end.y / 4, Color::Blue, window);
 		}
-		// СЂРёСЃСѓРµРј Р»РёРЅРЅРё Р±РѕРєРѕРІС‹С… РґРІРёР¶РµРЅРёР№
+		// рисуем линни боковых движений
 		Vector2f line1 = point, line2 = point;
 		float realDir = dir;
 		realDir = realDir * 180 / pi;
@@ -2974,21 +3102,21 @@ public:
 ;
 
 
-int main()// РіР»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ 
+int main()// главная функция 
 {
 
-	double time1 = 0, time2 = 0; // РїРµСЂРµРјРµРЅС‹Рµ РґР»СЏ С‚Р°Р№РјРµСЂР°
+	double time1 = 0, time2 = 0; // переменые для таймера
 	bool pause = false;
-	int countShotFocus = 0; // СЃС‡РµС‚С‡РёРє Р·Р°РґРµСЂР¶РєРё РІС‹СЃС‚СЂРµР»Р° РїРѕСЃР»Рµ РїРѕРµРІР»РµРЅРёРµ РѕРєРЅРѕ РёРіСЂС‹ РІ С„РѕРєСѓСЃРµ
+	int countShotFocus = 0; // счетчик задержки выстрела после поевление окно игры в фокусе
 	srand(time(0));
 	int selectMenu = 0;
 	Clock clock;
-	Font font;//С€СЂРёС„С‚ 
-	font.loadFromFile("times-new-roman.ttf");//РїРµСЂРµРґР°РµРј РЅР°С€РµРјСѓ С€СЂРёС„С‚Сѓ С„Р°Р№Р» С€СЂРёС„С‚Р°
-	Text text("", font, 20);//СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚ С‚РµРєСЃС‚. Р·Р°РєРёРґС‹РІР°РµРј РІ РѕР±СЉРµРєС‚ С‚РµРєСЃС‚ СЃС‚pРѕРєСѓ, С€СЂРёС„С‚, СЂР°Р·РјРµСЂ С€СЂРёС„С‚Р°(РІ РїРёРєСЃРµР»СЏС…);//СЃР°Рј РѕР±СЉРµРєС‚ С‚РµРєСЃС‚ (РЅРµ СЃС‚СЂРѕРєР°)
+	Font font;//шрифт 
+	font.loadFromFile("times-new-roman.ttf");//передаем нашему шрифту файл шрифта
+	Text text("", font, 20);//создаем объект текст. закидываем в объект текст стpоку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
 
-	font.loadFromFile("times-new-roman.ttf");//РїРµСЂРµРґР°РµРј РЅР°С€РµРјСѓ С€СЂРёС„С‚Сѓ С„Р°Р№Р» С€СЂРёС„С‚Р°
-	Text text1("", font, 40);//СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚ С‚РµРєСЃС‚. Р·Р°РєРёРґС‹РІР°РµРј РІ РѕР±СЉРµРєС‚ С‚РµРєСЃС‚ СЃС‚СЂРѕРєСѓ, С€СЂРёС„С‚, СЂР°Р·РјРµСЂ С€СЂРёС„С‚Р°(РІ РїРёРєСЃРµР»СЏС…);//СЃР°Рј РѕР±СЉРµРєС‚ С‚РµРєСЃС‚ (РЅРµ СЃС‚СЂРѕРєР°)
+	font.loadFromFile("times-new-roman.ttf");//передаем нашему шрифту файл шрифта
+	Text text1("", font, 40);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
 	Camera camera;
 
 	camera.LinePanzerGreen();
@@ -2997,7 +3125,7 @@ int main()// РіР»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ
 	while (window.isOpen())
 	{
 		clock.restart();
-		time1 = clock.getElapsedTime().asMicroseconds();// РїСЂРёСЃРІРѕРёРј РІСЂРµРјСЏ РІ РЅР°С‡Р°Р»Рµ С†РёРєР»Р°
+		time1 = clock.getElapsedTime().asMicroseconds();// присвоим время в начале цикла
 		Event event;
 		while (window.pollEvent(event))
 		{
@@ -3017,34 +3145,35 @@ int main()// РіР»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ
 		if (startGame == false)
 		{
 
-			if (StartConnected == true && networkGame == false)// РµСЃР»Рё Р±С‹Р»Рѕ РІС‹Р±СЂР°РЅРЅРѕ РІ РјРµРЅСЋ РјРЅРѕРіРѕРїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєР°СЏ РёРіСЂР°
+			if (StartConnected == true && networkGame == false)// если было выбранно в меню многопользовательская игра
 			{
-				system("cls");//РѕС‡РёСЃС‚РєР° РєРѕРЅСЃРѕР»Рё
+				system("cls");//очистка консоли
 				std::cout << "s - server; c - client" << "\n";
 				std::cin >> mode;
 				if (mode == 's')server.Listen();
 				if (mode == 'c')
-				{
+				{/*
 					std::cout << "new ip:";
-					std::cin >> ip;
-					std::cout << "new port:";
-					std::cin >> port;
+					std::cin >> ip;*/
+					ip = "127.0.0.1";
+					/*std::cout << "new port:";
+					std::cin >> port;*/
 					client.Connect();
 				}
-				// networkGame==true РІС‹РїРѕР»РЅСЏРµС‚СЊСЃСЏ РІ С‚РѕС‚ РјРѕРјРµРЅС‚ РєРѕРіРґР° СѓСЃС‚Р°РЅРѕРІР»РёРІР°С‚СЊ\РµС‚СЊСЃСЏ СЃРѕРµРґРёРЅРµРЅРёРµ
-				if (networkGame == true) // РµСЃР»Рё СЃРѕРµРґРёРЅРµРЅРёРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅРѕ
+				// networkGame==true выполняеться в тот момент когда установливать\еться соединение
+				if (networkGame == true) // если соединение установленно
 				{
 
 					if (mode == 's')
 					{
 						srand(10);
-						walls.Placement(); // СЂР°СЃС‚РѕРЅРѕРІРєР° СЃС‚РµРЅ 
+						walls.Placement(); // растоновка стен 
 					}
 					//	for (int i=0;i<kolvoStens;i++)
 					int k = 0;
 					Data data;
-					////////////////////// РїРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С… Рѕ СЃС‚РµРЅР°С… РєР»РёРµРЅС‚Сѓ		
-					if (mode == 's')// РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ РЅР° СЃРµСЂРІРµСЂРµ
+					////////////////////// передача данных о стенах клиенту		
+					if (mode == 's')// выполняется на сервере
 					{
 						while (k < amountWalls)
 						{
@@ -3052,20 +3181,20 @@ int main()// РіР»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ
 							data = server.Receive();
 							if (data.key == 8)
 							{
-								if (data.tip - 1 == k) k = data.tip;// РµСЃР»Рё РїСЂРёРЅСЏС‚Р° РѕР±СЂР°С‚РЅР°СЏ СЃРІСЏР·СЊ Рё РѕРЅР° СЃРѕРІРїР°РґР°РµС‚ СЃ СѓСЃР»РѕРІРёРµРј
-								walls.WallsSend(k);// РїРµСЂРµРґР°РµРј СЃС‚РµРЅСѓ СЃ РЅРѕРјРµСЂРѕРІ Рє
+								if (data.tip - 1 == k) k = data.tip;// если принята обратная связь и она совпадает с условием
+								walls.WallsSend(k);// передаем стену с номеров к
 							}
 						}
 					}
-					if (mode == 'c') // РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ РЅР° РєР»РёРµРЅС‚Рµ
+					if (mode == 'c') // выполняется на клиенте
 					{
 						while (k < amountWalls)
 						{
-							int flag = walls.WallsReceive();// РІРѕР·СЂР°С€Р°РµС‚ РЅРѕРјРµСЂ РїСЂРёРЅСЏС‚РѕР№ СЃС‚РµРЅС‹ Рё Р·Р°РіСЂСѓР¶Р°РµС‚ СЃС‚РµРЅСѓ
+							int flag = walls.WallsReceive();// возрашает номер принятой стены и загружает стену
 							if (flag == k)
 							{
 								k++;
-								client.Send(8, 0, 0, k, 0);// РїРµСЂРµРґР°РµРј РѕР±СЂР°С‚РЅСѓСЋ СЃРІСЏР·СЊ СЃРµСЂРІРµСЂСѓ СЃ РЅРѕРјРµСЂРѕРј СЃР»РµРґСѓРµС€РёРµ СЃС‚РµРЅС‹
+								client.Send(8, 0, 0, k, 0);// передаем обратную связь серверу с номером следуешие стены
 							}
 						}
 					}
@@ -3073,23 +3202,23 @@ int main()// РіР»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ
 					startGame = true;
 				}
 			}
-			selectMenu = mainmenu.Service(event);// РіР»Р°РІРЅРЅРѕРµ РјРµРЅСЋ 
+			selectMenu = mainmenu.Service(event);// главнное меню 
 			if (selectMenu == 1)
 			{
 				srand(10);
 				walls.Placement();
 				camera.BlockToLines();
 				srand(time(0));
-				startGame = true; // РµСЃР»Рё РІС‹Р±СЂР°РЅ 1 РїСѓРЅРєС‚ РіР»Р°РІРЅРѕРіРѕ РјРµРЅСЋ 
+				startGame = true; // если выбран 1 пункт главного меню 
 			}
-			if (selectMenu == 2)// РµСЃР»Рё РІС‹Р±СЂР°РЅ 2 РїСѓРЅРєС‚ РіР»Р°РІРЅРѕРіРѕ РјРµРЅСЋ
+			if (selectMenu == 2)// если выбран 2 пункт главного меню
 			{
 				//network=true;
-				
+
 				StartConnected = true;
 			}
 		}
-		if (startGame == true && networkGame == true)// РµСЃР»Рё РёРіСЂР° СЃРµС‚РµРІР°СЏ РёРіСЂР° СЃС‚Р°СЂС‚РѕРІР°Р»Р° 
+		if (startGame == true && networkGame == true)// если игра сетевая игра стартовала 
 		{
 			if (networkGame == true)
 			{
@@ -3112,35 +3241,39 @@ int main()// РіР»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ
 				NewBonusGame();
 			}
 		}
-		if (pause == false && startGame == true)// РµСЃР»Рё РѕРєРЅРѕ РёРіСЂС‹ РІ С„РѕРєСѓСЃРµ Рё Рё РёРіСЂР° СЃС‚Р°СЂС‚РѕРІР°Р»Р°
+		if (pause == false && startGame == true)// если окно игры в фокусе и и игра стартовала
 		{
 			//panzer.Control(event);
 			if (networkGame == true)
 			{
 				camera.LinePanzerGreen();
 				camera.LinePanzerRed();
-				camera.Services(window);
+				
 				if (mode == 's')
 				{
 					//if (isView3D == false)panzer.Control(event); else 
-						panzer.Control3D(event);
+					panzer.Control3D(event);
 					gameInterface.LoadData(panzer.Get_HP(), panzer.Get_Brony(),
 						panzer.Get_Pylu(), panzer.Get_ChetAttack(), panzer.Get_TimeAttack());
 					gameInterface.LoadDataBonus(panzer.speedTurn);
+					camera.Services(GREEN,window);
 				}
 				if (mode == 'c')
 				{
-					panzerBot.Control(event);
+					
+					//if (isView3D == false)panzerBot.Control(event); else 
+					panzerBot.Control3D(event);
 					gameInterface.LoadData(panzerBot.Get_HP(), panzerBot.Get_Brony(),
 						panzerBot.Get_Pylu(), panzerBot.Get_ChetAttack(), panzerBot.Get_TimeAttack());
 					gameInterface.LoadDataBonus(panzerBot.speedTurn);
+					camera.Services(RED,window);
 				}
 			}
 			else
 			{
 				camera.LinePanzerGreen();
 				camera.LinePanzerRed();
-				camera.Services(window);
+				camera.Services(GREEN,window);
 				panzerBot.AutoControl();
 				//if (isView3D == true)
 				{
@@ -3175,7 +3308,7 @@ int main()// РіР»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ
 			*/
 			if (Keyboard::isKeyPressed(Keyboard::M))
 			{
-				Vector2i mousePos = Mouse::getPosition(window);//Р·Р°Р±РёСЂР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РєСѓСЂСЃРѕСЂР°
+				Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
 				panzerBot.RegPointAim(mousePos.x + 20, mousePos.y + 20);
 				Sleep(10);
 			}
@@ -3187,7 +3320,7 @@ int main()// РіР»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ
 
 			if (ClickMouseLeft(event) == false)NoShotFocus = false;
 		}
-		if (Keyboard::isKeyPressed(Keyboard::V))// РїРѕРІРѕСЂРѕС‚ РїРѕ С‡Р°СЃРѕРІРѕР№
+		if (Keyboard::isKeyPressed(Keyboard::V))// поворот по часовой
 		{
 			isView3D = !isView3D;
 			while (Keyboard::isKeyPressed(Keyboard::V));
@@ -3225,10 +3358,10 @@ int main()// РіР»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ
 
 		do
 		{
-			time2 = clock.getElapsedTime().asMicroseconds();// РїСЂРёСЃРІРѕРёРІ РІСЂРµРјСЏ РІ РєРѕРЅС†Рµ С†РёРєР»Р°
+			time2 = clock.getElapsedTime().asMicroseconds();// присвоив время в конце цикла
 															//Sleep (1);
-		} while (time2 - time1 < 15000);// РїРѕРєР° СЂР°Р·РЅРёС†Р° РІРѕ РІСЂРµРјРµРЅРё РјРµР¶РґСѓ РЅР°С‡Р°Р»РѕРј Рё РєРѕРЅС†РѕРј С†РёРєР»Р° 
-									//РјРµРЅСЊС€Рµ РѕРїСЂРµРґРµР»РµРЅРЅРѕРіРѕ С†РёСЃР»Р° С‚Рѕ СЃС‡РёС‚С‹РІР°РµРј РІСЂРµРјСЏ Р·Р°РЅРѕРіРѕ 
+		} while (time2 - time1 < 15000);// пока разница во времени между началом и концом цикла 
+										//меньше определенного цисла то считываем время заного 
 	}
 
 	return 0;
