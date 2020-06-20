@@ -815,6 +815,7 @@ public:
 	Image bonusesImage; //создаем объект Image (изображение)
 	Texture bonusesTexture;//создаем объект Texture (текстура)
 	Sprite bonusesSprite;
+	int size;
 	struct Bonus // бонус
 	{
 	public:
@@ -828,17 +829,19 @@ public:
 			being=true;
 			tip= (rand()%3)+1;
 			*/
+			
 		}
 	};
 	Bonus bonus[amountBonus];
 	Bonuses()
 	{
-
+		size = 40;
 		bonusesImage.loadFromFile("Bonus.png");//загружаем в него файл
 		bonusesImage.createMaskFromColor(Color(255, 255, 255));
 
 		bonusesTexture.loadFromImage(bonusesImage);//передаем в него объект Image (изображени€)
 		bonusesSprite.setTexture(bonusesTexture);
+		
 	}
 	void Draw()// нарисовать бонусы
 	{
@@ -871,8 +874,8 @@ public:
 		for (i; i < i1; i++)
 			if (bonus[i].being == false)
 			{
-				bonus[i].x = x / 40 * 40;
-				bonus[i].y = y / 40 * 40;
+				bonus[i].x = x / size * size;
+				bonus[i].y = y / size * size;
 				bonus[i].type = tip;
 				bonus[i].being = true;
 
@@ -2708,13 +2711,14 @@ public:
 	Vector2f point;
 	enum Type// типы объектов
 	{
-		EMPTY, WALL, PANZRED, PANZGREEN
+		EMPTY, WALL, PANZRED, PANZGREEN,BONUSBULLETS,BONUSARMOUR,BONUSSTAR
 	};
 	struct DataLine// данные об отрезках стен
 	{
 		Vector2f begin;
 		Vector2f end;
 	};
+	
 	struct Data// данные о лини€х, которые рпаспростран€ютс€
 	{
 		float dist;// дистанци€
@@ -2723,6 +2727,7 @@ public:
 		Type type;
 	};
 	DataLine dataLine[amountWalls * 4];// массив данных о стенах
+	DataLine dataLineBonus[amountBonus];// массив данных о стенах
 	DataLine dataLinePanzerGreen[4];
 	DataLine dataLinePanzerRed[4];
 	Data data[amountLines];// массив линий просмотра
@@ -2808,7 +2813,28 @@ public:
 		MaxDistance = 1250;
 		//	BlockToLines();
 	}
+	void BonusToLine()
+	{
+		for (int i = 0; i < amountBonus; i++)
+		{
+			Vector2f A = Vector2f(bonuses.bonus[i].x, bonuses.bonus[i].y);
+			Vector2f B = Vector2f(bonuses.bonus[i].x, bonuses.bonus[i].y + bonuses.size);
+			Vector2f C = Vector2f(bonuses.bonus[i].x + bonuses.size, bonuses.bonus[i].y + bonuses.size);
+			Vector2f D = Vector2f(bonuses.bonus[i].x, bonuses.bonus[i].y + bonuses.size);
 
+			dataLineBonus[i * 4 + 0].begin = A;
+			dataLineBonus[i * 4 + 0].end = B;
+
+			dataLineBonus[i * 4 + 1].begin = B;
+			dataLineBonus[i * 4 + 1].end = C;
+
+			dataLineBonus[i * 4 + 2].begin = C;
+			dataLineBonus[i * 4 + 2].end = D;
+
+			dataLineBonus[i * 4 + 3].begin = D;
+			dataLineBonus[i * 4 + 3].end = A;
+		}
+	}
 	float distance(float x, float y, float x1, float y1)
 	{
 		float dx = abs(x1 - x),
@@ -3047,6 +3073,34 @@ public:
 					}
 
 				}
+			
+				for (int j = 0; j < amountBonus; j++)
+				{
+					if (bonuses.bonus[j].being == true)
+						if (IsCrossing(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y,
+							dataLineBonus[j].begin.x, dataLineBonus[j].begin.y, dataLineBonus[j].end.x, dataLineBonus[j].end.y))
+						{
+							Data oneData;
+							oneData.acrossPoint = GetCrossVector(point, data[i].acrossPoint, dataLineBonus[j].begin, dataLineBonus[j].end);
+							data[i].acrossPoint = oneData.acrossPoint;
+							switch (bonuses.bonus[j].type)
+							{
+								case 1: data[i].type = BONUSBULLETS; break;
+								case 2: data[i].type = BONUSSTAR; break;
+								case 3: data[i].type = BONUSARMOUR; break;
+
+							}
+
+
+						}
+				}
+				data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
+				// умножаем на косинус если точка пересечени€ не больше максимальной
+				if (data[i].dist < MaxDistance - 0.1)
+				{
+					data[i].dist *= cos(st);
+				}
+
 			}
 
 			st += StepOfField;// текушему прибавл€ем шаг
@@ -3116,6 +3170,15 @@ public:
 			{
 				float lineHeight = dist * 0.5;
 				recWall3D.setFillColor(Color::Green);
+				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
+				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+					screenHeigth / 2 - 40 - 1000 / lineHeight);
+				window.draw(recWall3D);
+			}
+			if (data[i].type == BONUSBULLETS)
+			{
+				float lineHeight = dist * 0.5;
+				recWall3D.setFillColor(Color::Yellow);
 				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
 				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
 					screenHeigth / 2 - 40 - 1000 / lineHeight);
@@ -3351,6 +3414,7 @@ int main()// главна€ функци€
 			{
 				camera.LinePanzerGreen();
 				camera.LinePanzerRed();
+				camera.BonusToLine();
 				camera.Services(GREEN, window);
 				panzerBot.AutoControl();
 				//if (isView3D == true)
@@ -3405,6 +3469,7 @@ int main()// главна€ функци€
 		{
 			camera.LinePanzerGreen();
 			camera.LinePanzerRed();
+			camera.BonusToLine();
 			if (mode == 's')
 			{
 				camera.Services(GREEN, window);
