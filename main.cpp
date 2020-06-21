@@ -2727,7 +2727,7 @@ public:
 		Type type;
 	};
 	DataLine dataLine[amountWalls * 4];// массив данных о стенах
-	DataLine dataLineBonus[amountBonus];// массив данных о стенах
+	DataLine dataLineBonus[amountBonus*4];// массив данных о стенах
 	DataLine dataLinePanzerGreen[4];
 	DataLine dataLinePanzerRed[4];
 	Data data[amountLines];// массив линий просмотра
@@ -2815,24 +2815,35 @@ public:
 	}
 	void BonusToLine()
 	{
+		
 		for (int i = 0; i < amountBonus; i++)
 		{
-			Vector2f A = Vector2f(bonuses.bonus[i].x, bonuses.bonus[i].y);
-			Vector2f B = Vector2f(bonuses.bonus[i].x, bonuses.bonus[i].y + bonuses.size);
-			Vector2f C = Vector2f(bonuses.bonus[i].x + bonuses.size, bonuses.bonus[i].y + bonuses.size);
-			Vector2f D = Vector2f(bonuses.bonus[i].x, bonuses.bonus[i].y + bonuses.size);
 
-			dataLineBonus[i * 4 + 0].begin = A;
-			dataLineBonus[i * 4 + 0].end = B;
+			//if (bonuses.bonus[i].being == true)
+			{
+				Vector2f A = Vector2f(bonuses.bonus[i].x, bonuses.bonus[i].y);
+				Vector2f B = Vector2f(bonuses.bonus[i].x+ bonuses.size, bonuses.bonus[i].y) ;
+				Vector2f C = Vector2f(bonuses.bonus[i].x + bonuses.size, bonuses.bonus[i].y + bonuses.size);
+				Vector2f D = Vector2f(bonuses.bonus[i].x, bonuses.bonus[i].y + bonuses.size);
 
-			dataLineBonus[i * 4 + 1].begin = B;
-			dataLineBonus[i * 4 + 1].end = C;
+				dataLineBonus[i * 4 + 0].begin = A;
+				dataLineBonus[i * 4 + 0].end = B;
 
-			dataLineBonus[i * 4 + 2].begin = C;
-			dataLineBonus[i * 4 + 2].end = D;
+				dataLineBonus[i * 4 + 1].begin = B;
+				dataLineBonus[i * 4 + 1].end = C;
 
-			dataLineBonus[i * 4 + 3].begin = D;
-			dataLineBonus[i * 4 + 3].end = A;
+				dataLineBonus[i * 4 + 2].begin = C;
+				dataLineBonus[i * 4 + 2].end = D;
+
+				dataLineBonus[i * 4 + 3].begin = D;
+				dataLineBonus[i * 4 + 3].end = A;
+				
+			}
+			if (Keyboard::isKeyPressed(Keyboard::B))
+			{
+				int a;
+				a = a;
+			}
 		}
 	}
 	float distance(float x, float y, float x1, float y1)
@@ -2991,6 +3002,7 @@ public:
 			}
 		}
 		ShakeCamera();
+		BonusToLine();
 		bool reyBotCenter = false;
 		float st = -FieldOfView / 2;// расчитываем начальный угол обзора для первой линии
 		for (int i = 0; i < amountLines; i++)
@@ -3074,26 +3086,7 @@ public:
 
 				}
 			
-				for (int j = 0; j < amountBonus; j++)
-				{
-					if (bonuses.bonus[j].being == true)
-						if (IsCrossing(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y,
-							dataLineBonus[j].begin.x, dataLineBonus[j].begin.y, dataLineBonus[j].end.x, dataLineBonus[j].end.y))
-						{
-							Data oneData;
-							oneData.acrossPoint = GetCrossVector(point, data[i].acrossPoint, dataLineBonus[j].begin, dataLineBonus[j].end);
-							data[i].acrossPoint = oneData.acrossPoint;
-							switch (bonuses.bonus[j].type)
-							{
-								case 1: data[i].type = BONUSBULLETS; break;
-								case 2: data[i].type = BONUSSTAR; break;
-								case 3: data[i].type = BONUSARMOUR; break;
-
-							}
-
-
-						}
-				}
+				
 				data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
 				// умножаем на косинус если точка пересечения не больше максимальной
 				if (data[i].dist < MaxDistance - 0.1)
@@ -3101,6 +3094,35 @@ public:
 					data[i].dist *= cos(st);
 				}
 
+			}
+			for (int j = 0; j < amountBonus * 4; j++)
+			{
+				if (bonuses.bonus[j/4].being == true)
+				{
+					if (IsCrossing(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y,
+						dataLineBonus[j].begin.x, dataLineBonus[j].begin.y, dataLineBonus[j].end.x, dataLineBonus[j].end.y))
+					{
+						Data oneData;
+						oneData.acrossPoint = GetCrossVector(point, data[i].acrossPoint, dataLineBonus[j].begin, dataLineBonus[j].end);
+						data[i].acrossPoint = oneData.acrossPoint;
+						/*switch (bonuses.bonus[j].type)
+						{
+						case 1:  data[i].type = BONUSBULLETS; break; 
+						case 2:  data[i].type = BONUSSTAR; break; 
+						case 3:  data[i].type = BONUSARMOUR; break; 
+
+						}*/
+						if (bonuses.bonus[j/4].type == 1) data[i].type = BONUSBULLETS;
+						if (bonuses.bonus[j/4].type == 2) data[i].type = BONUSSTAR;
+						if (bonuses.bonus[j/4].type == 3) data[i].type = BONUSARMOUR;
+					}
+				}
+				data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
+				// умножаем на косинус если точка пересечения не больше максимальной
+				if (data[i].dist < MaxDistance - 0.1)
+				{
+					data[i].dist *= cos(st);
+				}
 			}
 
 			st += StepOfField;// текушему прибавляем шаг
@@ -3178,7 +3200,25 @@ public:
 			if (data[i].type == BONUSBULLETS)
 			{
 				float lineHeight = dist * 0.5;
-				recWall3D.setFillColor(Color::Yellow);
+				recWall3D.setFillColor(Color(150,75,0));
+				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
+				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+					screenHeigth / 2 - 40 - 1000 / lineHeight);
+				window.draw(recWall3D);
+			}
+			if (data[i].type == BONUSARMOUR)
+			{
+				float lineHeight = dist * 0.5;
+				recWall3D.setFillColor(Color::Blue);
+				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
+				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+					screenHeigth / 2 - 40 - 1000 / lineHeight);
+				window.draw(recWall3D);
+			}
+			if (data[i].type == BONUSSTAR)
+			{
+				float lineHeight = dist * 0.5;
+				recWall3D.setFillColor(Color(255,128,0));
 				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
 				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
 					screenHeigth / 2 - 40 - 1000 / lineHeight);
@@ -3416,7 +3456,7 @@ int main()// главная функция
 				camera.LinePanzerRed();
 				camera.BonusToLine();
 				camera.Services(GREEN, window);
-				panzerBot.AutoControl();
+			//	panzerBot.AutoControl();
 				//if (isView3D == true)
 				{
 					//Control3D event)
