@@ -25,7 +25,7 @@ bool NoShotFocus = false; // запрет выстрела танка когда окно игры входит в фоку
 bool startGame = false;// стартавала ли игра
 bool StartConnected = false;// началось ли соедение то-есть ввод ип и ожидание
 bool networkGame = false;
-bool mouseCapture = true;// захват мыши приложением
+bool mouseCapture = false;// захват мыши приложением
 bool isView3D = true;
 bool shakesCamera = false;
 IpAddress ip = "127.0.0.1";
@@ -123,7 +123,7 @@ float ControlMouse()
 	if (flagBeginProg == false)
 	{
 		flagBeginProg = true;
-		window.setMouseCursorVisible(false);
+		//window.setMouseCursorVisible(false);
 	}
 	if (Keyboard::isKeyPressed(Keyboard::M))// поворот по часовой
 	{
@@ -331,6 +331,8 @@ class MainMenu
 	int startX, startY;//координаты от которых будет позиционироваться меню
 	int stepDown;// растояние между пунктами меню
 	int widthPunct;// ширина пункта для наведения мыши
+	int numPageMenu ;
+	int result;
 public:
 	MainMenu()
 	{
@@ -340,51 +342,144 @@ public:
 		startY = 165;
 		stepDown = 50;
 		widthPunct = 210;
+		numPageMenu = 0;
+		result = 0;
 	}
 	int Service(Event event)
 	{
+		
 		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
 		if (network == false)
 		{
 			focus = 0;
-			if (mousePos.x > startX && mousePos.x < startX + widthPunct)
+			if (numPageMenu == 0)
 			{
-				if (mousePos.y > startY && mousePos.y < startY + stepDown) focus = 1;
-				if (mousePos.y > startY + stepDown && mousePos.y < startY + stepDown * 2) focus = 2;
-				if (mousePos.y > startY + stepDown * 2 && mousePos.y < startY + stepDown * 3) focus = 3;
-				if (mousePos.y > startY + stepDown * 3 && mousePos.y < startY + stepDown * 4) focus = 4;
+				if (mousePos.x > startX && mousePos.x < startX + widthPunct)
+				{
+					if (mousePos.y > startY && mousePos.y < startY + stepDown) focus = 1;
+					if (mousePos.y > startY + stepDown && mousePos.y < startY + stepDown * 2) focus = 2;
+					if (mousePos.y > startY + stepDown * 2 && mousePos.y < startY + stepDown * 3) focus = 3;
+					if (mousePos.y > startY + stepDown * 3 && mousePos.y < startY + stepDown * 4) focus = 4;
+				}
+				if (focus == 1 && ClickMouseLeft(event) == true)
+				{
+					numPageMenu = 2;
+					//return 1;
+					result = 1;
+					while (ClickMouseLeft(event) == true) {}
+					return 0;
+				}
+				if (focus == 2 && ClickMouseLeft(event) == true)
+				{
+					//network = true;
+					numPageMenu = 1;
+					result = 2;
+					while (ClickMouseLeft(event) == true) {}
+					return 0;
+				//	return 2;
+				}
 			}
-			if (focus == 1 && ClickMouseLeft(event) == true) return 1;
-			if (focus == 2 && ClickMouseLeft(event) == true)
+			if (numPageMenu == 1)
 			{
-				network = true;
-				return 2;
+				if (mousePos.x > startX && mousePos.x < startX + widthPunct)
+				{
+					if (mousePos.y > startY && mousePos.y < startY + stepDown) focus = 1;
+					if (mousePos.y > startY + stepDown && mousePos.y < startY + stepDown * 2) focus = 2;
+				}
+				if (focus == 1 && ClickMouseLeft(event) == true)
+				{
+					mode = 's';
+					while (ClickMouseLeft(event) == true) {}
+					numPageMenu = 2;
+					return 0;
+					//result = 1;
+				}
+				if (focus == 2 && ClickMouseLeft(event) == true)
+				{
+					mode = 'c';
+					if (result == 2) network = true;
+					return result;
+				//	while (ClickMouseLeft(event) == true) {}
+					//return 0;
+				}
+			}
+			if (numPageMenu == 2 )
+			{
+				if (mousePos.x > startX && mousePos.x < startX + widthPunct)
+				{
+					if (mousePos.y > startY && mousePos.y < startY + stepDown) focus = 1;
+					if (mousePos.y > startY + stepDown && mousePos.y < startY + stepDown * 2) focus = 2;
+				}
+				if (focus == 1 && ClickMouseLeft(event) == true)
+				{
+					isView3D = false;
+					mouseCapture = false;
+					window.setMouseCursorVisible(true);
+					if (result==2) network = true;
+					return result;
+					//result = 1;
+				}
+				if (focus == 2 && ClickMouseLeft(event) == true)
+				{
+					isView3D = true;
+					mouseCapture = true;
+					window.setMouseCursorVisible(false);
+					if (result == 2) network = true;
+					return result;
+				}
 			}
 		}
 		return 0;
 	}
 	void Draw(Text text)
 	{
-		if (focus == 1) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
-		text.setString("New Game");
-		text.setPosition(startX, startY);
-		window.draw(text);
+		if (numPageMenu == 0)
+		{
+			if (focus == 1) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+			text.setString("New Game");
+			text.setPosition(startX, startY);
+			window.draw(text);
 
-		if (focus == 2) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
-		text.setString("MultiPlayer");
-		text.setPosition(startX, startY + stepDown);
-		window.draw(text);
+			if (focus == 2) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+			text.setString("MultiPlayer");
+			text.setPosition(startX, startY + stepDown);
+			window.draw(text);
 
-		if (focus == 3) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
-		text.setString("About");
-		text.setPosition(startX, startY + stepDown * 2);
-		window.draw(text);
+			if (focus == 3) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+			text.setString("About");
+			text.setPosition(startX, startY + stepDown * 2);
+			window.draw(text);
 
-		if (focus == 4) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
-		text.setString("Exit");
-		text.setPosition(startX, startY + stepDown * 3);
-		window.draw(text);
-		if (network == true)
+			if (focus == 4) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+			text.setString("Exit");
+			text.setPosition(startX, startY + stepDown * 3);
+			window.draw(text);
+		}
+		if (numPageMenu == 1)
+		{
+			if (focus == 1) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+			text.setString("Server");
+			text.setPosition(startX, startY);
+			window.draw(text);
+
+			if (focus == 2) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+			text.setString("Client");
+			text.setPosition(startX, startY + stepDown);
+			window.draw(text);
+		}
+		if (numPageMenu == 2)
+		{
+			if (focus == 1) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+			text.setString("2D");
+			text.setPosition(startX, startY);
+			window.draw(text);
+
+			if (focus == 2) text.setFillColor(Color::Red); else text.setFillColor(Color::White);
+			text.setString("3D");
+			text.setPosition(startX, startY + stepDown);
+			window.draw(text);
+		}
+		if (network == true )
 		{
 			text.setFillColor(Color::Yellow);
 			text.setString("Looking in console");
@@ -1107,13 +1202,13 @@ public:
 
 		}
 
-		if (walls.CrossWall(x + dx, y, size * 2, size * 2))
+		if (walls.CrossWall(x + dx, y, size * 2, size * 2) || x+dx+size/2>screenWidth || x + dx - size/2 <0)
 		{
 			dx = -dx;
 			//dy = -dy;
 			Move(dx, 0);
 		}
-		if (walls.CrossWall(x, y + dy, size * 2, size * 2))
+		if (walls.CrossWall(x, y + dy, size * 2, size * 2) || y+ dy + size/2 > screenHeigth-40-size/2 || y + dy - size/2 < 0)
 		{
 			//dx = -dx;
 			dy = -dy;
@@ -1130,7 +1225,7 @@ public:
 				double angleVustrel = angle + 180/*+(rand() % 7) - 4*/;
 				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
 				Shot(turnX, turnY, angleVustrel, 0, 0);
-				//ammoMagazine--;
+				ammoMagazine--;
 				countAttack = 0;
 				if (networkGame == true)
 				{
@@ -1976,6 +2071,19 @@ public:
 			Move(0, dy);
 		}
 
+		if (walls.CrossWall(x + dx, y, size * 2, size * 2) || x + dx + size / 2 > screenWidth || x + dx - size / 2 < 0)
+		{
+			dx = -dx;
+			//dy = -dy;
+			Move(dx, 0);
+		}
+		if (walls.CrossWall(x, y + dy, size * 2, size * 2) || y + dy + size / 2 > screenHeigth-40-size/2 || y + dy - size / 2 < 0)
+		{
+			//dx = -dx;
+			dy = -dy;
+			Move(0, dy);
+		}
+
 		//Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
 
 		//angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// расчет угла мыши
@@ -1986,7 +2094,7 @@ public:
 				double angleVustrel = angle + 180/*+(rand() % 7) - 4*/;
 				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
 				Shot(turnX, turnY, angleVustrel, 0, 0);
-				//ammoMagazine--;
+				ammoMagazine--;
 				countAttack = 0;
 				if (networkGame == true&& mode=='c')
 				{
@@ -3330,9 +3438,13 @@ int main()// главная функция
 			if (StartConnected == true && networkGame == false)// если было выбранно в меню многопользовательская игра
 			{
 				system("cls");//очистка консоли
-				std::cout << "s - server; c - client" << "\n";
-				std::cin >> mode;
-				if (mode == 's')server.Listen();
+				/*std::cout << "s - server; c - client" << "\n";
+				std::cin >> mode;*/
+				if (mode == 's')
+				{
+					std::cout << "Please wait for connection client";
+					server.Listen();
+				}
 				if (mode == 'c')
 				{
 					std::cout << "new ip:";
@@ -3352,30 +3464,76 @@ int main()// главная функция
 					}
 					//	for (int i=0;i<kolvoStens;i++)
 					int k = 0;
+					static bool viewSend=false;
+					static bool viewRaceResponce = false;
 					Data data;
 					////////////////////// передача данных о стенах клиенту		
 					if (mode == 's')// выполняется на сервере
 					{
-						while (k < amountWalls)
+						while (viewSend == false)
 						{
-							if (k == 0) 	walls.WallsSend(k);
-							data = server.Receive();
-							if (data.key == 8)
+							if (viewRaceResponce == false)
 							{
-								if (data.tip - 1 == k) k = data.tip;// если принята обратная связь и она совпадает с условием
-								walls.WallsSend(k);// передаем стену с номеров к
+								server.Send(9, 0, 0, isView3D ? 1 : 0, 0);
+
+							}
+							if (viewRaceResponce == false)
+							{
+								data = server.Receive();
+								if (data.key == 9 && data.tip == isView3D ? 1 : 0)
+								{
+									viewSend = true;
+									viewRaceResponce = true;
+								}
+							}
+						}
+						if (viewSend == true)
+						{
+							while (k < amountWalls)
+							{
+								if (k == 0) 	walls.WallsSend(k);
+								data = server.Receive();
+								if (data.key == 8)
+								{
+									if (data.tip - 1 == k) k = data.tip;// если принята обратная связь и она совпадает с условием
+									walls.WallsSend(k);// передаем стену с номеров к
+								}
 							}
 						}
 					}
 					if (mode == 'c') // выполняется на клиенте
 					{
-						while (k < amountWalls)
+						while (viewSend == false)
 						{
-							int flag = walls.WallsReceive();// возрашает номер принятой стены и загружает стену
-							if (flag == k)
+							data = client.Receive();
+							if (data.key == 9)
 							{
-								k++;
-								client.Send(8, 0, 0, k, 0);// передаем обратную связь серверу с номером следуешие стены
+								if (data.tip == 0) 
+								{ 
+									isView3D = false;
+									mouseCapture = false;
+									window.setMouseCursorVisible(true);
+								}
+								if (data.tip == 1)
+								{
+									isView3D = true;
+									mouseCapture = true;
+									window.setMouseCursorVisible(false);
+								}
+									client.Send(9, 0, 0, isView3D ? 1 : 0, 0);
+								viewSend = true;
+							}
+						}
+						if (viewSend == true)
+						{
+							while (k < amountWalls)
+							{
+								int flag = walls.WallsReceive();// возрашает номер принятой стены и загружает стену
+								if (flag == k)
+								{
+									k++;
+									client.Send(8, 0, 0, k, 0);// передаем обратную связь серверу с номером следуешие стены
+								}
 							}
 						}
 					}
@@ -3432,8 +3590,7 @@ int main()// главная функция
 
 				if (mode == 's')
 				{
-					//if (isView3D == false)panzer.Control(event); else 
-					panzer.Control3D(event);
+					if (isView3D == false)panzer.Control(event); else panzer.Control3D(event);
 					gameInterface.LoadData(panzer.Get_HP(), panzer.Get_Brony(),
 						panzer.Get_Pylu(), panzer.Get_ChetAttack(), panzer.Get_TimeAttack());
 					gameInterface.LoadDataBonus(panzer.speedTurn);
@@ -3442,8 +3599,7 @@ int main()// главная функция
 				if (mode == 'c')
 				{
 
-					//if (isView3D == false)panzerBot.Control(event); else 
-					panzerBot.Control3D(event);
+					if (isView3D == false) panzerBot.Control(event); else panzerBot.Control3D(event);
 					gameInterface.LoadData(panzerBot.Get_HP(), panzerBot.Get_Brony(),
 						panzerBot.Get_Pylu(), panzerBot.Get_ChetAttack(), panzerBot.Get_TimeAttack());
 					gameInterface.LoadDataBonus(panzerBot.speedTurn);
@@ -3456,16 +3612,16 @@ int main()// главная функция
 				camera.LinePanzerRed();
 				camera.BonusToLine();
 				camera.Services(GREEN, window);
-			//	panzerBot.AutoControl();
-				//if (isView3D == true)
+				panzerBot.AutoControl();
+				if (isView3D == true)
 				{
 					//Control3D event)
 					panzer.Control3D(event);
 				}
-				/*else
+				else
 				{
-				panzer.Control(event);
-				}*/
+					panzer.Control(event);
+				}
 				gameInterface.LoadData(panzer.Get_HP(), panzer.Get_Brony(),
 					panzer.Get_Pylu(), panzer.Get_ChetAttack(), panzer.Get_TimeAttack());
 				gameInterface.LoadDataBonus(panzer.speedTurn);
@@ -3540,8 +3696,11 @@ int main()// главная функция
 			}
 			else
 			{
-				camera.Draw(window);
-				camera.DrawLinePanzerREd(window);
+				if (isView3D)
+				{
+					camera.Draw(window);
+					camera.DrawLinePanzerREd(window);
+				}
 			}
 			gameInterface.Draw();
 			gameInterface.statistics.Draw(text);
