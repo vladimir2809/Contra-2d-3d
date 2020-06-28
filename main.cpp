@@ -28,6 +28,7 @@ bool networkGame = false;
 bool mouseCapture = false;// захват мыши приложением
 bool isView3D = true;
 bool shakesCamera = false;
+bool hitPanzerRed = false, hitPanzerGreen = false;
 IpAddress ip = "127.0.0.1";
 int port = 2000;
 char mode;
@@ -1143,8 +1144,8 @@ public:
 		//int size1=size/3;
 		turnY = size * 2 * sin(pi * (angle - 90) / 180) + y + size;
 		turnX = size * 2 * cos(pi * (angle - 90) / 180) + x + size;
-		turnY1 = size * 10 * sin(pi * (angle - 90) / 180) + y + size;
-		turnX1 = size * 10 * cos(pi * (angle - 90) / 180) + x + size;
+		turnY1 = size * 3 * sin(pi * (angle - 90) / 180) + y + size;
+		turnX1 = size * 3 * cos(pi * (angle - 90) / 180) + x + size;
 	}
 	void Control3D(Event event)
 	{
@@ -2270,11 +2271,29 @@ public:
 	}
 	void DrawAim()
 	{
-		DrawLine(screenWidth / 2 - 5, screenHeigth / 2 - mixingUp, screenWidth / 2 - 1, screenHeigth / 2 - mixingUp, Color::White);
-		DrawLine(screenWidth / 2 + 1, screenHeigth / 2 - mixingUp, screenWidth / 2 + 5, screenHeigth / 2 - mixingUp, Color::White);
+		Color color = Color::White;
+		static int count = 0;
+		int maxCount = 10;
+		if ((hitPanzerRed == true && networkGame==false)||((hitPanzerGreen == true || hitPanzerRed == true) && networkGame == true))
+		{
+			count = count;
+			if (count < maxCount)
+			{
+				color = count % 2 == 0 ? Color::Blue : Color(0,255,255);
+				count++;
+			}
+			else
+			{
+				count = 0;
+				hitPanzerRed = false;
+				hitPanzerGreen = false;
+			}
+		}
+		DrawLine(screenWidth / 2 - 5, screenHeigth / 2 - mixingUp, screenWidth / 2 - 1, screenHeigth / 2 - mixingUp, color);
+		DrawLine(screenWidth / 2 + 1, screenHeigth / 2 - mixingUp, screenWidth / 2 + 5, screenHeigth / 2 - mixingUp, color);
 
-		DrawLine(screenWidth / 2, screenHeigth / 2 - mixingUp - 1, screenWidth / 2, screenHeigth / 2 - mixingUp - 5, Color::White);
-		DrawLine(screenWidth / 2, screenHeigth / 2 - mixingUp + 1, screenWidth / 2, screenHeigth / 2 - mixingUp + 5, Color::White);
+		DrawLine(screenWidth / 2, screenHeigth / 2 - mixingUp - 1, screenWidth / 2, screenHeigth / 2 - mixingUp - 5, color);
+		DrawLine(screenWidth / 2, screenHeigth / 2 - mixingUp + 1, screenWidth / 2, screenHeigth / 2 - mixingUp + 5, color);
 
 
 
@@ -2457,7 +2476,9 @@ bool BulletInPanzer()
 						if (networkGame == false || (networkGame == true && mode == 's'))
 						{
 							shakesCamera = true;
+							
 						}
+						hitPanzerGreen = true;
 						break;
 					}
 				}
@@ -2475,7 +2496,9 @@ bool BulletInPanzer()
 					if (networkGame == false || (networkGame == true && mode == 's'))
 					{
 						shakesCamera = true;
+						
 					}
+					hitPanzerGreen =true;
 					burstes.Registration(bullets[i].x, bullets[i].y, true);
 				}
 			}
@@ -2498,8 +2521,10 @@ bool PyleInPanzerBot()
 						if (networkGame == true && mode == 'c')
 						{
 							shakesCamera = true;
+							
 						}
 						bullets[i].being = false;
+						hitPanzerRed= true;
 						break;
 					}
 				}
@@ -2517,7 +2542,9 @@ bool PyleInPanzerBot()
 					if (networkGame == true && mode == 'c')
 					{
 						shakesCamera = true;
+						
 					}
+					hitPanzerRed= true;
 					burstes.Registration(bullets[i].x, bullets[i].y, true);
 				}
 			}
@@ -3676,11 +3703,11 @@ int main()// главная функция
 			}
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::V))// поворот по часовой
-		{
-			isView3D = !isView3D;
-			while (Keyboard::isKeyPressed(Keyboard::V));
-		}
+		//if (Keyboard::isKeyPressed(Keyboard::V))// поворот по часовой
+		//{
+		//	isView3D = !isView3D;
+		//	while (Keyboard::isKeyPressed(Keyboard::V));
+		//}
 		window.clear();
 		if (startGame == true)
 		{
@@ -3699,7 +3726,7 @@ int main()// главная функция
 				if (isView3D)
 				{
 					camera.Draw(window);
-					camera.DrawLinePanzerREd(window);
+					//camera.DrawLinePanzerREd(window);
 				}
 			}
 			gameInterface.Draw();
