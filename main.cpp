@@ -26,7 +26,7 @@ bool startGame = false;// стартавала ли игра
 bool StartConnected = false;// началось ли соедение то-есть ввод ип и ожидание
 bool networkGame = false;
 bool mouseCapture = false;// захват мыши приложением
-float MaxDistance=500;// максимальная дистанция видимости
+float MaxDistance = 500;// максимальная дистанция видимости
 bool isView3D = true;
 bool shakesCamera = false;
 bool hitPanzerRed = false, hitPanzerGreen = false;
@@ -333,7 +333,7 @@ class MainMenu
 	int startX, startY;//координаты от которых будет позиционироваться меню
 	int stepDown;// растояние между пунктами меню
 	int widthPunct;// ширина пункта для наведения мыши
-	int numPageMenu ;
+	int numPageMenu;
 	int result;
 public:
 	MainMenu()
@@ -349,7 +349,7 @@ public:
 	}
 	int Service(Event event)
 	{
-		
+
 		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
 		if (network == false)
 		{
@@ -378,7 +378,7 @@ public:
 					result = 2;
 					while (ClickMouseLeft(event) == true) {}
 					return 0;
-				//	return 2;
+					//	return 2;
 				}
 			}
 			if (numPageMenu == 1)
@@ -401,11 +401,11 @@ public:
 					mode = 'c';
 					if (result == 2) network = true;
 					return result;
-				//	while (ClickMouseLeft(event) == true) {}
+					//	while (ClickMouseLeft(event) == true) {}
 					//return 0;
 				}
 			}
-			if (numPageMenu == 2 )
+			if (numPageMenu == 2)
 			{
 				if (mousePos.x > startX && mousePos.x < startX + widthPunct)
 				{
@@ -417,7 +417,7 @@ public:
 					isView3D = false;
 					mouseCapture = false;
 					window.setMouseCursorVisible(true);
-					if (result==2) network = true;
+					if (result == 2) network = true;
 					return result;
 					//result = 1;
 				}
@@ -481,7 +481,7 @@ public:
 			text.setPosition(startX, startY + stepDown);
 			window.draw(text);
 		}
-		if (network == true )
+		if (network == true)
 		{
 			text.setFillColor(Color::Yellow);
 			text.setString("Looking in console");
@@ -824,10 +824,10 @@ bool IsCrossing(float a1x, float a1y, float a2x, float a2y, float b1x, float b1y
 	float v4 = VectMult(a2x - a1x, a2y - a1y, b2x - a1x, b2y - a1y);
 	return (v1 * v2) <= 0 && (v3 * v4) <= 0;
 }
-bool LookAcrossWall(int x, int y, int arrivalX, int arrivalY,bool checkDist=false)// функция видимости через стены
+bool LookAcrossWall(int x, int y, int arrivalX, int arrivalY, bool checkDist = false)// функция видимости через стены
 {
-	float dx=0, dy=0,dist=0;
-	dx =  arrivalX - x;
+	float dx = 0, dy = 0, dist = 0;
+	dx = arrivalX - x;
 	dy = arrivalY - y;
 	dist = sqrt(dx * dx + dy * dy);
 	if (checkDist == false || (checkDist == true && dist < MaxDistance))
@@ -937,7 +937,7 @@ public:
 			being=true;
 			tip= (rand()%3)+1;
 			*/
-			
+
 		}
 	};
 	Bonus bonus[amountBonus];
@@ -949,7 +949,7 @@ public:
 
 		bonusesTexture.loadFromImage(bonusesImage);//передаем в него объект Image (изображения)
 		bonusesSprite.setTexture(bonusesTexture);
-		
+
 	}
 	void Draw()// нарисовать бонусы
 	{
@@ -1223,13 +1223,13 @@ public:
 
 		}
 
-		if (walls.CrossWall(x + dx, y, size*1.5 , size*1.5 ) || x+dx+size/2>screenWidth || x + dx - size/2 <0)
+		if (walls.CrossWall(x + dx, y, size*1.5, size*1.5) || x + dx + size / 2>screenWidth || x + dx - size / 2 <0)
 		{
 			dx = -dx;
 			//dy = -dy;
 			Move(dx, 0);
 		}
-		if (walls.CrossWall(x, y + dy, size*1.5 , size*1.5 ) || y+ dy + size/2 > screenHeigth-40-size/2 || y + dy - size/2 < 0)
+		if (walls.CrossWall(x, y + dy, size*1.5, size*1.5) || y + dy + size / 2 > screenHeigth - 40 - size / 2 || y + dy - size / 2 < 0)
 		{
 			//dx = -dx;
 			dy = -dy;
@@ -1869,7 +1869,7 @@ public:
 		if (panzer.Get_Being() == true)// условие атаки бота
 			if (ammoMagazine > 0)// если пуль больше 0
 				if (LookAcrossWall(x + size, y + size, panzer.Get_X() + panzer.Get_Size(),
-					panzer.Get_Y() + panzer.Get_Size(),isView3D==true?true:false))// если видит танк игрока
+					panzer.Get_Y() + panzer.Get_Size(), isView3D == true ? true : false))// если видит танк игрока
 				{
 					// расчет угла для атаки
 					angleAim = CalcAngle(x + size, y + size, panzer.Get_X() + panzer.Get_Size(), panzer.Get_Y() + panzer.Get_Size());
@@ -2098,7 +2098,7 @@ public:
 			//dy = -dy;
 			Move(dx, 0);
 		}
-		if (walls.CrossWall(x, y + dy, size * 1.5, size * 1.5) || y + dy + size / 2 > screenHeigth-40-size/2 || y + dy - size / 2 < 0)
+		if (walls.CrossWall(x, y + dy, size * 1.5, size * 1.5) || y + dy + size / 2 > screenHeigth - 40 - size / 2 || y + dy - size / 2 < 0)
 		{
 			//dx = -dx;
 			dy = -dy;
@@ -2117,7 +2117,7 @@ public:
 				Shot(turnX, turnY, angleVustrel, 0, 0);
 				ammoMagazine--;
 				countAttack = 0;
-				if (networkGame == true&& mode=='c')
+				if (networkGame == true && mode == 'c')
 				{
 					client.Send(5, turnX, turnY, 0, angleVustrel);
 				}
@@ -2294,12 +2294,12 @@ public:
 		Color color = Color::White;
 		static int count = 0;
 		int maxCount = 10;
-		if ((hitPanzerRed == true && networkGame==false)||((hitPanzerGreen == true || hitPanzerRed == true) && networkGame == true))
+		if ((hitPanzerRed == true && networkGame == false) || ((hitPanzerGreen == true || hitPanzerRed == true) && networkGame == true))
 		{
 			count = count;
 			if (count < maxCount)
 			{
-				color = count % 2 == 0 ? Color::Blue : Color(0,255,255);
+				color = count % 2 == 0 ? Color::Blue : Color(0, 255, 255);
 				count++;
 			}
 			else
@@ -2496,7 +2496,7 @@ bool BulletInPanzer()
 						if (networkGame == false || (networkGame == true && mode == 's'))
 						{
 							shakesCamera = true;
-							
+
 						}
 						hitPanzerGreen = true;
 						break;
@@ -2516,9 +2516,9 @@ bool BulletInPanzer()
 					if (networkGame == false || (networkGame == true && mode == 's'))
 					{
 						shakesCamera = true;
-						
+
 					}
-					hitPanzerGreen =true;
+					hitPanzerGreen = true;
 					burstes.Registration(bullets[i].x, bullets[i].y, true);
 				}
 			}
@@ -2541,10 +2541,10 @@ bool PyleInPanzerBot()
 						if (networkGame == true && mode == 'c')
 						{
 							shakesCamera = true;
-							
+
 						}
 						bullets[i].being = false;
-						hitPanzerRed= true;
+						hitPanzerRed = true;
 						break;
 					}
 				}
@@ -2562,9 +2562,9 @@ bool PyleInPanzerBot()
 					if (networkGame == true && mode == 'c')
 					{
 						shakesCamera = true;
-						
+
 					}
-					hitPanzerRed= true;
+					hitPanzerRed = true;
 					burstes.Registration(bullets[i].x, bullets[i].y, true);
 				}
 			}
@@ -2857,7 +2857,7 @@ void DrawLine(int x, int y, int x1, int y1, Color color, RenderWindow& window)//
 	//и в конце выводим все на экран:
 	window.draw(lines);
 }
-const int amountLines = 101;
+const int amountLines = 51;
 class Camera
 {
 
@@ -2866,14 +2866,14 @@ public:
 	Vector2f point;
 	enum Type// типы объектов
 	{
-		EMPTY, WALL, PANZRED, PANZGREEN,BONUSBULLETS,BONUSARMOUR,BONUSSTAR
+		EMPTY, WALL, PANZRED, PANZGREEN, BONUSBULLETS, BONUSARMOUR, BONUSSTAR
 	};
 	struct DataLine// данные об отрезках стен
 	{
 		Vector2f begin;
 		Vector2f end;
 	};
-	
+
 	struct Data// данные о линиях, которые рпаспространяются
 	{
 		float dist;// дистанция
@@ -2882,7 +2882,7 @@ public:
 		Type type;
 	};
 	DataLine dataLine[amountWalls * 4];// массив данных о стенах
-	DataLine dataLineBonus[amountBonus*4];// массив данных о стенах
+	DataLine dataLineBonus[amountBonus * 4];// массив данных о стенах
 	DataLine dataLinePanzerGreen[4];
 	DataLine dataLinePanzerRed[4];
 	Data data[amountLines];// массив линий просмотра
@@ -2892,7 +2892,7 @@ public:
 	float StepOfField;// угол между лучами
 	float WalkSpeed;// скорость ходьбы
 	float ViewSpeed;//скорость обзора мышью
-	//float MaxDistance;// максимальная дистанция видимости
+					//float MaxDistance;// максимальная дистанция видимости
 
 	void BlockToLines()// функция переведения к квадратиков серых блоков в линии стен
 	{
@@ -2962,22 +2962,27 @@ public:
 		point.y = screenHeigth / 2;
 		dir = 2.5;
 		FieldOfView = 1;
-		StepOfField = 0.01;
+		StepOfField = 0.02;
 		WalkSpeed = 0.04;
 		ViewSpeed = 0.002f;
-	//	MaxDistance = 500;
+		//float dir;// напрвление
+		//float FieldOfView;// угол области видимости в рад
+		//float StepOfField;// угол между лучами
+		//float WalkSpeed;// скорость ходьбы
+		//float ViewSpeed;//скорость обзора мышью
+		//	MaxDistance = 500;
 		//	BlockToLines();
 	}
 	void BonusToLine()
 	{
-		
+
 		for (int i = 0; i < amountBonus; i++)
 		{
 
 			//if (bonuses.bonus[i].being == true)
 			{
 				Vector2f A = Vector2f(bonuses.bonus[i].x, bonuses.bonus[i].y);
-				Vector2f B = Vector2f(bonuses.bonus[i].x+ bonuses.size, bonuses.bonus[i].y) ;
+				Vector2f B = Vector2f(bonuses.bonus[i].x + bonuses.size, bonuses.bonus[i].y);
 				Vector2f C = Vector2f(bonuses.bonus[i].x + bonuses.size, bonuses.bonus[i].y + bonuses.size);
 				Vector2f D = Vector2f(bonuses.bonus[i].x, bonuses.bonus[i].y + bonuses.size);
 
@@ -2992,12 +2997,12 @@ public:
 
 				dataLineBonus[i * 4 + 3].begin = D;
 				dataLineBonus[i * 4 + 3].end = A;
-				
+
 			}
 			if (Keyboard::isKeyPressed(Keyboard::B))
 			{
 				int a;
-				a = a;
+//				a = a;
 			}
 		}
 	}
@@ -3135,7 +3140,7 @@ public:
 		//Control(window);
 		static float dirOld = 0;
 		dir = ControlMouse();
-		if (isnan(dir)!=0)
+		if (isnan(dir) != 0)
 		{
 			dir = dirOld;
 		}
@@ -3149,13 +3154,13 @@ public:
 			{
 				point.x = panzer.Get_X() + panzer.Get_Size();
 				point.y = panzer.Get_Y() + panzer.Get_Size();
-			
+
 			}
 			else if (tpPanz == RED)
 			{
 				point.x = panzerBot.Get_X() + panzerBot.Get_Size();
 				point.y = panzerBot.Get_Y() + panzerBot.Get_Size();
-				
+
 			}
 		}
 		ShakeCamera();
@@ -3183,11 +3188,11 @@ public:
 
 
 						//если точка пересеяения рядом с краем линии стены
-						if (distance(data[i].acrossPoint.x, data[i].acrossPoint.y, dataLine[j].begin.x, dataLine[j].begin.y) < 0.5 ||
-							distance(data[i].acrossPoint.x, data[i].acrossPoint.y, dataLine[j].end.x, dataLine[j].end.y) < 0.5)
+						//if (distance(data[i].acrossPoint.x, data[i].acrossPoint.y, dataLine[j].begin.x, dataLine[j].begin.y) <0||
+						//	distance(data[i].acrossPoint.x, data[i].acrossPoint.y, dataLine[j].end.x, dataLine[j].end.y) < 0)
 							data[i].color = Color::White;
-						else
-							data[i].color = Color::Green;
+						//else
+							//data[i].color = Color::Green;
 
 					}
 					//data[i].type = WALL;
@@ -3242,8 +3247,8 @@ public:
 					}
 
 				}
-			
-				
+
+
 				data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
 				// умножаем на косинус если точка пересечения не больше максимальной
 				if (data[i].dist < MaxDistance - 0.1)
@@ -3254,7 +3259,7 @@ public:
 			}
 			for (int j = 0; j < amountBonus * 4; j++)
 			{
-				if (bonuses.bonus[j/4].being == true)
+				if (bonuses.bonus[j / 4].being == true)
 				{
 					if (IsCrossing(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y,
 						dataLineBonus[j].begin.x, dataLineBonus[j].begin.y, dataLineBonus[j].end.x, dataLineBonus[j].end.y))
@@ -3264,14 +3269,14 @@ public:
 						data[i].acrossPoint = oneData.acrossPoint;
 						/*switch (bonuses.bonus[j].type)
 						{
-						case 1:  data[i].type = BONUSBULLETS; break; 
-						case 2:  data[i].type = BONUSSTAR; break; 
-						case 3:  data[i].type = BONUSARMOUR; break; 
+						case 1:  data[i].type = BONUSBULLETS; break;
+						case 2:  data[i].type = BONUSSTAR; break;
+						case 3:  data[i].type = BONUSARMOUR; break;
 
 						}*/
-						if (bonuses.bonus[j/4].type == 1) data[i].type = BONUSBULLETS;
-						if (bonuses.bonus[j/4].type == 2) data[i].type = BONUSSTAR;
-						if (bonuses.bonus[j/4].type == 3) data[i].type = BONUSARMOUR;
+						if (bonuses.bonus[j / 4].type == 1) data[i].type = BONUSBULLETS;
+						if (bonuses.bonus[j / 4].type == 2) data[i].type = BONUSSTAR;
+						if (bonuses.bonus[j / 4].type == 3) data[i].type = BONUSARMOUR;
 					}
 				}
 				data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
@@ -3303,8 +3308,9 @@ public:
 		rectangle.setFillColor(Color(255, 128, 128));
 		rectangle.setPosition(1, screenHeigth / 2 + 1 - 40);
 		window.draw(rectangle);
-		RectangleShape recWall3D;
+		RectangleShape rect3D;
 		float multHeight = 0.15;
+		int widthRect3D = 20;
 		for (int i = 0; i < amountLines; i++)
 		{
 			float dist = data[i].dist;// *cos((pi));
@@ -3312,25 +3318,25 @@ public:
 			{
 
 				float lineHeight = dist * multHeight;
-				if (data[i].color == Color::Green)// рисуем серые линии если это не край отрезка стены
+				if (data[i].color == Color::White)// рисуем серые линии если это не край отрезка стены
 				{
-					recWall3D.setFillColor(Color(200 - lineHeight / 2, 200 - lineHeight / 2, 200 - lineHeight / 2));
-					recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
-					recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+					rect3D.setFillColor(Color(200 - lineHeight * 1.5, 200 - lineHeight * 1.5, 200 - lineHeight * 1.5));
+					rect3D.setSize(Vector2f(widthRect3D, 1000 / lineHeight * 2));
+					rect3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
 						screenHeigth / 2 - 40 - 1000 / lineHeight);
 
 					/*DrawLine((int)(screenWidth / (float)amountLines * (amountLines - i)), screenHeigth / 2-40 - 1000 / lineHeight,
 					(int)(screenWidth / (float)amountLines * (amountLines - i)), screenHeigth / 2-40 + 1000 / lineHeight,
 					Color(200 - lineHeight / 2, 200 - lineHeight / 2, 200 - lineHeight / 2), window);*/
-					window.draw(recWall3D);
+					window.draw(rect3D);
 				}
 				else
-				{	// рисуем белый линии если это край стены
-					recWall3D.setFillColor(Color(100, 255 - lineHeight / 2, 100));
-					recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
-					recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+				{	// рисуем зеленый линии если это край стены
+					rect3D.setFillColor(Color(50, 150 - lineHeight / 2, 50));
+					rect3D.setSize(Vector2f(widthRect3D, 1000 / lineHeight * 2));
+					rect3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
 						screenHeigth / 2 - 40 - 1000 / lineHeight);
-					window.draw(recWall3D);
+					window.draw(rect3D);
 					/*DrawLine((int)(screenWidth / (float)amountLines * (amountLines - i)), screenHeigth / 2-40 - 1000 / lineHeight,
 					(int)(screenWidth / (float)amountLines * (amountLines - i)), screenHeigth / 2-40 + 1000 / lineHeight,
 					Color::White, window);*/
@@ -3340,47 +3346,47 @@ public:
 			if (data[i].type == PANZRED)
 			{
 				float lineHeight = dist * multHeight;
-				recWall3D.setFillColor(Color::Red);
-				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
-				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+				rect3D.setFillColor(Color::Red);
+				rect3D.setSize(Vector2f(widthRect3D, 1000 / lineHeight * 2));
+				rect3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
 					screenHeigth / 2 - 40 - 1000 / lineHeight);
-				window.draw(recWall3D);
+				window.draw(rect3D);
 			}
 			if (data[i].type == PANZGREEN)
 			{
 				float lineHeight = dist * multHeight;
-				recWall3D.setFillColor(Color::Green);
-				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
-				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+				rect3D.setFillColor(Color::Green);
+				rect3D.setSize(Vector2f(widthRect3D, 1000 / lineHeight * 2));
+				rect3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
 					screenHeigth / 2 - 40 - 1000 / lineHeight);
-				window.draw(recWall3D);
+				window.draw(rect3D);
 			}
 			if (data[i].type == BONUSBULLETS)
 			{
 				float lineHeight = dist * multHeight;
-				recWall3D.setFillColor(Color(150,75,0));
-				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
-				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+				rect3D.setFillColor(Color(150, 75, 0));
+				rect3D.setSize(Vector2f(widthRect3D, 1000 / lineHeight * 2));
+				rect3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
 					screenHeigth / 2 - 40 - 1000 / lineHeight);
-				window.draw(recWall3D);
+				window.draw(rect3D);
 			}
 			if (data[i].type == BONUSARMOUR)
 			{
 				float lineHeight = dist * multHeight;
-				recWall3D.setFillColor(Color::Blue);
-				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
-				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+				rect3D.setFillColor(Color::Blue);
+				rect3D.setSize(Vector2f(widthRect3D, 1000 / lineHeight * 2));
+				rect3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
 					screenHeigth / 2 - 40 - 1000 / lineHeight);
-				window.draw(recWall3D);
+				window.draw(rect3D);
 			}
 			if (data[i].type == BONUSSTAR)
 			{
 				float lineHeight = dist * multHeight;
-				recWall3D.setFillColor(Color(255,128,0));
-				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
-				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
+				rect3D.setFillColor(Color(255, 128, 0));
+				rect3D.setSize(Vector2f(widthRect3D, 1000 / lineHeight * 2));
+				rect3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
 					screenHeigth / 2 - 40 - 1000 / lineHeight);
-				window.draw(recWall3D);
+				window.draw(rect3D);
 			}
 			if (i <= amountLines / 2 + 15 && i >= amountLines / 2 - 15)
 			{
@@ -3446,7 +3452,7 @@ int main()// главная функция
 {
 
 	double time1 = 0, time2 = 0; // переменые для таймера
-	
+
 	int countShotFocus = 0; // счетчик задержки выстрела после поевление окно игры в фокусе
 	srand(time(0));
 	int selectMenu = 0;
@@ -3488,8 +3494,8 @@ int main()// главная функция
 			if (StartConnected == true && networkGame == false)// если было выбранно в меню многопользовательская игра
 			{
 				system("cls");//очистка консоли
-				/*std::cout << "s - server; c - client" << "\n";
-				std::cin >> mode;*/
+							  /*std::cout << "s - server; c - client" << "\n";
+							  std::cin >> mode;*/
 				if (mode == 's')
 				{
 					std::cout << "Please wait for connection client";
@@ -3514,7 +3520,7 @@ int main()// главная функция
 					}
 					//	for (int i=0;i<kolvoStens;i++)
 					int k = 0;
-					static bool viewSend=false;
+					static bool viewSend = false;
 					static bool viewRaceResponce = false;
 					Data data;
 					////////////////////// передача данных о стенах клиенту		
@@ -3558,8 +3564,8 @@ int main()// главная функция
 							data = client.Receive();
 							if (data.key == 9)
 							{
-								if (data.tip == 0) 
-								{ 
+								if (data.tip == 0)
+								{
 									isView3D = false;
 									mouseCapture = false;
 									window.setMouseCursorVisible(true);
@@ -3570,7 +3576,7 @@ int main()// главная функция
 									mouseCapture = true;
 									window.setMouseCursorVisible(false);
 								}
-									client.Send(9, 0, 0, isView3D ? 1 : 0, 0);
+								client.Send(9, 0, 0, isView3D ? 1 : 0, 0);
 								viewSend = true;
 							}
 						}
@@ -3635,8 +3641,8 @@ int main()// главная функция
 			//panzer.Control(event);
 			if (networkGame == true)
 			{
-			//	camera.LinePanzerGreen();
-			//	camera.LinePanzerRed();
+				//	camera.LinePanzerGreen();
+				//	camera.LinePanzerRed();
 
 				if (mode == 's')
 				{
@@ -3653,7 +3659,7 @@ int main()// главная функция
 					gameInterface.LoadData(panzerBot.Get_HP(), panzerBot.Get_Brony(),
 						panzerBot.Get_Pylu(), panzerBot.Get_ChetAttack(), panzerBot.Get_TimeAttack());
 					gameInterface.LoadDataBonus(panzerBot.speedTurn);
-				//	camera.Services(RED, window);
+					//	camera.Services(RED, window);
 				}
 			}
 			else
@@ -3677,7 +3683,7 @@ int main()// главная функция
 				gameInterface.LoadDataBonus(panzer.speedTurn);
 			}
 
-			if (networkGame == false) camera.Services(GREEN, window);
+			if (networkGame == false && isView3D==true) camera.Services(GREEN, window);
 			panzerBot.MovingToKeyboard();
 			panzer.Servis();
 			panzerBot.Servis();
@@ -3710,7 +3716,7 @@ int main()// главная функция
 
 			if (ClickMouseLeft(event) == false)NoShotFocus = false;
 		}
-		
+
 		if (networkGame == true)
 		{
 			camera.LinePanzerGreen();
@@ -3726,11 +3732,11 @@ int main()// главная функция
 			}
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::V))// поворот по часовой
-		{
-			isView3D = !isView3D;
-			while (Keyboard::isKeyPressed(Keyboard::V));
-		}
+		//if (Keyboard::isKeyPressed(Keyboard::V))// // изменение режима игры 2д/3д
+		//{
+		//	isView3D = !isView3D;
+		//	while (Keyboard::isKeyPressed(Keyboard::V));
+		//}
 		window.clear();
 		if (startGame == true)
 		{
