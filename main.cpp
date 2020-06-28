@@ -26,6 +26,7 @@ bool startGame = false;// стартавала ли игра
 bool StartConnected = false;// началось ли соедение то-есть ввод ип и ожидание
 bool networkGame = false;
 bool mouseCapture = false;// захват мыши приложением
+float MaxDistance=500;// максимальная дистанция видимости
 bool isView3D = true;
 bool shakesCamera = false;
 bool hitPanzerRed = false, hitPanzerGreen = false;
@@ -823,15 +824,26 @@ bool IsCrossing(float a1x, float a1y, float a2x, float a2y, float b1x, float b1y
 	float v4 = VectMult(a2x - a1x, a2y - a1y, b2x - a1x, b2y - a1y);
 	return (v1 * v2) <= 0 && (v3 * v4) <= 0;
 }
-bool LookAcrossWall(int x, int y, int arrivalX, int arrivalY)// функция видимости через стены
+bool LookAcrossWall(int x, int y, int arrivalX, int arrivalY,bool checkDist=false)// функция видимости через стены
 {
-	for (size_t i = 0; i < amountWalls; i++)
-		if (IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x, walls.wall[i].y, walls.wall[i].x + walls.size, walls.wall[i].y) ||
-			IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x + walls.size, walls.wall[i].y, walls.wall[i].x + walls.size, walls.wall[i].y + walls.size) ||
-			IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x + walls.size, walls.wall[i].y + walls.size, walls.wall[i].x, walls.wall[i].y + walls.size) ||
-			IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x, walls.wall[i].y + walls.size, walls.wall[i].x, walls.wall[i].y))
-			return false;
-	return true;
+	float dx=0, dy=0,dist=0;
+	dx =  arrivalX - x;
+	dy = arrivalY - y;
+	dist = sqrt(dx * dx + dy * dy);
+	if (checkDist == false || (checkDist == true && dist < MaxDistance))
+	{
+		for (size_t i = 0; i < amountWalls; i++)
+			if (IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x, walls.wall[i].y, walls.wall[i].x + walls.size, walls.wall[i].y) ||
+				IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x + walls.size, walls.wall[i].y, walls.wall[i].x + walls.size, walls.wall[i].y + walls.size) ||
+				IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x + walls.size, walls.wall[i].y + walls.size, walls.wall[i].x, walls.wall[i].y + walls.size) ||
+				IsCrossing(x, y, arrivalX, arrivalY, walls.wall[i].x, walls.wall[i].y + walls.size, walls.wall[i].x, walls.wall[i].y))
+			{
+				return false;
+			}
+
+		return true;
+	}
+	return false;
 
 	//double angle, pointX = x, pointY = y;
 	//angle = CalcAngle(x, y, arrivalX, arrivalY);
@@ -1147,6 +1159,14 @@ public:
 		turnY1 = size * 3 * sin(pi * (angle - 90) / 180) + y + size;
 		turnX1 = size * 3 * cos(pi * (angle - 90) / 180) + x + size;
 	}
+	float get_TurnX()
+	{
+		return turnX;
+	}
+	float get_TurnY()
+	{
+		return turnY;
+	}
 	void Control3D(Event event)
 	{
 		float speed = 1.5;// скорость движения танка
@@ -1203,13 +1223,13 @@ public:
 
 		}
 
-		if (walls.CrossWall(x + dx, y, size * 2, size * 2) || x+dx+size/2>screenWidth || x + dx - size/2 <0)
+		if (walls.CrossWall(x + dx, y, size*1.5 , size*1.5 ) || x+dx+size/2>screenWidth || x + dx - size/2 <0)
 		{
 			dx = -dx;
 			//dy = -dy;
 			Move(dx, 0);
 		}
-		if (walls.CrossWall(x, y + dy, size * 2, size * 2) || y+ dy + size/2 > screenHeigth-40-size/2 || y + dy - size/2 < 0)
+		if (walls.CrossWall(x, y + dy, size*1.5 , size*1.5 ) || y+ dy + size/2 > screenHeigth-40-size/2 || y + dy - size/2 < 0)
 		{
 			//dx = -dx;
 			dy = -dy;
@@ -1849,7 +1869,7 @@ public:
 		if (panzer.Get_Being() == true)// условие атаки бота
 			if (ammoMagazine > 0)// если пуль больше 0
 				if (LookAcrossWall(x + size, y + size, panzer.Get_X() + panzer.Get_Size(),
-					panzer.Get_Y() + panzer.Get_Size()))// если видит танк игрока
+					panzer.Get_Y() + panzer.Get_Size(),isView3D==true?true:false))// если видит танк игрока
 				{
 					// расчет угла для атаки
 					angleAim = CalcAngle(x + size, y + size, panzer.Get_X() + panzer.Get_Size(), panzer.Get_Y() + panzer.Get_Size());
@@ -2072,13 +2092,13 @@ public:
 			Move(0, dy);
 		}
 
-		if (walls.CrossWall(x + dx, y, size * 2, size * 2) || x + dx + size / 2 > screenWidth || x + dx - size / 2 < 0)
+		if (walls.CrossWall(x + dx, y, size * 1.5, size * 1.5) || x + dx + size / 2 > screenWidth || x + dx - size / 2 < 0)
 		{
 			dx = -dx;
 			//dy = -dy;
 			Move(dx, 0);
 		}
-		if (walls.CrossWall(x, y + dy, size * 2, size * 2) || y + dy + size / 2 > screenHeigth-40-size/2 || y + dy - size / 2 < 0)
+		if (walls.CrossWall(x, y + dy, size * 1.5, size * 1.5) || y + dy + size / 2 > screenHeigth-40-size/2 || y + dy - size / 2 < 0)
 		{
 			//dx = -dx;
 			dy = -dy;
@@ -2872,7 +2892,7 @@ public:
 	float StepOfField;// угол между лучами
 	float WalkSpeed;// скорость ходьбы
 	float ViewSpeed;//скорость обзора мышью
-	float MaxDistance;// максимальная дистанция видимости
+	//float MaxDistance;// максимальная дистанция видимости
 
 	void BlockToLines()// функция переведения к квадратиков серых блоков в линии стен
 	{
@@ -2945,7 +2965,7 @@ public:
 		StepOfField = 0.01;
 		WalkSpeed = 0.04;
 		ViewSpeed = 0.002f;
-		MaxDistance = 1250;
+	//	MaxDistance = 500;
 		//	BlockToLines();
 	}
 	void BonusToLine()
@@ -3129,11 +3149,13 @@ public:
 			{
 				point.x = panzer.Get_X() + panzer.Get_Size();
 				point.y = panzer.Get_Y() + panzer.Get_Size();
+			
 			}
 			else if (tpPanz == RED)
 			{
 				point.x = panzerBot.Get_X() + panzerBot.Get_Size();
 				point.y = panzerBot.Get_Y() + panzerBot.Get_Size();
+				
 			}
 		}
 		ShakeCamera();
@@ -3282,13 +3304,14 @@ public:
 		rectangle.setPosition(1, screenHeigth / 2 + 1 - 40);
 		window.draw(rectangle);
 		RectangleShape recWall3D;
+		float multHeight = 0.15;
 		for (int i = 0; i < amountLines; i++)
 		{
 			float dist = data[i].dist;// *cos((pi));
 			if (dist < MaxDistance - 0.1)
 			{
 
-				float lineHeight = dist * 0.5;
+				float lineHeight = dist * multHeight;
 				if (data[i].color == Color::Green)// рисуем серые линии если это не край отрезка стены
 				{
 					recWall3D.setFillColor(Color(200 - lineHeight / 2, 200 - lineHeight / 2, 200 - lineHeight / 2));
@@ -3316,7 +3339,7 @@ public:
 			}
 			if (data[i].type == PANZRED)
 			{
-				float lineHeight = dist * 0.5;
+				float lineHeight = dist * multHeight;
 				recWall3D.setFillColor(Color::Red);
 				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
 				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
@@ -3325,7 +3348,7 @@ public:
 			}
 			if (data[i].type == PANZGREEN)
 			{
-				float lineHeight = dist * 0.5;
+				float lineHeight = dist * multHeight;
 				recWall3D.setFillColor(Color::Green);
 				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
 				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
@@ -3334,7 +3357,7 @@ public:
 			}
 			if (data[i].type == BONUSBULLETS)
 			{
-				float lineHeight = dist * 0.5;
+				float lineHeight = dist * multHeight;
 				recWall3D.setFillColor(Color(150,75,0));
 				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
 				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
@@ -3343,7 +3366,7 @@ public:
 			}
 			if (data[i].type == BONUSARMOUR)
 			{
-				float lineHeight = dist * 0.5;
+				float lineHeight = dist * multHeight;
 				recWall3D.setFillColor(Color::Blue);
 				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
 				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
@@ -3352,7 +3375,7 @@ public:
 			}
 			if (data[i].type == BONUSSTAR)
 			{
-				float lineHeight = dist * 0.5;
+				float lineHeight = dist * multHeight;
 				recWall3D.setFillColor(Color(255,128,0));
 				recWall3D.setSize(Vector2f(10, 1000 / lineHeight * 2));
 				recWall3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
@@ -3703,11 +3726,11 @@ int main()// главная функция
 			}
 
 		}
-		//if (Keyboard::isKeyPressed(Keyboard::V))// поворот по часовой
-		//{
-		//	isView3D = !isView3D;
-		//	while (Keyboard::isKeyPressed(Keyboard::V));
-		//}
+		if (Keyboard::isKeyPressed(Keyboard::V))// поворот по часовой
+		{
+			isView3D = !isView3D;
+			while (Keyboard::isKeyPressed(Keyboard::V));
+		}
 		window.clear();
 		if (startGame == true)
 		{
