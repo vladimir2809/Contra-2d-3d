@@ -1,8 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include <time.h>
 #include <stdio.h>
-#include <dos.h>
-#include <windows.h>
+// #include <dos.h>
+// #include <windows.h>
 #include <sstream>
 #include <iostream>
 #include <math.h>
@@ -11,22 +11,22 @@ using namespace  sf;
 using namespace  std;
 int screenWidth = 800, screenHeigth = 600;
 const double  pi = 3.1415926;
-const int amountBullet = 200;// количество пуль
-int const amountWalls = 35;// количество стен
-int const amountBonus = 20;// количество бонусов
-int const amountBurst = 20;// количество взрывов
-int const timeBurst = 35;// длительность взрыва
+const int amountBullet = 200;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+int const amountWalls = 35;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+int const amountBonus = 20;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+int const amountBurst = 20;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+int const timeBurst = 35;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 int const map_Size_X = 20;
 int const map_Size_Y = 14;
 int const countPacked = 10;
 int scorePlayer = 0, scoreBot = 0, starsPlayer = 0, starsBot = 0;
-bool pause = false;// флаг того, что окно игры не активно.
-bool NoShotFocus = false; // запрет выстрела танка когда окно игры входит в фокус
-bool startGame = false;// стартавала ли игра
-bool StartConnected = false;// началось ли соедение то-есть ввод ип и ожидание
+bool pause = false;// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+bool NoShotFocus = false; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
+bool startGame = false;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
+bool StartConnected = false;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ-пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 bool networkGame = false;
-bool mouseCapture = false;// захват мыши приложением
-float MaxDistance = 500;// максимальная дистанция видимости
+bool mouseCapture = false;// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+float MaxDistance = 500;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 bool isView3D = true;
 bool shakesCamera = false;
 bool hitPanzerRed = false, hitPanzerGreen = false;
@@ -38,25 +38,25 @@ enum typePanzer
 	GREEN, RED
 };
 sf::RenderWindow window(VideoMode(800, 600), "CONTRA ", Style::Close);
-void DrawLine(int x, int y, int x1, int y1, Color color)// процедура рисования линии
+void DrawLine(int x, int y, int x1, int y1, Color color)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 {
-	//создаем массив точек, по которым будут рисоваться линии:
-	sf::VertexArray lines(sf::Lines, 16 /*количество точек*/);
+	//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ:
+	sf::VertexArray lines(sf::Lines, 16 /*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ*/);
 
-	//далее для каждой из точек задаем свою позицию:
+	//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 	lines[0].position = sf::Vector2f(x, y);
 	lines[1].position = sf::Vector2f(x1, y1);
-	//и т.д.
+	//пїЅ пїЅ.пїЅ.
 
-	//далее для каждой точки указываем цвет(так можно создавать градиенты):
+	//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ(пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ):
 	lines[0].color = color;
 	lines[1].color = color;
-	//и т.д.
+	//пїЅ пїЅ.пїЅ.
 
-	//и в конце выводим все на экран:
+	//пїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ:
 	window.draw(lines);
 }
-double CalcAngle(int x, int y, int ArrivalX, int ArrivalY)// процедура расчета угла по 2м точкам
+double CalcAngle(int x, int y, int ArrivalX, int ArrivalY)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ 2пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 {
 	int fdx, fdy;
 	double fxy, ff;
@@ -74,11 +74,11 @@ double CalcAngle(int x, int y, int ArrivalX, int ArrivalY)// процедура расчета у
 	ff += 90;
 	return ff;
 }
-bool ClickMouseLeft(Event event)// процедура обработки события нажатие левой кнопки мыщи
+bool ClickMouseLeft(Event event)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 {
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-		//if (event.type == Event::MouseButtonPressed)//если нажата клавиша мыши
-		//			if (event.key.code == Mouse::Left)//а именно левая
+		//if (event.type == Event::MouseButtonPressed)//пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+		//			if (event.key.code == Mouse::Left)//пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 		//std::cout<<"ckick mouse"<<"\n";
 		return true;
@@ -86,7 +86,7 @@ bool ClickMouseLeft(Event event)// процедура обработки события нажатие левой кно
 	}
 	return false;
 }
-double MovingToAngle(double angle, double angle1, bool speedTurn = false)// функция плавного изменеия угла (нужна для того что бы прицел был плавным) 
+double MovingToAngle(double angle, double angle1, bool speedTurn = false)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ) 
 {
 	int vector = 0;
 	//if (vector==0)
@@ -127,10 +127,10 @@ float ControlMouse()
 		flagBeginProg = true;
 		//window.setMouseCursorVisible(false);
 	}
-	if (Keyboard::isKeyPressed(Keyboard::M))// поворот по часовой
+	if (Keyboard::isKeyPressed(Keyboard::M))// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		mouseCapture = !mouseCapture;
-		//window.setMouseCursorVisible() // спрятать курсор
+		//window.setMouseCursorVisible() // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 		window.setMouseCursorVisible(!mouseCapture);
 
 
@@ -143,7 +143,7 @@ float ControlMouse()
 	if (mouseCapture == true)
 	{
 		static Vector2i oldMouse = Mouse::getPosition(window);
-		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+		Vector2i mousePos = Mouse::getPosition(window);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		Vector2i winPos = window.getPosition();
 		if (pause == false)
 		{
@@ -157,20 +157,21 @@ float ControlMouse()
 				dir -= (mousePos.x - oldMouse.x) / (float)500;
 				if (dir < 0) dir += 2 * pi;
 			}
-			Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// устанновка курсора в пользовательские координаты  
+			Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ  
 		}
-		//Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// устанновка курсора в пользовательские координаты  
+		//Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ  
 		oldMouse = Mouse::getPosition(window);
 		return dir;
 	}
+	return dir;
 }
 struct Data
 {
 	sf::Uint16 key, tip;
 	double x, y, angle;
 };
-Data dataServerRace[countPacked],// дфнные приема сервера
-dataClientRace[countPacked];// данные приема клиента
+Data dataServerRace[countPacked],// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+dataClientRace[countPacked];// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 class Server
 {
 
@@ -312,14 +313,14 @@ public:
 };
 
 Client client;
-void ServerRace()// прием данных с клиента сервером
+void ServerRace()// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 {
 	for (int i = 0; i < countPacked; i++)
 	{
 		dataServerRace[i] = server.Receive();
 	}
 }
-void ClientRace()// прием данных с сервера клиентом
+void ClientRace()// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 {
 	for (int i = 0; i < countPacked; i++)
 	{
@@ -328,11 +329,11 @@ void ClientRace()// прием данных с сервера клиентом
 }
 class MainMenu
 {
-	int focus;// номер пункта меню на который наведен указатель мыши 
+	int focus;// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ 
 	bool network;
-	int startX, startY;//координаты от которых будет позиционироваться меню
-	int stepDown;// растояние между пунктами меню
-	int widthPunct;// ширина пункта для наведения мыши
+	int startX, startY;//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+	int stepDown;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+	int widthPunct;// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	int numPageMenu;
 	int result;
 public:
@@ -350,7 +351,7 @@ public:
 	int Service(Event event)
 	{
 
-		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+		Vector2i mousePos = Mouse::getPosition(window);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		if (network == false)
 		{
 			focus = 0;
@@ -499,7 +500,7 @@ public:
 
 	void Draw(Text text)
 	{
-		std::ostringstream FPSString;    // объявили переменную
+		std::ostringstream FPSString;    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		FPSString << FPS;
 		text.setString(FPSString.str());
 		text.setPosition(400, 577);
@@ -513,17 +514,17 @@ public:
 	}
 };
 Fps fps;
-class Walls// класс стен
+class Walls// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 {
 
 public:
 	int size;
-	struct Wall// одна стенка
+	struct Wall// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		int x, y;
 	};
 	Wall wall[amountWalls];
-	Walls()// конструктор стен. расставляяет случайно стены
+	Walls()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 		size = 40;
 	}
@@ -539,7 +540,7 @@ public:
 		}
 
 	}
-	void DrawWalls()// нарисовать стены
+	void DrawWalls()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 		RectangleShape rectangle(sf::Vector2f(size, size));
 		rectangle.setFillColor(Color(128, 128, 128));
@@ -549,13 +550,13 @@ public:
 			window.draw(rectangle);
 		}
 	}
-	bool CrossWall(int x, int y, int dx = -1, int dy = -1, bool baruer = false)// процедура проверки нахожжденя в стене
+	bool CrossWall(int x, int y, int dx = -1, int dy = -1, bool baruer = false)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 		for (int i = 0; i < amountWalls; i++)
 		{
 			if (dx == -1 && dy == -1)
 			{
-				//если не задано смешение dx, dy то проверяет одну точку
+				//пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ dx, dy пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 				if (baruer == false)
 				{
 
@@ -564,19 +565,19 @@ public:
 				}
 				else
 				{
-					// если барьер ==истина то проверяет раздвинув рамки
+					// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ ==пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 					if (x >= wall[i].x - 5 && x <= wall[i].x + size + 5 && y >= wall[i].y - 5 && y <= wall[i].y + size + 5) return true;
 				}
 			}
 			else
 			{
-				//если смешение dy, dx  заданно то проверяет на пересечение 2 примоугольника
+				//пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ dy, dx  пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 2 пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 				if (x + dx >= wall[i].x && x <= wall[i].x + size && y + dy >= wall[i].y && y <= wall[i].y + size) return true;
 			}
 		}
 		return false;
 	}
-	void WallsSend(int k)// передача координат стен с сервера клиенту
+	void WallsSend(int k)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 
 
@@ -584,7 +585,7 @@ public:
 
 
 	}
-	int WallsReceive()// прием стен с сервера и присвоение стенам кoординат
+	int WallsReceive()// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅoпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 
 		Data data;
@@ -599,14 +600,14 @@ public:
 	}
 };
 Walls walls;
-class Route //класс который хранит маршрут для движения юнитов
+class Route //пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 {
-	int MapSearch[map_Size_X][map_Size_Y];// массив который хранит значения ждля поиска пути, который хранить номер клетки от начала поиска
+	int MapSearch[map_Size_X][map_Size_Y];// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 
 public:
 	int length, lengthRoute, arrivalX, arrivalY, beginX, beginY;
-	bool being;// сушествует ли маршрут
-	struct PointPuti // точка пути
+	bool being;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	struct PointPuti // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		int x, y;
 		bool being;
@@ -676,16 +677,16 @@ public:
 				MapSearch[i][j] = 0;
 			}
 	}
-	void PrepareMapForSearchRoute(int x, int y, int arrX, int arrY, int panzerX = -1, int panzerY = -1)// загрузитть данные в массив предназначеннй для поиска пути
+	void PrepareMapForSearchRoute(int x, int y, int arrX, int arrY, int panzerX = -1, int panzerY = -1)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 
 		for (int i = 0; i < map_Size_X; i++)
 			for (int j = 0; j < map_Size_Y; j++)
 			{
-				//инициализация массива для поиска пути   
+				//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ   
 				MapSearch[i][j] = 0;
 				for (int k = 0; k < amountWalls; k++)
-					if (walls.wall[k].x == i * 40 && walls.wall[k].y == j * 40) // заносим в массив стены
+					if (walls.wall[k].x == i * 40 && walls.wall[k].y == j * 40) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 					{
 						MapSearch[i][j] = -1;
 						break;
@@ -694,16 +695,16 @@ public:
 				{
 					beginX = i;
 					beginY = j;
-					MapSearch[i][j] = -2;// заносим в массив точку начала пути 
+					MapSearch[i][j] = -2;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ 
 				}
 				if (arrX > i * 40 && arrX <= i * 40 + 40 && arrY > j * 40 && arrY <= j * 40 + 40)
 				{
 					arrivalX = i;
 					arrivalY = j;
-					//  MapPoisk[i][j]=-3;// заносим точку конца пути
+					//  MapPoisk[i][j]=-3;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 				}
 				if (panzerX != -1 && panzerY != -1)
-					if (panzerX + 30 > i * 40 && panzerX<i * 40 + 40 && panzerY + 30>j * 40 && panzerY < j * 40 + 40) MapSearch[i][j] = -4; // заносим точки движушихся препятсвий
+					if (panzerX + 30 > i * 40 && panzerX<i * 40 + 40 && panzerY + 30>j * 40 && panzerY < j * 40 + 40) MapSearch[i][j] = -4; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 			}
 		for (int i = 0; i < 100; i++)
@@ -713,11 +714,11 @@ public:
 		arrX = arrX;
 	}
 
-	void  WaveSpread(int LENGTH)// распространеет волну пути от х,у
+	void  WaveSpread(int LENGTH)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅ,пїЅ
 	{
 		length = LENGTH;
 
-		for (int k = 0; k < length; k++) // само распространение волны
+		for (int k = 0; k < length; k++) // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 			for (int i = 0; i < map_Size_X; i++)
 				for (int j = 0; j < map_Size_Y; j++)
@@ -753,7 +754,7 @@ public:
 	}
 	void LoadRoute(int numStep = 0)
 	{
-		// numstep переменная которая хранит номер шага от которого начинается точка начала пути
+		// numstep пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		int pointX, pointY;
 		lengthRoute = MapSearch[arrivalX][arrivalY];
 		pointX = arrivalX;
@@ -801,7 +802,7 @@ public:
 			}
 		}
 		pointX = pointX;
-		being = true;// маршрут создан и присвоем его сушествованию истина
+		being = true;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 		if (Keyboard::isKeyPressed(Keyboard::X))
 		{
 			pointX = pointX;
@@ -824,7 +825,7 @@ bool IsCrossing(float a1x, float a1y, float a2x, float a2y, float b1x, float b1y
 	float v4 = VectMult(a2x - a1x, a2y - a1y, b2x - a1x, b2y - a1y);
 	return (v1 * v2) <= 0 && (v3 * v4) <= 0;
 }
-bool LookAcrossWall(int x, int y, int arrivalX, int arrivalY, bool checkDist = false)// функция видимости через стены
+bool LookAcrossWall(int x, int y, int arrivalX, int arrivalY, bool checkDist = false)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 {
 	float dx = 0, dy = 0, dist = 0;
 	dx = arrivalX - x;
@@ -857,9 +858,9 @@ bool LookAcrossWall(int x, int y, int arrivalX, int arrivalY, bool checkDist = f
 	//}
 }
 
-class Burstes// класс взрывов
+class Burstes// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 {
-	struct burst// взрыв
+	struct burst// пїЅпїЅпїЅпїЅпїЅ
 	{
 		int x, y, count;
 		bool being;
@@ -867,13 +868,13 @@ class Burstes// класс взрывов
 	};
 	burst burst[amountBurst];
 public:
-	void Draw()// нарисовать взрыв
+	void Draw()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 		for (int i = 0; i < amountBurst; i++)
 			if (burst[i].being == true)
 			{
 				CircleShape shape(burst[i].count);
-				if (burst[i].count % 2 == 0) //если четное то рисовать крсным иначе желтым
+				if (burst[i].count % 2 == 0) //пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 				{
 					shape.setFillColor(Color(255, 0, 0));
 
@@ -886,7 +887,7 @@ public:
 				window.draw(shape);
 			}
 	}
-	void Registration(int xx, int yy, bool smallBabah = false)// регистрация взрыва
+	void Registration(int xx, int yy, bool smallBabah = false)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		for (int i = 0; i < amountBurst; i++)
 			if (burst[i].being == false)
@@ -898,7 +899,7 @@ public:
 				break;
 			}
 	}
-	void Service()// обслуживание взрывов
+	void Service()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		for (int i = 0; i < amountBurst; i++)
 			if (burst[i].being == true)
@@ -917,14 +918,14 @@ public:
 	}
 };
 Burstes burstes;
-class Bonuses// класс бонысы
+class Bonuses// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 {
 public:
-	Image bonusesImage; //создаем объект Image (изображение)
-	Texture bonusesTexture;//создаем объект Texture (текстура)
+	Image bonusesImage; //пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ Image (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
+	Texture bonusesTexture;//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ Texture (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 	Sprite bonusesSprite;
 	int size;
-	struct Bonus // бонус
+	struct Bonus // пїЅпїЅпїЅпїЅпїЅ
 	{
 	public:
 		int x, y, type;
@@ -944,14 +945,14 @@ public:
 	Bonuses()
 	{
 		size = 40;
-		bonusesImage.loadFromFile("Bonus.png");//загружаем в него файл
+		bonusesImage.loadFromFile("Bonus.png");//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		bonusesImage.createMaskFromColor(Color(255, 255, 255));
 
-		bonusesTexture.loadFromImage(bonusesImage);//передаем в него объект Image (изображения)
+		bonusesTexture.loadFromImage(bonusesImage);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ Image (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 		bonusesSprite.setTexture(bonusesTexture);
 
 	}
-	void Draw()// нарисовать бонусы
+	void Draw()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		for (int i = 0; i < amountBonus; i++)
 			if (bonus[i].being == true)
@@ -964,11 +965,11 @@ public:
 				window.draw(bonusesSprite);
 			}
 	}
-	void NewBonus(int x, int y, int tip, bool rezerv = false)// регистрация нового бонуса
+	void NewBonus(int x, int y, int tip, bool rezerv = false)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		int realCountBonus = (rezerv == false ? amountBonus - 15 : amountBonus);
 		int i1, i;
-		// расчитаем переменные для цикла что бы был резерв
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 		if (rezerv == false)
 		{
 			i = 0;
@@ -999,7 +1000,7 @@ public:
 		}
 		*/
 	}
-	int CrossBonus(int x, int y, int dx = -1, int dy = -1)// процедура проверки нахождения точки или прямоугольника в бонусе
+	int CrossBonus(int x, int y, int dx = -1, int dy = -1)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 
 		for (int i = 0; i < amountBonus; i++)
@@ -1018,36 +1019,36 @@ public:
 			}
 		return -1;
 	}
-	void KillBonus(int n)// удалить бонус
+	void KillBonus(int n)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 		bonus[n].being = false;
 	}
 };
 Bonuses bonuses;
 
-class Bullet// класс пуля
+class Bullet// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 {
 public:
-	double x, y,// координаты
-		angle, // угол
-		dx, dy;// смешение при полете
+	double x, y,// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+		angle, // пїЅпїЅпїЅпїЅ
+		dx, dy;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	bool being;
 	Bullet()
 	{
 		being = false;
 	}
-	void Draw()// нарисовать пулю
+	void Draw()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		if (being == true)
 		{
 			CircleShape shape(2);
-			// задаём фигуре зелёный цвет
+			// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 			shape.setFillColor(Color(250, 250, 0));
 			shape.setPosition(x, y);
 			window.draw(shape);
 		}
 	}
-	void Registration(int xx, int yy, double angle1, double dx1 = 0, double dy1 = 0)// зарегать пулю
+	void Registration(int xx, int yy, double angle1, double dx1 = 0, double dy1 = 0)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		if (being == false)
 		{
@@ -1059,7 +1060,7 @@ public:
 			being = true;
 		}
 	}
-	void Service()// обслуживание пуль
+	void Service()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		if (being == true)
 		{
@@ -1077,14 +1078,14 @@ public:
 
 };
 Bullet bullets[amountBullet];
-void FlyBullets()// фунцкция обработки полетов пуль
+void FlyBullets()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 {
 	for (int i = 0; i < amountBullet; i++)
 	{
 		bullets[i].Service();
 	}
 }
-void Shot(int x, int y, double angle, double dx, double dy)// регистрация новой пули
+void Shot(int x, int y, double angle, double dx, double dy)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 {
 	for (int i = 0; i < amountBullet; i++)
 	{
@@ -1095,25 +1096,25 @@ void Shot(int x, int y, double angle, double dx, double dy)// регистрация новой 
 		}
 	}
 }
-class Panzer// класс танк игрока
+class Panzer// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 {
 protected:
 	float x, y;
 	bool being;
-	int countKill;// счетчик времени когда умер танк
+	int countKill;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	int pos;
 	int size;
-	int countAttack,// счетчик перезарядки
-		timeAttack;// время перезарядки
-	int ammoMagazine;// Магазин патронов
+	int countAttack,// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+		timeAttack;// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	int ammoMagazine;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	int HP;
-	int ARMOR;// броня
+	int ARMOR;// пїЅпїЅпїЅпїЅпїЅ
 	Color color;
 	double angle;
-	double turnX, turnY, turnX1, turnY1;// точки рисования пушки
+	double turnX, turnY, turnX1, turnY1;// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 
 public:
-	bool speedTurn;// быстрое вращение башни
+	bool speedTurn;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	Panzer()
 	{
 		size = 15;
@@ -1130,7 +1131,7 @@ public:
 		color = Color::Green;
 		speedTurn = false;
 	}
-	void Draw()// нарисовать танк 
+	void Draw()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ 
 	{
 		if (being == true)
 		{
@@ -1144,14 +1145,14 @@ public:
 	void ChangePosition(int newPos)
 	{
 	}
-	void Move(double dx, double dy) // движения танка
+	void Move(double dx, double dy) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 		x += dx;
 		y += dy;
 
 
 	}
-	void Turn(double angle)// поворот башни в определенный угол
+	void Turn(double angle)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		//int size1=size/3;
 		turnY = size * 2 * sin(pi * (angle - 90) / 180) + y + size;
@@ -1169,11 +1170,11 @@ public:
 	}
 	void Control3D(Event event)
 	{
-		float speed = 1.5;// скорость движения танка
+		float speed = 1.5;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		float dx = 0, dy = 0;
-		static double angleOld = angle;// переменная для того что бы передовать данные об угле в том случае сли угол изменился
-									   // нужно вставить в условие нажатия кнопок управлеия
-									   //if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// если не врезался в стену
+		static double angleOld = angle;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+									   // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+									   //if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 									   //{
 									   //	Move(0, -speed);
 									   //	dy. = -speed;
@@ -1190,7 +1191,7 @@ public:
 
 		/*if (angle < -180) angle += 360;
 		else if (angle > 180) angle -= 360;*/
-		if (Keyboard::isKeyPressed(Keyboard::W)) // движение вверх
+		if (Keyboard::isKeyPressed(Keyboard::W)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 
 			dy = speed * sin(pi * (angle + 90) / 180);
@@ -1198,7 +1199,7 @@ public:
 			Move(dx, dy);
 
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::S)) // движение вверх
+		else if (Keyboard::isKeyPressed(Keyboard::S)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 
 			dy = -speed * sin(pi * (angle + 90) / 180);
@@ -1206,7 +1207,7 @@ public:
 			Move(dx, dy);
 
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::D)) // движение вверх
+		else if (Keyboard::isKeyPressed(Keyboard::D)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 
 			dy = speed * sin(pi * (angle + 90 + 90) / 180);
@@ -1214,7 +1215,7 @@ public:
 			Move(dx, dy);
 
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::A)) // движение вверх
+		else if (Keyboard::isKeyPressed(Keyboard::A)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 
 			dy = speed * sin(pi * (angle + 90 - 90) / 180);
@@ -1236,12 +1237,12 @@ public:
 			Move(0, dy);
 		}
 
-		//Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+		//Vector2i mousePos = Mouse::getPosition(window);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-		//angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// расчет угла мыши
+		//angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		//cout<<angle<<"\n";
 		if (NoShotFocus == false)
-			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// условие выстрела
+			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			{
 				double angleVustrel = angle + 180/*+(rand() % 7) - 4*/;
 				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
@@ -1253,7 +1254,7 @@ public:
 					server.Send(5, turnX, turnY, 0, angleVustrel);
 				}
 			}
-		// двигать башню туда куда указывает мышь
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		//angle = MovingToAngle(angle, angleMouse, speedTurn);
 		Turn(angle + 180);
 		cout << angle << "   " << angle + 90 << '\n';
@@ -1279,23 +1280,23 @@ public:
 			angleOld = angle;
 		}
 	}
-	virtual void Control(Event event)//функция управления танком с клавиатуры
+	virtual void Control(Event event)//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
-		double angleMouse, // угол приццела куда смотрит мышь
-			speed = 1.5,// скорость движения танка
-			dx = 0, dy = 0;// скорости движения по вертикали и горизонтали
-		static double angleOld = angle;// переменная для того что бы передовать данные об угле в том случае сли угол изменился
+		double angleMouse, // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+			speed = 1.5,// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+			dx = 0, dy = 0;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+		static double angleOld = angle;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		int vector = 0;
-		if (Keyboard::isKeyPressed(Keyboard::W)) // движение вверх
+		if (Keyboard::isKeyPressed(Keyboard::W)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
-			if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// если не врезался в стену
+			if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 			{
 				Move(0, -speed);
 				dy = -speed;
 
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::D)) // движение вправо
+		if (Keyboard::isKeyPressed(Keyboard::D)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 		{
 			if (walls.CrossWall(x + speed, y, size * 2, size * 2) == false)
 			{
@@ -1303,7 +1304,7 @@ public:
 				dx = speed;
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::S)) // движение вниз
+		if (Keyboard::isKeyPressed(Keyboard::S)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		{
 			if (walls.CrossWall(x, y + speed, size * 2, size * 2) == false)
 			{
@@ -1311,7 +1312,7 @@ public:
 				dy = speed;
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::A)) // двиение влево
+		if (Keyboard::isKeyPressed(Keyboard::A)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 			if (walls.CrossWall(x - speed, y, size * 2, size * 2) == false)
 			{
@@ -1319,16 +1320,16 @@ public:
 				dx -= speed;
 			}
 		}
-		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// если врезался в границу игрового поля
+		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		{
 			Move(-dx, -dy);
 		}
-		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+		Vector2i mousePos = Mouse::getPosition(window);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-		angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// расчет угла мыши
+		angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 																		   //cout<<angle<<"\n";
 		if (NoShotFocus == false)
-			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// условие выстрела
+			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			{
 				double angleVustrel = angle + (rand() % 7) - 4;
 				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
@@ -1340,7 +1341,7 @@ public:
 					server.Send(5, turnX, turnY, 0, angleVustrel);
 				}
 			}
-		// двигать башню туда куда указывает мышь
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		angle = MovingToAngle(angle, angleMouse, speedTurn);
 		Turn(angle);
 		cout << angle << '\n';
@@ -1362,7 +1363,7 @@ public:
 			}
 		}
 	}
-	bool CrossMe(int xx, int yy, int dx1 = -1, int dy1 = -1)//нахождение точки или прямоугольника в танке
+	bool CrossMe(int xx, int yy, int dx1 = -1, int dy1 = -1)//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 
 		if (dx1 == -1 && dy1 == -1)
@@ -1377,7 +1378,7 @@ public:
 		return false;
 	}
 
-	void Servis()// процедура для обслуживания танка
+	void Servis()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 		if (being == true)
 		{
@@ -1385,7 +1386,7 @@ public:
 		}
 		else
 		{
-			if (countKill < timeBurst)// пока танк взырваеться 
+			if (countKill < timeBurst)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
 			{
 				countKill++;
 			}
@@ -1398,7 +1399,7 @@ public:
 		}
 
 	}
-	void PanzerRace() // процедура управения зеленым танком с помошью данных полученных с сервера
+	void PanzerRace() // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 
 		Data data;
@@ -1513,17 +1514,17 @@ public:
 	}
 };
 Panzer panzer;
-class PanzerBot : public Panzer// класс танка бота наследуеться от танка игрока
+class PanzerBot : public Panzer// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 {
-	int vector;// вектор движение танка
-	int numStep;// число пройденных клеток, ботом по пути
-	double speed, dx, dy;// скорость движения и смешение по х и у
-	bool looking;// видит ли бот игрока 
+	int vector;// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+	int numStep;// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
+	double speed, dx, dy;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅ пїЅ пїЅ
+	bool looking;// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 
 
-	bool motion;// прошел ли бот от клетки к клетке пути
-	bool normalizePuty;// нормализует ли танк путь 
+	bool motion;// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+	bool normalizePuty;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ 
 public:
-	bool motionToPuty;// движется ли бот по пути
+	bool motionToPuty;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
 	PanzerBot()
 	{
 		x = (int)10 * 40 + 5;
@@ -1539,14 +1540,14 @@ public:
 		motionToPuty = false;
 
 	}
-	void CancelMovingToRoute()// отменить движени бота по пути
+	void CancelMovingToRoute()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		motionToPuty = false;
 		numStep = 0;
 		route.being = false;
 		route.CancelRoute();
 	}
-	void RegPointAim(int arrivalX, int arrivalY)// регистрация точки куда должен приехать бот
+	void RegPointAim(int arrivalX, int arrivalY)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
 	{
 		CancelMovingToRoute();
 		numStep = 0;
@@ -1560,7 +1561,7 @@ public:
 	}
 	void RefreshRoute(int arrivalX, int arrivalY)
 	{
-		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+		Vector2i mousePos = Mouse::getPosition(window);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		route.PrepareMapForSearchRoute(x + size, y + size, arrivalX, arrivalY,
 			panzer.Get_X() + panzer.Get_Size(), panzer.Get_Y() + panzer.Get_Size());
 		/*marshrut.LoadMapPoisk(x+size,y+size,arrivalX,arrivalY,
@@ -1617,7 +1618,7 @@ public:
 			}
 		}
 	}
-	void ToGoBonus()// изменение вектора бота, когда увидил бонус
+	void ToGoBonus()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 
 		for (int i = 0; i < amountBonus; i++)
@@ -1627,12 +1628,12 @@ public:
 				{
 					if (LookAcrossWall(x + size, y + size, bonuses.bonus[i].x + 20, bonuses.bonus[i].y + 20))
 					{
-						if (bonuses.bonus[i].x + 20 >= x + size - 2 && bonuses.bonus[i].x + 20 <= x + size + 2)// если бонус ниже или выше
+						if (bonuses.bonus[i].x + 20 >= x + size - 2 && bonuses.bonus[i].x + 20 <= x + size + 2)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 						{
 							if (bonuses.bonus[i].y + 20 >= y + size) vector = 3;
 							if (bonuses.bonus[i].y + 20 <= y + size) vector = 1;
 						}
-						if (bonuses.bonus[i].y + 20 >= y + size - 2 && bonuses.bonus[i].y + 20 <= y + size + 2)//если бонус левее или правее
+						if (bonuses.bonus[i].y + 20 >= y + size - 2 && bonuses.bonus[i].y + 20 <= y + size + 2)//пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 						{
 							if (bonuses.bonus[i].x + 20 >= x + size) vector = 2;
 							if (bonuses.bonus[i].x + 20 <= x + size) vector = 4;
@@ -1644,39 +1645,39 @@ public:
 			}
 		BonusControl();
 	}
-	void MovingToKeyboard()// управлять ботом с клавиатуры
+	void MovingToKeyboard()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
-		if (Keyboard::isKeyPressed(Keyboard::Up)) // движение вверх
+		if (Keyboard::isKeyPressed(Keyboard::Up)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 
 			Move(0, -speed);
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Right)) // движение вправо
+		if (Keyboard::isKeyPressed(Keyboard::Right)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 		{
 			Move(speed, 0);
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Down)) // движение вниз
+		if (Keyboard::isKeyPressed(Keyboard::Down)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		{
 
 			Move(0, speed);
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Left)) // двиение влево
+		if (Keyboard::isKeyPressed(Keyboard::Left)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 
 			Move(-speed, 0);
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Space)) // двиение влево
+		if (Keyboard::isKeyPressed(Keyboard::Space)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 			vector = 0;
 		}
 	}
-	void MoveToVector()// перемешение бота по задоному вектору
+	void MoveToVector()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
-		if (vector == 1) // движение вверх
+		if (vector == 1) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 			if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)
 			{
@@ -1686,7 +1687,7 @@ public:
 			}
 			else vector = (rand() % 4) + 1;
 		}
-		if (vector == 2) // движение вправо
+		if (vector == 2) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 		{
 			if (walls.CrossWall(x + speed, y, size * 2, size * 2) == false)
 			{
@@ -1695,7 +1696,7 @@ public:
 			}
 			else vector = (rand() % 4) + 1;
 		}
-		if (vector == 3) // движение вниз
+		if (vector == 3) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		{
 			if (walls.CrossWall(x, y + speed, size * 2, size * 2) == false)
 			{
@@ -1704,7 +1705,7 @@ public:
 			}
 			else vector = (rand() % 4) + 1;
 		}
-		if (vector == 4)// движение налево
+		if (vector == 4)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 		{
 			if (walls.CrossWall(x - speed, y, size * 2, size * 2) == false)
 			{
@@ -1728,26 +1729,26 @@ public:
 
 
 
-	bool NormalizeX()// истина если нормилизовался по Х
+	bool NormalizeX()// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅ
 	{
 		if (x + size >= route.pointRoute[numStep].x * 40 + 20 - speed
 			&& x + size <= route.pointRoute[numStep].x * 40 + 20 + speed) return true;
 		return false;
 	}
-	bool NormalizeY()// исттина если нормализовался по У
+	bool NormalizeY()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅ
 	{
 		if (y + size >= route.pointRoute[numStep].y * 40 + 20 - speed
 			&& y + size <= route.pointRoute[numStep].y * 40 + 20 + speed) return true;
 		return false;
 	}
-	void BeginNormalize()// начать нормализаацию позицции в центральную линию клетки
+	void BeginNormalize()// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		if (NormalizeX() != true || NormalizeY() != true)
 		{
 			normalizePuty = true;
 		}
 	}
-	// функция которая перемешает на центр линию клетки карты для того чтобы бот не врезался в стены
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 	void NormalizeMovingToRoute()
 	{
 		/*
@@ -1765,7 +1766,7 @@ public:
 					if ((route.pointRoute[numStep].y * 40 + 20 <= y + size
 						|| route.pointRoute[numStep].y * 40 + 20 >= y + size)
 						&& !(x + size >= route.pointRoute[numStep].x * 40 + 20 - speed
-							&& x + size < route.pointRoute[numStep].x * 40 + 20 + speed))// если точка пути находится выше или ниже
+							&& x + size < route.pointRoute[numStep].x * 40 + 20 + speed))// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 					{
 						if (route.pointRoute[numStep].x * 40 + 20 <= x + size)		vector = 4;
 						if (route.pointRoute[numStep].x * 40 + 20 > x + size)		vector = 2;
@@ -1781,7 +1782,7 @@ public:
 					if ((route.pointRoute[numStep].x * 40 + 20 <= x + size
 						|| route.pointRoute[numStep].x * 40 + 20 >= x + size)
 						&& !(y + size >= route.pointRoute[numStep].y * 40 + 20 - speed
-							&& y + size < route.pointRoute[numStep].y * 40 + 20 + speed)) // если точка пути находится левее или правее
+							&& y + size < route.pointRoute[numStep].y * 40 + 20 + speed)) // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 					{
 						if (route.pointRoute[numStep].y * 40 + 20 <= y + size)		vector = 1;
 						if (route.pointRoute[numStep].y * 40 + 20 > y + size)		vector = 3;
@@ -1807,7 +1808,7 @@ public:
 
 	}
 
-	void MovingToRoute()// функция движения бота по пути
+	void MovingToRoute()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 
 		if (route.pointRoute[numStep].being == true)
@@ -1859,25 +1860,25 @@ public:
 		if (Keyboard::isKeyPressed(Keyboard::Z))
 		{
 			//	bonuses.NewBonus(rand()%800,rand()%541,1);
-			Sleep(10);
+			sleep(milliseconds(10));
 		}
 	}
-	void ControlAttack()// вункция которая управлеят аттакой бота
+	void ControlAttack()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		double angleAim = 0;
-		static double angleOld = angle;// нужна для того чтобы определить изменялся ли угол повората башни
-		if (panzer.Get_Being() == true)// условие атаки бота
-			if (ammoMagazine > 0)// если пуль больше 0
+		static double angleOld = angle;// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+		if (panzer.Get_Being() == true)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+			if (ammoMagazine > 0)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 0
 				if (LookAcrossWall(x + size, y + size, panzer.Get_X() + panzer.Get_Size(),
-					panzer.Get_Y() + panzer.Get_Size(), isView3D == true ? true : false))// если видит танк игрока
+					panzer.Get_Y() + panzer.Get_Size(), isView3D == true ? true : false))// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 				{
-					// расчет угла для атаки
+					// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 					angleAim = CalcAngle(x + size, y + size, panzer.Get_X() + panzer.Get_Size(), panzer.Get_Y() + panzer.Get_Size());
-					vector = 0;// остановим движение танка
+					vector = 0;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 					looking = true;
-					angle = MovingToAngle(angle, angleAim);// присвоем башни танка новый угол
+					angle = MovingToAngle(angle, angleAim);// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 														   //angle=angleAim;
-					if (angle >= angleAim - 1 && angle <= angleAim + 1 && countAttack >= timeAttack && ammoMagazine > 0)// условие стрельбы бота
+					if (angle >= angleAim - 1 && angle <= angleAim + 1 && countAttack >= timeAttack && ammoMagazine > 0)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 					{
 						double angleVustrel = angle + (rand() % 7) - 4;
 						Shot(turnX, turnY, angleVustrel, 0, 0);
@@ -1900,36 +1901,36 @@ public:
 				}
 				else
 				{
-					if (looking == true)// если игрок ушел с поля видимости
+					if (looking == true)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					{
 						vector = (rand() % 4) + 1;
 						looking = false;
 					}
 
 				}
-		if (vector == 0 && looking == true && ammoMagazine <= 0)// если бот видел игрока но у бота закончились патроны
+		if (vector == 0 && looking == true && ammoMagazine <= 0)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		{
 			vector = (rand() % 4) + 1;
 			looking = false;
 		}
-		Turn(angle);// повернем башню бота в расчитанный ранее угол
+		Turn(angle);// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	}
-	void AutoControl()// функцуя поведиение бота
+	void AutoControl()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		int vector1 = vector;
 		dx = 0;
 		dy = 0;
 		if (motionToPuty == false) 	ControlAttack();
 
-		if (rand() % 200 == 1) vector = (rand() % 4) + 1;// сменить вектор случайнo с вероятностью 1 на 200
+		if (rand() % 200 == 1) vector = (rand() % 4) + 1;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅo пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅ 200
 		MovingToRoute();
 		ToGoBonus();
 
 		NormalizeMovingToRoute();
 		MoveToVector();
-		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// если врезался в границы поля игры
+		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		{
-			do// менять вектор пока он равен предыдушему вектору
+			do// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			{
 				vector = (rand() % 4) + 1;
 			} while (vector1 == vector);
@@ -1939,23 +1940,23 @@ public:
 		if (motionToPuty == true) Turn(angle);
 
 	}
-	void Control(Event event)//функция управления танком с клавиатуры
+	void Control(Event event)//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
-		double angleMouse, // угол приццела куда смотрит мышь
-			speed = 1.5,// скорость движения танка
-			dx = 0, dy = 0;// скорости движения по вертикали и горизонтали
-		static double angleOld = angle;// переменная для того что бы передовать данные об угле в том случае сли угол изменился
+		double angleMouse, // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+			speed = 1.5,// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+			dx = 0, dy = 0;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+		static double angleOld = angle;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		int vector = 0;
-		if (Keyboard::isKeyPressed(Keyboard::W)) // движение вверх
+		if (Keyboard::isKeyPressed(Keyboard::W)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
-			if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// если не врезался в стену
+			if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 			{
 				Move(0, -speed);
 				dy = -speed;
 
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::D)) // движение вправо
+		if (Keyboard::isKeyPressed(Keyboard::D)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 		{
 			if (walls.CrossWall(x + speed, y, size * 2, size * 2) == false)
 			{
@@ -1963,7 +1964,7 @@ public:
 				dx = speed;
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::S)) // движение вниз
+		if (Keyboard::isKeyPressed(Keyboard::S)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		{
 			if (walls.CrossWall(x, y + speed, size * 2, size * 2) == false)
 			{
@@ -1971,7 +1972,7 @@ public:
 				dy = speed;
 			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::A)) // двиение влево
+		if (Keyboard::isKeyPressed(Keyboard::A)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 			if (walls.CrossWall(x - speed, y, size * 2, size * 2) == false)
 			{
@@ -1979,16 +1980,16 @@ public:
 				dx -= speed;
 			}
 		}
-		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// если врезался в границу игрового поля
+		if (x <= 0 || x + size * 2 >= 800 || y <= 0 || y + size * 2 >= 560)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		{
 			Move(-dx, -dy);
 		}
-		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+		Vector2i mousePos = Mouse::getPosition(window);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-		angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// расчет угла мыши
+		angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 																		   //cout<<angle<<"\n";
 		if (NoShotFocus == false)
-			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// условие выстрела
+			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			{
 				double angleVustrel = angle + (rand() % 7) - 4;
 				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
@@ -2000,7 +2001,7 @@ public:
 					client.Send(5, turnX, turnY, 0, angleVustrel);
 				}
 			}
-		// двигать башню туда куда указывает мышь
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		angle = MovingToAngle(angle, angleMouse, speedTurn);
 		Turn(angle);
 
@@ -2024,11 +2025,11 @@ public:
 	}
 	void Control3D(Event event)
 	{
-		float speed = 1.5;// скорость движения танка
+		float speed = 1.5;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		float dx = 0, dy = 0;
-		static double angleOld = angle;// переменная для того что бы передовать данные об угле в том случае сли угол изменился
-									   // нужно вставить в условие нажатия кнопок управлеия
-									   //if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// если не врезался в стену
+		static double angleOld = angle;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+									   // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+									   //if (walls.CrossWall(x, y - speed, size * 2, size * 2) == false)// пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 									   //{
 									   //	Move(0, -speed);
 									   //	dy. = -speed;
@@ -2046,7 +2047,7 @@ public:
 			angle = angleOld;
 		}
 
-		if (Keyboard::isKeyPressed(Keyboard::W)) // движение вверх
+		if (Keyboard::isKeyPressed(Keyboard::W)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 
 			dy = speed * sin(pi * (angle + 90) / 180);
@@ -2054,7 +2055,7 @@ public:
 			Move(dx, dy);
 
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::S)) // движение вверх
+		else if (Keyboard::isKeyPressed(Keyboard::S)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 
 			dy = -speed * sin(pi * (angle + 90) / 180);
@@ -2062,7 +2063,7 @@ public:
 			Move(dx, dy);
 
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::D)) // движение вверх
+		else if (Keyboard::isKeyPressed(Keyboard::D)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 
 			dy = speed * sin(pi * (angle + 90 + 90) / 180);
@@ -2070,7 +2071,7 @@ public:
 			Move(dx, dy);
 
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::A)) // движение вверх
+		else if (Keyboard::isKeyPressed(Keyboard::A)) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
 
 			dy = speed * sin(pi * (angle + 90 - 90) / 180);
@@ -2105,12 +2106,12 @@ public:
 			Move(0, dy);
 		}
 
-		//Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+		//Vector2i mousePos = Mouse::getPosition(window);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-		//angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// расчет угла мыши
+		//angleMouse = CalcAngle(x + size, y + size, mousePos.x, mousePos.y);// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		//cout<<angle<<"\n";
 		if (NoShotFocus == false)
-			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// условие выстрела
+			if (ClickMouseLeft(event) && countAttack >= timeAttack && ammoMagazine > 0)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			{
 				double angleVustrel = angle + 180/*+(rand() % 7) - 4*/;
 				//vustrel(turnX,turnY,angle+(rand() % 7)-4,dx,dy);
@@ -2122,7 +2123,7 @@ public:
 					client.Send(5, turnX, turnY, 0, angleVustrel);
 				}
 			}
-		// двигать башню туда куда указывает мышь
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		//angle = MovingToAngle(angle, angleMouse, speedTurn);
 		Turn(angle + 180);
 		//	cout << angle << "   " << angle + 90 << '\n';
@@ -2144,7 +2145,7 @@ public:
 			}
 		}
 	}
-	void PanzerBotRace() // процедура упрвления ботом с помошью приниятых данных с клиента
+	void PanzerBotRace() // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 
 		Data data;
@@ -2171,7 +2172,7 @@ public:
 	}
 };
 PanzerBot panzerBot;
-Vector2i NewCoordinateBonus()// расчет новых координат для бонуса
+Vector2i NewCoordinateBonus()// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 {
 	int x, y;
 	Vector2i vect;
@@ -2185,7 +2186,7 @@ Vector2i NewCoordinateBonus()// расчет новых координат для бонуса
 	vect.y = y;
 	return vect;
 }
-void NewBonusGame()// размешение бонусов пуль в случайно 
+void NewBonusGame()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
 {
 	static int chet = 0, chet1 = 0;
 	int x, y, kolvoBonusPylu = 0, kolvoBonusPricel = 0;
@@ -2206,7 +2207,7 @@ void NewBonusGame()// размешение бонусов пуль в случайно
 			}
 		}
 	}
-	// если 5 бонусов пуль размешенно то не считать время поевления нового бонуса
+	// пїЅпїЅпїЅпїЅ 5 пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	for (int i = 0; i < amountBonus; i++)
 	{
 
@@ -2239,7 +2240,7 @@ void NewBonusGame()// размешение бонусов пуль в случайно
 	//}
 	//if (kolvoBonusPricel==0 && panzer.speedTurn==false) chet1++ ;else chet1=0;
 }
-void ClientBonusRace()// прием бонусов с сервера и растановка их на карте клиента
+void ClientBonusRace()// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 {
 	Data data;
 	for (int i = 0; i < countPacked; i++)
@@ -2256,10 +2257,10 @@ void ClientBonusRace()// прием бонусов с сервера и растановка их на карте клиент
 		}
 	}
 }
-class GameInterface// класс показа игровых параметров внизу крана
+class GameInterface// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 {
 	int HP, BRONY, BULLET, TimeAttack, CountAttack;
-	bool bonusAim;//бонус прицел
+	bool bonusAim;//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	Image interfaceImage;
 	Texture interfaceTexture;
 	Sprite interfaceSprite;
@@ -2268,15 +2269,15 @@ public:
 	GameInterface()
 	{
 
-		interfaceImage.loadFromFile("InterfaceImage.png");//загружаем в него файл
+		interfaceImage.loadFromFile("InterfaceImage.png");//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		interfaceImage.createMaskFromColor(Color(255, 255, 255));
 
-		interfaceTexture.loadFromImage(interfaceImage);//передаем в него объект Image (изображения)
+		interfaceTexture.loadFromImage(interfaceImage);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ Image (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 		interfaceSprite.setTexture(interfaceTexture);
 		bonusAim = false;
 		mixingUp = 40;
 	}
-	void LoadData(int hp, int brony, int pylu1, int chetattack, int timeattack)// собрать данные
+	void LoadData(int hp, int brony, int pylu1, int chetattack, int timeattack)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		HP = hp;
 		BRONY = brony;
@@ -2328,7 +2329,7 @@ public:
 			window.draw(interfaceSprite);
 		}
 	}
-	void DrawBullet()// нарисывать количество пуль
+	void DrawBullet()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		for (int i = 1; i <= BULLET; i++)
 		{
@@ -2336,21 +2337,21 @@ public:
 		}
 
 	}
-	void DrawTimeAttack()// нарисовать время перезарядки
+	void DrawTimeAttack()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		RectangleShape rectangle(sf::Vector2f((int)((float)CountAttack / (float)TimeAttack * 90), 5));
 		rectangle.setPosition(302, 569);
 		rectangle.setFillColor(Color(128, 255, 128));
 		window.draw(rectangle);
 	}
-	void DrawHP()// нарисовать полусы здоровья
+	void DrawHP()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		RectangleShape rectangle(sf::Vector2f((int)((float)HP / (float)100 * 90), 10));
 		rectangle.setPosition(10, 579);
 		rectangle.setFillColor(Color(255, 125, 128));
 		window.draw(rectangle);
 	}
-	void DrawARMOR()// нарисовать полосу брони
+	void DrawARMOR()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 		RectangleShape rectangle(sf::Vector2f((int)((float)BRONY / (float)100 * 90), 10));
 		rectangle.setPosition(10, 569);
@@ -2360,21 +2361,21 @@ public:
 	class Statistics
 	{
 		Image starsImage;
-		Texture starsTexture;//создаем объект Texture (текстура)
+		Texture starsTexture;//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ Texture (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 		Sprite starsSprite;
 	public:
 		Statistics()
 		{
-			starsImage.loadFromFile("Stars.png");//загружаем в него файл
+			starsImage.loadFromFile("Stars.png");//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 			starsImage.createMaskFromColor(Color(255, 255, 255));
 
-			starsTexture.loadFromImage(starsImage);//передаем в него объект Image (изображения)
+			starsTexture.loadFromImage(starsImage);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ Image (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 			starsSprite.setTexture(starsTexture);
 		}
 		void DrawStarsPlayer(Text text)
 		{
 			if (starsPlayer < 16)text.setFillColor(Color(255, 255, 0)); else text.setFillColor(Color(255, 0, 0));
-			std::ostringstream starsString;    // объявили переменную
+			std::ostringstream starsString;    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			starsString << starsPlayer;
 
 			text.setString(starsString.str());
@@ -2387,7 +2388,7 @@ public:
 		void DrawStarsBot(Text text)
 		{
 			if (starsBot < 16)text.setFillColor(Color(255, 255, 0)); else text.setFillColor(Color(255, 0, 0));
-			std::ostringstream starsString;    // объявили переменную
+			std::ostringstream starsString;    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			starsString << starsBot;
 
 			text.setString(starsString.str());
@@ -2399,14 +2400,14 @@ public:
 		}
 		void DrawBoardScore(Text text)
 		{
-			text.setFillColor(Color(255, 255, 255));//покрасили текст в красный. если убрать эту строку, то по умолчанию он белый
-			std::ostringstream scoreString[2];    // объявили переменную
+			text.setFillColor(Color(255, 255, 255));//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+			std::ostringstream scoreString[2];    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			scoreString[0] << scorePlayer;
 			scoreString[1] << scoreBot;
 			text.setString(scoreString[0].str() + " : " + scoreString[1].str());
 			if (scorePlayer < 10) text.setPosition(550, 565); else text.setPosition(542, 565);
 			window.draw(text);
-			//	text.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
+			//	text.setStyle(sf::Text::Bold | sf::Text::Underlined);//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ. пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ "пїЅпїЅпїЅпїЅпїЅ":)) пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 		}
 		void Draw(Text text)
@@ -2419,7 +2420,7 @@ public:
 	};
 	Statistics statistics;
 
-	void Draw()// нарисовать интервейс
+	void Draw()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		DrawLine(1, 560, 800, 560, Color(128, 128, 128));
 		DrawBullet();
@@ -2432,10 +2433,10 @@ public:
 
 };
 GameInterface gameInterface;
-void GrabBonus()// функция подбора бонусов
+void GrabBonus()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 {
-	int valuePanzer = -1,// номер подобранного бонуса игроком
-		valuePanzerBot = -1;// номер подобранного бонуса ботом
+	int valuePanzer = -1,// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+		valuePanzerBot = -1;// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	if (panzer.Get_Being() == true)
 	{
 		valuePanzer = bonuses.CrossBonus(panzer.Get_X(), panzer.Get_Y(), panzer.Get_Size() * 2, panzer.Get_Size() * 2);
@@ -2448,16 +2449,16 @@ void GrabBonus()// функция подбора бонусов
 	if (valuePanzer != -1)
 	{
 		bonuses.KillBonus(valuePanzer);
-		if (bonuses.bonus[valuePanzer].type == 1) panzer.Add_Pylu(5);// 1- бонус пуль
-		if (bonuses.bonus[valuePanzer].type == 2)// 2- бонус звездочка
+		if (bonuses.bonus[valuePanzer].type == 1) panzer.Add_Pylu(5);// 1- пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+		if (bonuses.bonus[valuePanzer].type == 2)// 2- пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		{
 			panzer.Add_TimeAttack(-3);
 			starsPlayer++;
 		}
-		if (bonuses.bonus[valuePanzer].type == 3) panzer.Add_Brony(100);// 3-бонус брони
+		if (bonuses.bonus[valuePanzer].type == 3) panzer.Add_Brony(100);// 3-пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		if (bonuses.bonus[valuePanzer].type == 4)
 		{
-			panzer.speedTurn = true;// 3-бонус брони
+			panzer.speedTurn = true;// 3-пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 
 		}
 	}
@@ -2482,11 +2483,11 @@ bool BulletInPanzer()
 {
 	for (int i = 0; i < amountBullet; i++)
 		if (bullets[i].being == true)
-			if (panzer.CrossMe(bullets[i].x, bullets[i].y))// если в игрока попала пуля
+			if (panzer.CrossMe(bullets[i].x, bullets[i].y))// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 			{
 				bullets[i].being = false;
 				//	if (panzer.Get_Brony()>=25)
-				//расчет здоровья и брони
+				//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 				if (panzer.Get_Brony() > 0)
 				{
 					panzer.Add_Brony(-25);
@@ -2506,7 +2507,7 @@ bool BulletInPanzer()
 				{
 					panzer.Add_HP(-25);
 				}
-				if (panzer.Get_HP() <= 0)	// если здоровья нет
+				if (panzer.Get_HP() <= 0)	// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
 				{
 
 					return true;
@@ -2528,10 +2529,10 @@ bool PyleInPanzerBot()
 {
 	for (int i = 0; i < amountBullet; i++)
 		if (bullets[i].being == true)
-			if (panzerBot.CrossMe(bullets[i].x, bullets[i].y))// если в игрока попала пуля
+			if (panzerBot.CrossMe(bullets[i].x, bullets[i].y))// пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 			{
 				//if (panzer.Get_Brony()>=25)
-				//расчет здоровья и брони
+				//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 				bullets[i].being = false;
 				if (panzerBot.Get_Brony() > 0)
 				{
@@ -2553,7 +2554,7 @@ bool PyleInPanzerBot()
 					panzerBot.Add_HP(-25);
 
 				}
-				if (panzerBot.Get_HP() <= 0)	// если здоровья нет
+				if (panzerBot.Get_HP() <= 0)	// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
 				{
 					return true;
 				}
@@ -2578,7 +2579,7 @@ Vector2i CalcPanzerCoordinate(bool killPanzer, bool killPanzerBot)
 	Vector2i result;
 	result.x = 0;
 	result.y = 0;
-	if (killPanzer || killPanzerBot)// если убит игрок или бот то расчитаем новыен координаты
+	if (killPanzer || killPanzerBot)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 
 		do
@@ -2587,11 +2588,11 @@ Vector2i CalcPanzerCoordinate(bool killPanzer, bool killPanzerBot)
 			notWalls = false;
 			x = (rand() % 740) + 30;
 			y = (rand() % 500) + 30;
-			// если х и у не попадают в стену 
+			// пїЅпїЅпїЅпїЅ пїЅ пїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ 
 			if (walls.CrossWall(x, y, panzer.Get_Size() * 2, panzer.Get_Size() * 2) == false) notWalls = true;
 
 			{
-				//если х и у не попадают под зону видиости врага
+				//пїЅпїЅпїЅпїЅ пїЅ пїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 				if (killPanzer)
 				{
 					if (LookAcrossWall(x + panzer.Get_Size(), y + panzer.Get_Size(),
@@ -2613,7 +2614,7 @@ Vector2i CalcPanzerCoordinate(bool killPanzer, bool killPanzerBot)
 					}
 				}
 			}
-			// если х и у не попадают в стену , не попадапют в зону видимости врага, и не попадают на бонус
+			// пїЅпїЅпїЅпїЅ пїЅ пїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ , пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		} while ((notWalls == false || notLocking == false)
 			|| bonuses.CrossBonus(x - panzer.Get_Size(), y - panzer.Get_Size(),
 				panzer.Get_Size() * 3, panzer.Get_Size() * 3) != -1
@@ -2627,21 +2628,21 @@ Vector2i CalcPanzerCoordinate(bool killPanzer, bool killPanzerBot)
 }
 
 
-void NewCoordinateKill()// новые координаты после смерти танка
+void NewCoordinateKill()// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 {
 	bool killPanzer = false, killPanzerBot = false, flagPanzer = false, flagPanzerBot = false;
 	int oldPanzerX = 0, oldPanzerY = 0, oldPanzerBotX = 0, oldPanzerBotY = 0;
 	flagPanzer = BulletInPanzer();
-	if (flagPanzer == true)	// если здоровья нет у зеленого танка
+	if (flagPanzer == true)	// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	{
 		if (networkGame == false)
 		{
 			killPanzer = true;
 			panzer.KIlled();
-			// регистрация взрвва
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 			burstes.Registration(panzer.Get_X() + panzer.Get_Size(),
 				panzer.Get_Y() + panzer.Get_Size());
-			// регистрация бонуса
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 			/*bonuses.NewBonus(panzer.Get_X()+panzer.Get_Size(),
 			panzer.Get_Y()+panzer.Get_Size(),(rand()%2)+2,true);*/
 			oldPanzerX = panzer.Get_X();
@@ -2654,10 +2655,10 @@ void NewCoordinateKill()// новые координаты после смерти танка
 			{
 				killPanzer = true;
 				panzer.KIlled();
-				// регистрация взрвва
+				// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 				burstes.Registration(panzer.Get_X() + panzer.Get_Size(),
 					panzer.Get_Y() + panzer.Get_Size());
-				// регистрация бонуса
+				// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 				/*bonuses.NewBonus(panzer.Get_X()+panzer.Get_Size(),
 				panzer.Get_Y()+panzer.Get_Size(),(rand()%2)+2,true);*/
 				oldPanzerX = panzer.Get_X();
@@ -2684,30 +2685,30 @@ void NewCoordinateKill()// новые координаты после смерти танка
 		if (networkGame == true)
 			if (mode == 'c')
 			{
-				killPanzerBot = true;// убиваем красный танк на клиенте
+				killPanzerBot = true;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 				panzerBot.KIlled();
 				burstes.Registration(panzerBot.Get_X() + panzerBot.Get_Size(),
 					panzerBot.Get_Y() + panzerBot.Get_Size());
 				scorePlayer++;
-				client.Send(6, 0, 0, 2, 0);// передаем серверу инфу о смерти красного танка
+				client.Send(6, 0, 0, 2, 0);// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 			}
 
 	}
 
-	if (networkGame == true)// обрабатываем принятые данные
+	if (networkGame == true)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	{
-		if (mode == 's')// на сервере
+		if (mode == 's')// пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		{
 			Data data;
 			for (int i = 0; i < countPacked; i++)
 			{
 				data = dataServerRace[i];
-				if (data.key == 6 && data.tip == 2)// если приняlи на сервере инфу о смерте красного танка
+				if (data.key == 6 && data.tip == 2)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅlпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 				{
-					oldPanzerBotX = panzerBot.Get_X();// сохраняем старые координаты
+					oldPanzerBotX = panzerBot.Get_X();// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					oldPanzerBotY = panzerBot.Get_Y();
 					killPanzerBot = true;
-					panzerBot.KIlled();// убиваем красный танк на сервере
+					panzerBot.KIlled();// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					scorePlayer++;
 					burstes.Registration(panzerBot.Get_X() + panzerBot.Get_Size(),
 						panzerBot.Get_Y() + panzerBot.Get_Size());
@@ -2716,16 +2717,16 @@ void NewCoordinateKill()// новые координаты после смерти танка
 			}
 
 		}
-		if (mode == 'c')// на клиенте
+		if (mode == 'c')// пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		{
 			Data data;
 			for (int i = 0; i < countPacked; i++)
 			{
 				data = dataClientRace[i];
-				if (data.key == 6 && data.tip == 1)// если приняlи на клиенте инфу о смерте зеленого танка
+				if (data.key == 6 && data.tip == 1)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅlпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 				{
 					killPanzer = true;
-					panzer.KIlled();// убиваем зеленый танк на клиенте
+					panzer.KIlled();// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					burstes.Registration(panzer.Get_X() + panzer.Get_Size(),
 						panzer.Get_Y() + panzer.Get_Size());
 					scoreBot++;
@@ -2744,9 +2745,9 @@ void NewCoordinateKill()// новые координаты после смерти танка
 	}
 
 
-	if (killPanzer)// если танк игрока был убит 
+	if (killPanzer)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ 
 	{
-		// то присвоить ему новые координты и обновить параметры
+		// пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		killPanzer = false;
 		panzer.Put_Pylu(5);
 		panzer.Put_HP(100);
@@ -2759,7 +2760,7 @@ void NewCoordinateKill()// новые координаты после смерти танка
 			panzer.Put_X(x);
 			panzer.Put_Y(y);
 		}
-		// зеленые танк 
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ 
 		if (networkGame == true)
 		{
 			if (mode == 's')
@@ -2779,23 +2780,23 @@ void NewCoordinateKill()// новые координаты после смерти танка
 			}
 		}
 	}
-	// аналогично
-	if (killPanzerBot)// если уменр красный танк
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	if (killPanzerBot)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		killPanzerBot = false;
 		panzerBot.Put_Pylu(5);
 		panzerBot.Put_HP(100);
 
-		if (networkGame == false)// если офлайн игра
+		if (networkGame == false)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		{
 			bonuses.NewBonus(oldPanzerBotX + panzerBot.Get_Size(),
 				oldPanzerBotY + panzerBot.Get_Size(), (rand() % 2) + 2, true);
 			panzerBot.Put_X(x);
 			panzerBot.Put_Y(y);
 		}
-		if (networkGame == true)// если сетевая игра
+		if (networkGame == true)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		{
-			if (mode == 's')// на сервере
+			if (mode == 's')// пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			{
 				int oldX = oldPanzerBotX + panzerBot.Get_Size();
 				int oldY = oldPanzerBotY + panzerBot.Get_Size();
@@ -2808,7 +2809,7 @@ void NewCoordinateKill()// новые координаты после смерти танка
 			}
 
 		}
-		// красные танк
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 
 		if (panzerBot.motionToPuty == true)
 		{
@@ -2839,22 +2840,22 @@ void NewCoordinateKill()// новые координаты после смерти танка
 }
 
 
-void DrawLine(int x, int y, int x1, int y1, Color color, RenderWindow& window)// процедура рисования линии
+void DrawLine(int x, int y, int x1, int y1, Color color, RenderWindow& window)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 {
-	//создаем массив точек, по которым будут рисоваться линии:
-	sf::VertexArray lines(sf::Lines, 2/*количество точек*/);
+	//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ:
+	sf::VertexArray lines(sf::Lines, 2/*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ*/);
 
-	//далее для каждой из точек задаем свою позицию:
+	//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 	lines[0].position = sf::Vector2f(x, y);
 	lines[1].position = sf::Vector2f(x1, y1);
-	//и т.д.
+	//пїЅ пїЅ.пїЅ.
 
-	//далее для каждой точки указываем цвет(так можно создавать градиенты):
+	//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ(пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ):
 	lines[0].color = color;
 	lines[1].color = color;
-	//и т.д.
+	//пїЅ пїЅ.пїЅ.
 
-	//и в конце выводим все на экран:
+	//пїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ:
 	window.draw(lines);
 }
 const int amountLines = 51;
@@ -2864,37 +2865,37 @@ class Camera
 public:
 
 	Vector2f point;
-	enum Type// типы объектов
+	enum Type// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		EMPTY, WALL, PANZRED, PANZGREEN, BONUSBULLETS, BONUSARMOUR, BONUSSTAR
 	};
-	struct DataLine// данные об отрезках стен
+	struct DataLine// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		Vector2f begin;
 		Vector2f end;
 	};
 
-	struct Data// данные о линиях, которые рпаспространяются
+	struct Data// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
-		float dist;// дистанция
-		Vector2f acrossPoint;// точка пересечения
+		float dist;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+		Vector2f acrossPoint;// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		Color color;
 		Type type;
 	};
-	DataLine dataLine[amountWalls * 4];// массив данных о стенах
-	DataLine dataLineBonus[amountBonus * 4];// массив данных о стенах
+	DataLine dataLine[amountWalls * 4];// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+	DataLine dataLineBonus[amountBonus * 4];// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	DataLine dataLinePanzerGreen[4];
 	DataLine dataLinePanzerRed[4];
-	Data data[amountLines];// массив линий просмотра
+	Data data[amountLines];// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-	float dir;// напрвление
-	float FieldOfView;// угол области видимости в рад
-	float StepOfField;// угол между лучами
-	float WalkSpeed;// скорость ходьбы
-	float ViewSpeed;//скорость обзора мышью
-					//float MaxDistance;// максимальная дистанция видимости
+	float dir;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	float FieldOfView;// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ
+	float StepOfField;// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+	float WalkSpeed;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+	float ViewSpeed;//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+					//float MaxDistance;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-	void BlockToLines()// функция переведения к квадратиков серых блоков в линии стен
+	void BlockToLines()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 
 		for (int i = 0; i < amountWalls; i++)
@@ -2965,11 +2966,11 @@ public:
 		StepOfField = 0.02;
 		WalkSpeed = 0.04;
 		ViewSpeed = 0.002f;
-		//float dir;// напрвление
-		//float FieldOfView;// угол области видимости в рад
-		//float StepOfField;// угол между лучами
-		//float WalkSpeed;// скорость ходьбы
-		//float ViewSpeed;//скорость обзора мышью
+		//float dir;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+		//float FieldOfView;// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ
+		//float StepOfField;// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+		//float WalkSpeed;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+		//float ViewSpeed;//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		//	MaxDistance = 500;
 		//	BlockToLines();
 	}
@@ -3046,26 +3047,26 @@ public:
 		return CrossingPoint(a1, b1, c1, a2, b2, c2);
 	}
 
-	void Control(RenderWindow& window)// функция управления с клавиатуры
+	void Control(RenderWindow& window)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
 		float speed = 1.5;
-		if (Keyboard::isKeyPressed(Keyboard::W))// Идти вперед 
+		if (Keyboard::isKeyPressed(Keyboard::W))// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 
 		{
 			point.x += sin(dir) * speed;
 			point.y += cos(dir) * speed;
 		}
-		if (Keyboard::isKeyPressed(Keyboard::S))// Идти назад 
+		if (Keyboard::isKeyPressed(Keyboard::S))// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ 
 		{
 			point.x -= sin(dir) * speed;
 			point.y -= cos(dir) * speed;
 
 		}
-		if (Keyboard::isKeyPressed(Keyboard::A))// поворот против часовой 
+		if (Keyboard::isKeyPressed(Keyboard::A))// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
 		{
 			point.x -= sin(dir - 1.57) * speed;
 			point.y -= cos(dir - 1.57) * speed;
 		}
-		if (Keyboard::isKeyPressed(Keyboard::D))// поворот по часовой
+		if (Keyboard::isKeyPressed(Keyboard::D))// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		{
 			point.x -= sin(dir + 1.57) * speed;
 			point.y -= cos(dir + 1.57) * speed;
@@ -3079,10 +3080,10 @@ public:
 	//		flagBeginProg = true;
 	//		window.setMouseCursorVisible(false);
 	//	}
-	//	if (Keyboard::isKeyPressed(Keyboard::M))// поворот по часовой
+	//	if (Keyboard::isKeyPressed(Keyboard::M))// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	//	{
 	//		mouseCapture = !mouseCapture;
-	//		//window.setMouseCursorVisible() // спрятать курсор
+	//		//window.setMouseCursorVisible() // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	//		window.setMouseCursorVisible(!mouseCapture);
 
 
@@ -3095,7 +3096,7 @@ public:
 	//	if (mouseCapture == true)
 	//	{
 	//		static Vector2i oldMouse = Mouse::getPosition(window);
-	//		Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+	//		Vector2i mousePos = Mouse::getPosition(window);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	//		Vector2i winPos = window.getPosition();
 	//		if (oldMouse.x > mousePos.x)
 	//		{
@@ -3105,7 +3106,7 @@ public:
 	//		{
 	//			dir -= (mousePos.x - oldMouse.x) / (float)500;
 	//		}
-	//		Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// устанновка курсора в пользовательские координаты  
+	//		Mouse::setPosition(Vector2i(winPos.x + screenWidth / 2, winPos.y + screenHeigth / 2));// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ  
 	//		oldMouse = Mouse::getPosition(window);
 	//	}
 	//}
@@ -3135,7 +3136,7 @@ public:
 			}
 		}
 	}
-	void Services(typePanzer tpPanz, RenderWindow& window)// функция которая выполняетс я кажд такт основного цикла игры
+	void Services(typePanzer tpPanz, RenderWindow& window)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	{
 		//Control(window);
 		static float dirOld = 0;
@@ -3166,10 +3167,10 @@ public:
 		ShakeCamera();
 		BonusToLine();
 		bool reyBotCenter = false;
-		float st = -FieldOfView / 2;// расчитываем начальный угол обзора для первой линии
+		float st = -FieldOfView / 2;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		for (int i = 0; i < amountLines; i++)
 		{
-			// расчитаваем точку пересечения в самой далекой которая может быть
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 			data[i].type = EMPTY;
 			data[i].acrossPoint = Vector2f(
 				(float)(MaxDistance * sin(dir + st) + point.x),
@@ -3179,15 +3180,15 @@ public:
 
 				if (data[i].type == EMPTY)
 				{
-					// проверяем есть пересечение со стеной
+					// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 					if (IsCrossing(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y,
 						dataLine[j].begin.x, dataLine[j].begin.y, dataLine[j].end.x, dataLine[j].end.y))
 					{
-						// присвоеваеваем точку пересеченяия
+						// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 						data[i].acrossPoint = GetCrossVector(point, data[i].acrossPoint, dataLine[j].begin, dataLine[j].end);
 
 
-						//если точка пересеяения рядом с краем линии стены
+						//пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 						//if (distance(data[i].acrossPoint.x, data[i].acrossPoint.y, dataLine[j].begin.x, dataLine[j].begin.y) <0||
 						//	distance(data[i].acrossPoint.x, data[i].acrossPoint.y, dataLine[j].end.x, dataLine[j].end.y) < 0)
 							data[i].color = Color::White;
@@ -3196,9 +3197,9 @@ public:
 
 					}
 					//data[i].type = WALL;
-					// расчитываем дистанцию от игрока до точки пересечения со стеной
+					// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 					data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
-					// умножаем на косинус если точка пересечения не больше максимальной
+					// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					if (data[i].dist < MaxDistance - 0.1)
 					{
 						data[i].dist *= cos(st);
@@ -3219,7 +3220,7 @@ public:
 						data[i].type = PANZRED;
 					}
 					data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
-					// умножаем на косинус если точка пересечения не больше максимальной
+					// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					if (data[i].dist < MaxDistance - 0.1)
 					{
 						data[i].dist *= cos(st);
@@ -3240,7 +3241,7 @@ public:
 						data[i].type = PANZGREEN;
 					}
 					data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
-					// умножаем на косинус если точка пересечения не больше максимальной
+					// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					if (data[i].dist < MaxDistance - 0.1)
 					{
 						data[i].dist *= cos(st);
@@ -3250,7 +3251,7 @@ public:
 
 
 				data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
-				// умножаем на косинус если точка пересечения не больше максимальной
+				// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 				if (data[i].dist < MaxDistance - 0.1)
 				{
 					data[i].dist *= cos(st);
@@ -3280,23 +3281,23 @@ public:
 					}
 				}
 				data[i].dist = distance(point.x, point.y, data[i].acrossPoint.x, data[i].acrossPoint.y);
-				// умножаем на косинус если точка пересечения не больше максимальной
+				// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 				if (data[i].dist < MaxDistance - 0.1)
 				{
 					data[i].dist *= cos(st);
 				}
 			}
 
-			st += StepOfField;// текушему прибавляем шаг
+			st += StepOfField;// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
 		}
 
 
 		dirOld == dir;
 	}
 
-	void Draw(RenderWindow& window)// функция отрисовки
+	void Draw(RenderWindow& window)// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	{
-		// рисуем верхний фон
+		// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
 		RectangleShape rectangle(Vector2f(screenWidth, screenHeigth / 2));
 		CircleShape shape;
 		rectangle.setFillColor(Color(128, 128, 255));
@@ -3304,7 +3305,7 @@ public:
 		rectEdge.setFillColor(Color(255, 128, 0));
 		rectangle.setPosition(1, 1);
 		window.draw(rectangle);
-		// рисуем нижний фон
+		// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
 		rectangle.setFillColor(Color(255, 128, 128));
 		rectangle.setPosition(1, screenHeigth / 2 + 1 - 40);
 		window.draw(rectangle);
@@ -3318,7 +3319,7 @@ public:
 			{
 
 				float lineHeight = dist * multHeight;
-				if (data[i].color == Color::White)// рисуем серые линии если это не край отрезка стены
+				if (data[i].color == Color::White)// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 				{
 					rect3D.setFillColor(Color(200 - lineHeight * 1.5, 200 - lineHeight * 1.5, 200 - lineHeight * 1.5));
 					rect3D.setSize(Vector2f(widthRect3D, 1000 / lineHeight * 2));
@@ -3331,7 +3332,7 @@ public:
 					window.draw(rect3D);
 				}
 				else
-				{	// рисуем зеленый линии если это край стены
+				{	// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 					rect3D.setFillColor(Color(50, 150 - lineHeight / 2, 50));
 					rect3D.setSize(Vector2f(widthRect3D, 1000 / lineHeight * 2));
 					rect3D.setPosition((int)(screenWidth / (float)amountLines * (amountLines - i)),
@@ -3390,7 +3391,7 @@ public:
 			}
 			if (i <= amountLines / 2 + 15 && i >= amountLines / 2 - 15)
 			{
-				// рисуем линии на карте навправляния куда смотрит игрок
+				// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 				DrawLine(point.x / 4, point.y / 4, data[i].acrossPoint.x / 4, data[i].acrossPoint.y / 4, Color::Red, window);
 			}
 			else if (data[i].type == PANZRED)
@@ -3399,7 +3400,7 @@ public:
 			}
 			else
 			{
-				// рисуем желтые линии что видит игрок
+				// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 				DrawLine(point.x / 4, point.y / 4, data[i].acrossPoint.x / 4, data[i].acrossPoint.y / 4, Color::Yellow, window);
 			}
 
@@ -3416,7 +3417,7 @@ public:
 			DrawLine(dataLine[i].begin.x / 4, dataLine[i].begin.y / 4,
 				dataLine[i].end.x / 4, dataLine[i].end.y / 4, Color::Blue, window);
 		}
-		// рисуем линни боковых движений
+		// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		Vector2f line1 = point, line2 = point;
 		float realDir = dir;
 		realDir = realDir * 180 / pi;
@@ -3448,21 +3449,21 @@ public:
 ;
 
 
-int main()// главная функция 
+int main()// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
 {
 
-	double time1 = 0, time2 = 0; // переменые для таймера
+	double time1 = 0, time2 = 0; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-	int countShotFocus = 0; // счетчик задержки выстрела после поевление окно игры в фокусе
+	int countShotFocus = 0; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	srand(time(0));
 	int selectMenu = 0;
 	Clock clock;
-	Font font;//шрифт 
-	font.loadFromFile("times-new-roman.ttf");//передаем нашему шрифту файл шрифта
-	Text text("", font, 20);//создаем объект текст. закидываем в объект текст стpоку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
+	Font font;//пїЅпїЅпїЅпїЅпїЅ 
+	font.loadFromFile("times-new-roman.ttf");//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+	Text text("", font, 20);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅpпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ(пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ);//пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)
 
-	font.loadFromFile("times-new-roman.ttf");//передаем нашему шрифту файл шрифта
-	Text text1("", font, 40);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
+	font.loadFromFile("times-new-roman.ttf");//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+	Text text1("", font, 40);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ(пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ);//пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)
 	Camera camera;
 
 	camera.LinePanzerGreen();
@@ -3471,7 +3472,7 @@ int main()// главная функция
 	while (window.isOpen())
 	{
 		clock.restart();
-		time1 = clock.getElapsedTime().asMicroseconds();// присвоим время в начале цикла
+		time1 = clock.getElapsedTime().asMicroseconds();// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		Event event;
 		while (window.pollEvent(event))
 		{
@@ -3491,9 +3492,9 @@ int main()// главная функция
 		if (startGame == false)
 		{
 
-			if (StartConnected == true && networkGame == false)// если было выбранно в меню многопользовательская игра
+			if (StartConnected == true && networkGame == false)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 			{
-				system("cls");//очистка консоли
+				system("cls");//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 							  /*std::cout << "s - server; c - client" << "\n";
 							  std::cin >> mode;*/
 				if (mode == 's')
@@ -3509,22 +3510,22 @@ int main()// главная функция
 					std::cin >> port;*/
 					client.Connect();
 				}
-				// networkGame==true выполняеться в тот момент когда установливать\еться соединение
-				if (networkGame == true) // если соединение установленно
+				// networkGame==true пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ\пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+				if (networkGame == true) // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 				{
 
 					if (mode == 's')
 					{
 						srand(10);
-						walls.Placement(); // растоновка стен 
+						walls.Placement(); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ 
 					}
 					//	for (int i=0;i<kolvoStens;i++)
 					int k = 0;
 					static bool viewSend = false;
 					static bool viewRaceResponce = false;
 					Data data;
-					////////////////////// передача данных о стенах клиенту		
-					if (mode == 's')// выполняется на сервере
+					////////////////////// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ		
+					if (mode == 's')// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					{
 						while (viewSend == false)
 						{
@@ -3551,13 +3552,13 @@ int main()// главная функция
 								data = server.Receive();
 								if (data.key == 8)
 								{
-									if (data.tip - 1 == k) k = data.tip;// если принята обратная связь и она совпадает с условием
-									walls.WallsSend(k);// передаем стену с номеров к
+									if (data.tip - 1 == k) k = data.tip;// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+									walls.WallsSend(k);// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ
 								}
 							}
 						}
 					}
-					if (mode == 'c') // выполняется на клиенте
+					if (mode == 'c') // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					{
 						while (viewSend == false)
 						{
@@ -3584,11 +3585,11 @@ int main()// главная функция
 						{
 							while (k < amountWalls)
 							{
-								int flag = walls.WallsReceive();// возрашает номер принятой стены и загружает стену
+								int flag = walls.WallsReceive();// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 								if (flag == k)
 								{
 									k++;
-									client.Send(8, 0, 0, k, 0);// передаем обратную связь серверу с номером следуешие стены
+									client.Send(8, 0, 0, k, 0);// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 								}
 							}
 						}
@@ -3597,23 +3598,23 @@ int main()// главная функция
 					startGame = true;
 				}
 			}
-			selectMenu = mainmenu.Service(event);// главнное меню 
+			selectMenu = mainmenu.Service(event);// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ 
 			if (selectMenu == 1)
 			{
 				srand(10);
 				walls.Placement();
 				camera.BlockToLines();
 				srand(time(0));
-				startGame = true; // если выбран 1 пункт главного меню 
+				startGame = true; // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ 
 			}
-			if (selectMenu == 2)// если выбран 2 пункт главного меню
+			if (selectMenu == 2)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 2 пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 			{
 				//network=true;
 
 				StartConnected = true;
 			}
 		}
-		if (startGame == true && networkGame == true)// если игра сетевая игра стартовала 
+		if (startGame == true && networkGame == true)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
 		{
 			if (networkGame == true)
 			{
@@ -3636,7 +3637,7 @@ int main()// главная функция
 				NewBonusGame();
 			}
 		}
-		if (pause == false && startGame == true)// если окно игры в фокусе и и игра стартовала
+		if (pause == false && startGame == true)// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		{
 			//panzer.Control(event);
 			if (networkGame == true)
@@ -3704,9 +3705,9 @@ int main()// главная функция
 			*/
 			if (Keyboard::isKeyPressed(Keyboard::M))
 			{
-				Vector2i mousePos = Mouse::getPosition(window);//забираем координаты курсора
+				Vector2i mousePos = Mouse::getPosition(window);//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 				panzerBot.RegPointAim(mousePos.x + 20, mousePos.y + 20);
-				Sleep(10);
+				sleep(milliseconds(10));
 			}
 			NewBonusGame();
 			GrabBonus();                                        //  Get_ChetAttack()
@@ -3732,7 +3733,7 @@ int main()// главная функция
 			}
 
 		}
-		//if (Keyboard::isKeyPressed(Keyboard::V))// // изменение режима игры 2д/3д
+		//if (Keyboard::isKeyPressed(Keyboard::V))// // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ 2пїЅ/3пїЅ
 		//{
 		//	isView3D = !isView3D;
 		//	while (Keyboard::isKeyPressed(Keyboard::V));
@@ -3773,10 +3774,10 @@ int main()// главная функция
 
 		do
 		{
-			time2 = clock.getElapsedTime().asMicroseconds();// присвоив время в конце цикла
+			time2 = clock.getElapsedTime().asMicroseconds();// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 															//Sleep (1);
-		} while (time2 - time1 < 15000);// пока разница во времени между началом и концом цикла 
-										//меньше определенного цисла то считываем время заного 
+		} while (time2 - time1 < 15000);// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ 
+										//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 
 	}
 
 	return 0;
